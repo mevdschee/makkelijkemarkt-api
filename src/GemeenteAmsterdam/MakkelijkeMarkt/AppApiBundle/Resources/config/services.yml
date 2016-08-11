@@ -1,0 +1,136 @@
+
+services:
+  appapi.factuurservice:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Service\FactuurService
+    arguments:
+      - '@doctrine.orm.entity_manager'
+      - '@appapi.concreetplanfactuurservice'
+      - '@appapi.lineairplanfactuurservice'
+  appapi.concreetplanfactuurservice:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Service\ConcreetplanFactuurService
+    arguments:
+      - '@doctrine.orm.entity_manager'
+  appapi.lineairplanfactuurservice:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Service\LineairplanFactuurService
+    arguments:
+      - '@doctrine.orm.entity_manager'
+  # mapper
+  appapi.mapper.account:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\AccountMapper
+  appapi.mapper.btwtarief:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\BtwTariefMapper
+  appapi.mapper.token:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\TokenMapper
+    calls:
+      - ['setAccountMapper', ['@appapi.mapper.account']]
+  appapi.mapper.koopman:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\KoopmanMapper
+    calls:
+      - ['setSollicitatieMapper', ['@appapi.mapper.sollicitatie']]
+      - ['setVervangerMapper',    ['@appapi.mapper.vervanger']]
+      - ['setImagineCacheManager', ['@liip_imagine.cache.manager']]
+  appapi.mapper.markt:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\MarktMapper
+  appapi.mapper.notitie:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\NotitieMapper
+    calls:
+      - ['setMarktMapper', ['@appapi.mapper.markt']]
+  appapi.mapper.sollicitatie:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\SollicitatieMapper
+    calls:
+      - ['setKoopmanMapper', ['@appapi.mapper.koopman']]
+      - ['setMarktMapper', ['@appapi.mapper.markt']]
+  appapi.mapper.dagvergunning:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\DagvergunningMapper
+    arguments:
+      - '@appapi.mapper.markt'
+      - '@appapi.mapper.koopman'
+      - '@appapi.mapper.sollicitatie'
+      - '@appapi.mapper.account'
+      - '@appapi.mapper.factuur'
+  appapi.mapper.vervanger:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\VervangerMapper
+  appapi.mapper.tariefplan:
+      class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\TariefplanMapper
+      arguments:
+        - '@appapi.mapper.lineairplan'
+        - '@appapi.mapper.concreetplan'
+  appapi.mapper.factuur:
+      class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\FactuurMapper
+      arguments:
+        - '@appapi.mapper.product'
+        - '@appapi.factuurservice'
+  appapi.mapper.product:
+      class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\ProductMapper
+  appapi.mapper.lineairplan:
+      class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\LineairplanMapper
+  appapi.mapper.concreetplan:
+      class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\ConcreetPlanMapper
+  # repository
+  appapi.repository.account:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\AccountRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Account'
+  appapi.repository.dagvergunning:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\DagvergunningRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Dagvergunning'
+  appapi.repository.markt:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\MarktRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt'
+  appapi.repository.marktextradata:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\DagvergunningRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\MarktExtraData'
+  appapi.repository.koopman:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\DagvergunningRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Koopman'
+  appapi.repository.sollicitatie:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\SollicitatieRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Sollicitatie'
+  appapi.repository.token:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\TokenRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Token'
+  appapi.repository.notitie:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\NotitieRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Notitie'
+  # security
+  api_key_user_provider:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Security\ApiKeyUserProvider
+    arguments:
+      - '@appapi.repository.account'
+      - '@appapi.repository.token'
+  apikey_authenticator:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Security\ApiKeyAuthenticator
+    arguments:
+      - '%mm_app_key%'
+  appapi.kernel.listener.exception:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Security\ExceptionListener
+    tags:
+      - { name: kernel.event_listener, event: kernel.exception, method: onKernelException, priority: 1 }
+  appapi.repair.factuur:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Process\RepairFactuur
+    arguments:
+      - '@doctrine.orm.entity_manager'
+      - '@appapi.factuurservice'

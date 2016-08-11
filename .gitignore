@@ -1,0 +1,20 @@
+syntax: glob
+app/bootstrap.php.cache
+app/cache/*
+!app/cache/.hgkeep
+app/config/parameters.yml
+app/logs/*
+!app/logs/.hgkeep
+app/phpunit.xml
+bin/
+composer.phar
+vendor/
+web/bundles/
+.project
+.settings
+app/data/*
+!app/data/.hgkeep
+.buildpath
+web/media/cache/*
+!web/media/cache/.hgkeep
+.idea
