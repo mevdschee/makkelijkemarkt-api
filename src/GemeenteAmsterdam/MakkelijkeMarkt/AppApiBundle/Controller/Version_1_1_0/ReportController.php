@@ -1,4 +1,13 @@
 <?php
+/*
+ *  Copyright (C) 2017 X Gemeente
+ *                     X Amsterdam
+ *                     X Onderzoek, Informatie en Statistiek
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 
 namespace GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Controller\Version_1_1_0;
 
@@ -13,10 +22,10 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Model\AbstractRapportModel;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Doctrine\ORM\QueryBuilder;
+use Doctrine\DBAL\Connection;
 
 /**
- * @author maartendekeizer
- * @copyright Gemeente Amsterdam, Datalab
  * @Route("1.1.0")
  */
 class ReportController extends Controller
@@ -256,4 +265,73 @@ class ReportController extends Controller
 
         return new JsonResponse($response, Response::HTTP_OK, ['X-Api-ListSize' => count($response)]);
     }
+
+    /**
+     * @Method("GET")
+     * @Route("/rapport/detailfactuur")
+     * @ApiDoc(
+     *  section="Rapport",
+     *  requirements={
+     *      {"name"="marktId", "required"="true", "dataType"="integer", "description"="ID van markt"},
+     *      {"name"="dagStart", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
+     *      {"name"="dagEind", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"}
+     *  },
+     *  views = { "default", "1.1.0" }
+     * )
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function detailFactuurRapportAction(Request $request)
+    {
+        $marktIds = $request->query->get('marktIds', '');
+        if (is_array($marktIds) === false) {
+            $marktIds = explode(',', $marktIds);
+        }
+        $dateStart = $request->query->get('dagStart');
+        $dateEnd = $request->query->get('dagEind');
+
+        /* @var $stmt \Doctrine\DBAL\Driver\Statement */
+        $sql = '
+            SELECT
+                COUNT(p.id) AS voorkomens,
+                p.naam, p.bedrag,
+                p.aantal,
+                (p.bedrag * p.aantal) AS som,
+                ((p.bedrag * p.aantal) * count(p.id)) AS totaal,
+                m.naam,
+                d.dag
+            FROM product p
+            JOIN factuur f ON p.factuur_id = f.id
+            JOIN dagvergunning d ON f.dagvergunning_id = d.id
+            JOIN markt m ON d.markt_id = m.id
+            WHERE p.bedrag > 0
+            AND d.doorgehaald = false
+            AND d.dag >= :dateStart
+            AND d.dag <= :dateEnd
+            AND m.id IN (:marktIds)
+            GROUP BY
+                p.naam,
+                p.bedrag,
+                p.aantal,
+                m.naam,
+                d.dag
+            ORDER BY
+                m.naam ASC,
+                d.dag ASC,
+                totaal DESC
+        ;';
+        $stmt = $this->getDoctrine()->getConnection()->executeQuery(
+            $sql,
+            ['dateStart' => $dateStart, 'dateEnd' => $dateEnd, 'marktIds' => $marktIds],
+            ['dateStart' => \PDO::PARAM_STR, 'dateEnd' => \PDO::PARAM_STR, 'marktIds' => \Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+        );
+
+        // bouw abstract rapport model
+        $model = new AbstractRapportModel();
+        $model->type = 'factuurdetail';
+        $model->generationDate = date('Y-m-d H:i:s');
+        $model->input = ['marktIds' => $marktIds, 'dagStart' => $dateStart, 'dagEind' =>  $dateEnd];
+        $model->output = $stmt->fetchAll();
+
+        return new JsonResponse($model, Response::HTTP_OK, ['X-Api-ListSize' => count($model->output)]);
+}
 }
