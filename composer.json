@@ -1,6 +1,6 @@
 {
     "name": "gemeenteamsterdam/makkelijkemarkt-api",
-    "license": "mit",
+    "license": "MPLv2",
     "type": "project",
     "autoload": {
         "psr-4": {
