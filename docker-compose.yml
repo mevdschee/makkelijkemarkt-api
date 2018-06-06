@@ -30,7 +30,5 @@ services:
       SYMFONY__MM_API__MAILER__PASSWORD: ""
       SYMFONY__MM_API__MAILER__PORT: "25"
       SYMFONY__MM_API__MAILER__ENCRYPTION: "ssl" # null, ssl, tls
-      SYMFONY__MM_API__MAIL__FROM: "service@website-domain"
-      SYMFONY__MM_API__MAIL__CC: "service@website-domain"
       SYMFONY__MM_API__SECRET: "insecure" # random
       SYMFONY__MM_API__APP_KEY: "TEST"
