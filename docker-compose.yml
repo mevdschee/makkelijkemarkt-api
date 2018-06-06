@@ -1,0 +1,36 @@
+version: "3.2"
+
+services:
+  database:
+    image: amsterdam/postgres
+    ports:
+    - "5432:5432"
+    environment:
+      POSTGRES_USER: makkelijkemarkt
+      POSTGRES_PASSWORD: insecure
+
+  web:
+    build: .
+    ports:
+    - "8080:8080"
+    depends_on:
+    - database
+    command: ["/usr/bin/wait-for-it.sh", "database:5432", "--" , "/app/docker-entrypoint.sh"]
+    links:
+    - database:database
+    environment:
+      SYMFONY__MM_API__DATABASE__HOST: "database"
+      SYMFONY__MM_API__DATABASE__PORT: "5432"
+      SYMFONY__MM_API__DATABASE__NAME: "makkelijkemarkt"
+      SYMFONY__MM_API__DATABASE__USER: "makkelijkemarkt"
+      SYMFONY__MM_API__DATABASE__PASSWORD: "insecure"
+      SYMFONY__MM_API__MAILER__TRANSPORT: "smtp"
+      SYMFONY__MM_API__MAILER__HOST: "localhost"
+      SYMFONY__MM_API__MAILER__USER: ""
+      SYMFONY__MM_API__MAILER__PASSWORD: ""
+      SYMFONY__MM_API__MAILER__PORT: "25"
+      SYMFONY__MM_API__MAILER__ENCRYPTION: "ssl" # null, ssl, tls
+      SYMFONY__MM_API__MAIL__FROM: "service@website-domain"
+      SYMFONY__MM_API__MAIL__CC: "service@website-domain"
+      SYMFONY__MM_API__SECRET: "insecure" # random
+      SYMFONY__MM_API__APP_KEY: "TEST"
