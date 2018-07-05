@@ -20,8 +20,6 @@ parameters:
     mailer_password:    ${SYMFONY__MM_API__MAILER__PASSWORD}
     mailer_port:        ${SYMFONY__MM_API__MAILER__PORT}
     mailer_encryption:  ${SYMFONY__MM_API__MAILER__ENCRYPTION}
-    mail_from:          ${SYMFONY__MM_API__MAIL__FROM}
-    mail_cc:            ${SYMFONY__MM_API__MAIL__CC}
     secret:             ${SYMFONY__MM_API__SECRET}
     android_version:    1.0.5
     android_build:      2016050517
