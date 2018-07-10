@@ -4,26 +4,26 @@ echo Starting server
 set -u
 set -e
 
-DB_HOST=${SYMFONY__MM_API__DATABASE__HOST:-makkelijkemarkt-db.service.consul}
-DB_PORT=${SYMFONY__MM_API__DATABASE__PORT:-5432}
+DB_HOST=${MM_API__DATABASE__HOST:-makkelijkemarkt-db.service.consul}
+DB_PORT=${MM_API__DATABASE__PORT:-5432}
 
 cat > /app/app/config/parameters.yml <<EOF
 parameters:
     database_host:      ${DB_HOST}
     database_port:      ${DB_PORT}
-    database_name:      ${SYMFONY__MM_API__DATABASE__NAME}
-    database_user:      ${SYMFONY__MM_API__DATABASE__USER}
-    database_password:  ${SYMFONY__MM_API__DATABASE__PASSWORD}
-    mailer_transport:   ${SYMFONY__MM_API__MAILER__TRANSPORT}
-    mailer_host:        ${SYMFONY__MM_API__MAILER__HOST}
-    mailer_user:        ${SYMFONY__MM_API__MAILER__USER}
-    mailer_password:    ${SYMFONY__MM_API__MAILER__PASSWORD}
-    mailer_port:        ${SYMFONY__MM_API__MAILER__PORT}
-    mailer_encryption:  ${SYMFONY__MM_API__MAILER__ENCRYPTION}
-    secret:             ${SYMFONY__MM_API__SECRET}
+    database_name:      ${MM_API__DATABASE__NAME}
+    database_user:      ${MM_API__DATABASE__USER}
+    database_password:  ${MM_API__DATABASE__PASSWORD}
+    mailer_transport:   ${MM_API__MAILER__TRANSPORT}
+    mailer_host:        ${MM_API__MAILER__HOST}
+    mailer_user:        ${MM_API__MAILER__USER}
+    mailer_password:    ${MM_API__MAILER__PASSWORD}
+    mailer_port:        ${MM_API__MAILER__PORT}
+    mailer_encryption:  ${MM_API__MAILER__ENCRYPTION}
+    secret:             ${MM_API__SECRET}
     android_version:    1.0.5
     android_build:      2016050517
-    mm_app_key:         ${SYMFONY__MM_API__APP_KEY}
+    mm_app_key:         ${MM_API__APP_KEY}
 EOF
 
 php composer.phar install
