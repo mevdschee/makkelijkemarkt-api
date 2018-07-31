@@ -115,6 +115,18 @@ class Markt
     private $perfectViewNummer;
 
     /**
+     * @var number
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $aantalKramen;
+
+    /**
+     * @var number
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $aantalMeter;
+
+    /**
      * Init
      */
     public function __construct()
@@ -361,4 +373,37 @@ class Markt
     {
         return $this->tariefplannen;
     }
+
+    /**
+     * @return number
+     */
+    public function getAantalKramen()
+    {
+        return $this->aantalKramen;
+    }
+
+    /**
+     * @param number $aantalKramen
+     */
+    public function setAantalKramen($aantalKramen)
+    {
+        $this->aantalKramen = $aantalKramen;
+    }
+
+    /**
+     * @return number
+     */
+    public function getAantalMeter()
+    {
+        return $this->aantalMeter;
+    }
+
+    /**
+     * @param number $aantalMeter
+     */
+    public function setAantalMeter($aantalMeter)
+    {
+        $this->aantalMeter = $aantalMeter;
+    }
+
 }

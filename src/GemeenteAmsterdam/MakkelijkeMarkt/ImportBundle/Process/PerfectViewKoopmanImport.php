@@ -111,7 +111,7 @@ class PerfectViewKoopmanImport
             // set data
             $this->setValue($qb, 'erkenningsnummer',     \PDO::PARAM_STR,  str_replace('.', '', $pvRecord['Erkenningsnummer']));
             $this->setValue($qb, 'achternaam',           \PDO::PARAM_STR,  utf8_encode(str_replace('.', '', $pvRecord['ACHTERNAAM'])));
-            $this->setValue($qb, 'email',                \PDO::PARAM_STR,  utf8_encode(str_replace('.', '', $pvRecord['email'])));
+            $this->setValue($qb, 'email',                \PDO::PARAM_STR,  utf8_encode($pvRecord['email']));
             $this->setValue($qb, 'telefoon',             \PDO::PARAM_STR,  str_replace('.', '', $pvRecord['Telefoonnummer']));
             $this->setValue($qb, 'voorletters',          \PDO::PARAM_STR,  utf8_encode(str_replace('.', '', $pvRecord['Voorletters'])));
             $this->setValue($qb, 'status',               \PDO::PARAM_STR,  $this->convertKoopmanStatus($pvRecord['Status']));

@@ -46,7 +46,10 @@ class FactuurReportCommand extends ContainerAwareCommand
             'achternaam',
             'productNaam',
             'productAantal',
-            'productBedrag'));
+            'productBedrag',
+            'btwPerProduct',
+            'totaalBtw',
+            'totaalExclusief'));
 
         gc_enable();
 
@@ -82,7 +85,11 @@ class FactuurReportCommand extends ContainerAwareCommand
                             $koopman->getAchternaam(),
                             $product->getNaam(),
                             $product->getAantal(),
-                            $product->getBedrag()));
+                            $product->getBedrag(),
+                            number_format($product->getBtwHoog()/100 * $product->getBedrag(),2),
+                            number_format($product->getBtwHoog()/100 * $product->getBedrag() * $product->getAantal(),2),
+                            number_format($product->getBedrag() * $product->getAantal(),2)
+                        ));
                         $em->detach($product);
                     }
                     $em->detach($factuur);

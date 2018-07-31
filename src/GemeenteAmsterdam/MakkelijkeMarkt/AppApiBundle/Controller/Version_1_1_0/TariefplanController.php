@@ -468,7 +468,7 @@ class TariefplanController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
      */
     public function factuurOverzichtAction($van, $tot)
     {
@@ -517,7 +517,7 @@ class TariefplanController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
      */
     public function factuurOverzichtMarktAction($marktId, $van, $tot)
     {

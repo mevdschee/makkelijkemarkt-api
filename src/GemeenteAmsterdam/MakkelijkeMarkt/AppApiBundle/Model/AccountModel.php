@@ -42,4 +42,9 @@ class AccountModel
      * @var boolean
      */
     public $locked;
+
+    /**
+     * @var boolean
+     */
+    public $active;
 }

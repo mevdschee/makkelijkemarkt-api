@@ -38,7 +38,9 @@ class AccountController extends Controller
      * @ApiDoc(
      *  section="Account",
      *  filters={
-     *      {"name"="naam", "dataType"="string", "description"="Deel van een naam"}
+     *      {"name"="naam", "dataType"="string", "description"="Deel van een naam"},
+     *      {"name"="active", "dataType"="string", "default"="-1", "description"="Actief status 1 = actief, 0 = non actief, -1 = geen selectie"},
+     *      {"name"="locked", "dataType"="string", "default"="-1", "description"="Locked status 1 = actief, 0 = non actief, -1 = geen selectie"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -51,6 +53,10 @@ class AccountController extends Controller
         $q = [];
         if ($request->query->has('naam') === true)
             $q['naam'] = $request->query->get('naam');
+        if ($request->query->getInt('active', -1) !== -1)
+            $q['active'] = ($request->query->getInt('active') === 1);
+        if ($request->query->getInt('locked', -1) !== -1)
+            $q['locked'] = ($request->query->getInt('locked') === 1);
         $results = $repo->search($q, $request->query->get('listOffset'), $request->query->get('listLength', 100));
 
         /* @var $mapper \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\AccountMapper */
@@ -131,6 +137,7 @@ class AccountController extends Controller
         }
 
         // get account
+        /* @var $account Account */
         $account = $repositoryAccount->getById($id);
         if ($account === null)
             throw $this->createNotFoundException('No account with id ' . $id);
@@ -140,6 +147,7 @@ class AccountController extends Controller
         $account->setEmail($message['email']);
         $account->setUsername($message['username']);
         $account->setRole($message['role']);
+        $account->setActive(($message['active'] == 1));
 
         if (isset($message['password']) === true)
         {
@@ -216,6 +224,7 @@ class AccountController extends Controller
         $account->setRole($message['role']);
         $account->setLocked(false);
         $account->setAttempts(0);
+        $account->setActive(true);
 
         // save
         $this->getDoctrine()->getManager()->persist($account);

@@ -94,7 +94,7 @@ class PerfectViewVervangerImport
             // set data
             $this->setValue($qb, 'koopman_id',           \PDO::PARAM_INT,  $koopmanRecord['id']);
             $this->setValue($qb, 'vervanger_id',         \PDO::PARAM_INT,  $vervangerRecord['id']);
-            $this->setValue($qb, 'pas_uid',              \PDO::PARAM_STR,  $pvRecord['Vervanger_NFCHEX']);
+            $this->setValue($qb, 'pas_uid',              \PDO::PARAM_STR,  strtoupper($pvRecord['Vervanger_NFCHEX']));
 
             // execute insert/update query
             $result = $this->conn->executeUpdate($qb->getSQL(), $qb->getParameters(), $qb->getParameterTypes());
