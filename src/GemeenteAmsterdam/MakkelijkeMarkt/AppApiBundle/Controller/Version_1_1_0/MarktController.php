@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -77,4 +78,41 @@ class MarktController extends Controller
         return new JsonResponse($response, Response::HTTP_OK);
     }
 
+    /**
+     * Sla extra markt gegevens op die niet uit PerfectView komen
+     *
+     * @Method("POST")
+     * @Route("/markt/{id}")
+     * @ApiDoc(
+     *  section="Markt",
+     *  parameters={
+     *      {"name"="aantalKramen", "dataType"="integer", "required"=true, "description"="Aantal kramen op de markt (capaciteit)"},
+     *      {"name"="aantalMeter", "dataType"="integer", "required"=true, "description"="Aantal meter op de markt (capaciteit)"}
+     *  }
+     * )
+     * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
+     */
+    public function saveExtraInformation(Request $request, $id)
+    {
+        /** @var $repo \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\MarktRepository */
+        $repo = $this->get('appapi.repository.markt');
+
+        $markt = $repo->getById($id);
+        if ($markt === null) {
+            throw $this->createNotFoundException('Markt not found, id = ' . $id);
+        }
+
+        $message = json_decode($request->getContent(false), true);
+
+        $markt->setAantalKramen($message['aantalKramen']);
+        $markt->setAantalMeter($message['aantalMeter']);
+
+        $this->getDoctrine()->getEntityManager()->flush();
+
+        /** @var $mapper \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\MarktMapper */
+        $mapper = $this->get('appapi.mapper.markt');
+        $response = $mapper->singleEntityToModel($markt);
+
+        return new JsonResponse($response, Response::HTTP_OK);
+    }
 }

@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\DBAL\Connection;
+use GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Koopman;
 
 /**
  * @Route("1.1.0")
@@ -40,7 +41,7 @@ class ReportController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
      */
     public function dubbelstaanRaportAction($dag)
     {
@@ -127,36 +128,45 @@ class ReportController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
      */
     public function staanverplichtingRapportAction($marktId, $dagStart, $dagEind, $vergunningType)
     {
-        /* @var $koopmanMapper \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\KoopmanMapper */
+        /** @var $koopmanMapper \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\KoopmanMapper */
         $koopmanMapper = $this->get('appapi.mapper.koopman');
+        /** @var $koopmanMapper \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\SollicitatieMapper */
+        $sollicitatieMapper = $this->get('appapi.mapper.sollicitatie');
 
         // get the right markt
         $markt = $this->getDoctrine()->getRepository('AppApiBundle:Markt')->find($marktId);
-        if ($markt === null)
+        if ($markt === null) {
             throw $this->createNotFoundException('Markt unknown');
-
-        $qb = $this->getDoctrine()->getRepository('AppApiBundle:Dagvergunning')->createQueryBuilder('dagvergunning');
-        $qb->select('dagvergunning.erkenningsnummerInvoerWaarde AS erkenningsnummer');
-        $qb->addSelect('dagvergunning.statusSolliciatie AS status');
-        $qb->addSelect('COUNT(dagvergunning.id) AS aantal');
-        $qb->andWhere('dagvergunning.dag BETWEEN :startDate AND :endDate');
-        $qb->setParameter('startDate', $dagStart);
-        $qb->setParameter('endDate', $dagEind);
-        $qb->andWhere('dagvergunning.markt = :markt');
-        $qb->setParameter('markt', $markt);
-        $qb->andWhere('dagvergunning.doorgehaald = :doorgehaald');
-        if ('alle' !== $vergunningType) {
-            $qb->andWhere('dagvergunning.statusSolliciatie = :statusSolliciatie');
-            $qb->setParameter('statusSolliciatie', $vergunningType);
         }
-        $qb->setParameter('doorgehaald', false);
-        $qb->addGroupBy('dagvergunning.erkenningsnummerInvoerWaarde');
-        $qb->addGroupBy('dagvergunning.statusSolliciatie');
-        $qb->addOrderBy('aantal', 'DESC');
+
+        /** @var $qb QueryBuilder */
+        $qb = $this->getDoctrine()->getManager()->getRepository('AppApiBundle:Sollicitatie')->createQueryBuilder('s');
+        $qb->select('s.id AS sollicitatie_id');
+        $qb->innerJoin('s.koopman', 'k');
+        $qb->andWhere('s.markt = :markt');
+        $qb->setParameter('markt', $markt);
+        $qb->andWhere('s.doorgehaald = :sdoorgehaald');
+        $qb->setParameter('sdoorgehaald', false);
+        $qb->andWhere('k.status <> :kstatus');
+        $qb->setParameter('kstatus', Koopman::STATUS_VERWIJDERD);
+        if ('alle' !== $vergunningType) {
+            $qb->andWhere('s.status = :status');
+            $qb->setParameter('status', $vergunningType);
+        }
+        $qb->addSelect('(SELECT COUNT(d1.id) FROM AppApiBundle:Dagvergunning AS d1 WHERE d1.sollicitatie = s AND d1.dag BETWEEN :dagStart1 AND :dagEind1 AND d1.doorgehaald = false) AS aantalActieveDagvergunningen');
+        $qb->setParameter('dagStart1', new \DateTime($dagStart));
+        $qb->setParameter('dagEind1', new \DateTime($dagEind));
+        $qb->addSelect('(SELECT COUNT(d2.id) FROM AppApiBundle:Dagvergunning AS d2 WHERE d2.sollicitatie = s AND d2.dag BETWEEN :dagStart2 AND :dagEind2 AND d2.doorgehaald = false AND LOWER(d2.aanwezig) = \'zelf\') AS aantalActieveDagvergunningenZelfAanwezig');
+        $qb->setParameter('dagStart2', new \DateTime($dagStart));
+        $qb->setParameter('dagEind2', new \DateTime($dagEind));
+        $qb->addOrderBy('k.erkenningsnummer');
+        $qb->addGroupBy('s.id');
+        $qb->addGroupBy('k.erkenningsnummer');
+
         $selector = $qb->getQuery()->execute([], Query::HYDRATE_ARRAY);
 
         // bouw abstract rapport model
@@ -167,25 +177,26 @@ class ReportController extends Controller
         $model->output = [];
 
         // make a indexed quick lookup array of koopmannen
-        $koopmannen = [];
-        $qb = $this->getDoctrine()->getRepository('AppApiBundle:Koopman')->createQueryBuilder('koopman');
-        $qb->select('koopman');
-        $qb->join('koopman.sollicitaties', 'sollicitatie');
-        $qb->andWhere('sollicitatie.markt = :markt');
+        $sollicitaties = [];
+        $qb = $this->getDoctrine()->getRepository('AppApiBundle:Sollicitatie')->createQueryBuilder('s');
+        $qb->select('s');
+        $qb->join('s.koopman', 'k');
+        $qb->addSelect('k');
+        $qb->andWhere('s.markt = :markt');
         $qb->setParameter('markt', $markt);
-        $unindexedKoopmannen = $qb->getQuery()->execute();
-        foreach ($unindexedKoopmannen as $koopman) {
-            $koopmannen[$koopman->getErkenningsnummer()] = $koopman;
+        $unindexedSollicitaties = $qb->getQuery()->execute();
+        foreach ($unindexedSollicitaties as $sollicitatie) {
+            $sollicitaties[$sollicitatie->getId()] = $sollicitatie;
         }
 
         // create output
         foreach ($selector as $record) {
-            $model->output[] = [
-                'erkenningsnummer' => $record['erkenningsnummer'],
-                'aantalDagvergunningenUitgegeven' => $record['aantal'],
-                'koopman' => isset($koopmannen[$record['erkenningsnummer']]) ? $koopmanMapper->singleEntityToSimpleModel($koopmannen[$record['erkenningsnummer']]) : null,
-                'status' => $record['status']
-            ];
+            $formattedRecord = $record;
+            $formattedRecord['aantalActieveDagvergunningenNietZelfAanwezig'] = $record['aantalActieveDagvergunningen'] - $record['aantalActieveDagvergunningenZelfAanwezig'];
+            $formattedRecord['percentageAanwezig'] = $record['aantalActieveDagvergunningen'] > 0  ? (round($record['aantalActieveDagvergunningenZelfAanwezig'] / $record['aantalActieveDagvergunningen'], 2)) : 0;
+            $formattedRecord['koopman'] = $koopmanMapper->singleEntityToSimpleModel($sollicitaties[$record['sollicitatie_id']]->getKoopman());
+            $formattedRecord['sollicitatie'] = $sollicitatieMapper->singleEntityToSimpleModel($sollicitaties[$record['sollicitatie_id']]);
+            $model->output[] = $formattedRecord;
         }
 
         return new JsonResponse($model, Response::HTTP_OK, ['X-Api-ListSize' => count($selector)]);
@@ -204,7 +215,7 @@ class ReportController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
      */
     public function frequentieRapportAction($marktId, $type, $dagStart, $dagEind)
     {
@@ -232,7 +243,7 @@ class ReportController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
      */
     public function persoonlijkeAanwezigheidRapportAction($marktId, $dagStart, $dagEind)
     {
@@ -255,7 +266,7 @@ class ReportController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
      */
     public function invoerRapportAction($marktId, $dagStart, $dagEind)
     {
@@ -278,7 +289,7 @@ class ReportController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
      */
     public function detailFactuurRapportAction(Request $request)
     {
@@ -293,11 +304,11 @@ class ReportController extends Controller
         $sql = '
             SELECT
                 COUNT(p.id) AS voorkomens,
-                p.naam, p.bedrag,
+                p.naam AS product_naam, p.bedrag,
                 p.aantal,
                 (p.bedrag * p.aantal) AS som,
                 ((p.bedrag * p.aantal) * count(p.id)) AS totaal,
-                m.naam,
+                m.naam AS markt_naam,
                 d.dag
             FROM product p
             JOIN factuur f ON p.factuur_id = f.id
@@ -333,5 +344,156 @@ class ReportController extends Controller
         $model->output = $stmt->fetchAll();
 
         return new JsonResponse($model, Response::HTTP_OK, ['X-Api-ListSize' => count($model->output)]);
-}
+    }
+
+    /**
+     * @Method("GET")
+     * @Route("/rapport/marktcapaciteit")
+     * @ApiDoc(
+     *  section="Rapport",
+     *  requirements={
+     *      {"name"="marktId", "required"="true", "dataType"="integer", "description"="ID van markt"},
+     *      {"name"="dagStart", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
+     *      {"name"="dagEind", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"}
+     *  },
+     *  views = { "default", "1.1.0" }
+     * )
+     * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
+     */
+    public function marktCapaciteitRapportAction(Request $request)
+    {
+        $marktIds = $request->query->get('marktId', '');
+        if (is_array($marktIds) === false) {
+            $marktIds = explode(',', $marktIds);
+        }
+        $dateStart = $request->query->get('dagStart');
+        $dateEnd = $request->query->get('dagEind');
+
+        /* @var $stmt \Doctrine\DBAL\Driver\Statement */
+        $sql = '
+            SELECT
+                to_char(d.dag, \'dy\') AS dag,
+                to_char(d.dag, \'IW\') AS week,
+                to_char(d.dag, \'mon\') AS maand,
+                to_char(d.dag, \'YYYY\') AS jaar,
+            	d.dag AS datum,
+            	d.markt_id,
+            	d.status_solliciatie,
+            	COUNT(d.id) AS aantal_dagvergunningen,
+            	SUM(d.aantal3meter_kramen) AS aantal_3_meter_kramen,
+            	SUM(d.aantal4meter_kramen) AS aantal_4_meter_kramen,
+            	SUM(d.extra_meters) AS aantal_extra_meters,
+            	((SUM(d.aantal3meter_kramen) * 3) + (SUM(d.aantal4meter_kramen) * 4) + SUM(d.extra_meters)) AS totaal_aantal_meters
+            FROM dagvergunning AS d
+            WHERE d.doorgehaald = false
+            AND d.dag BETWEEN :dateStart AND :dateEnd
+            AND d.markt_id IN (:marktIds)
+            GROUP BY
+                d.dag,
+                d.markt_id,
+                d.status_solliciatie
+            ORDER BY
+            	d.dag DESC,
+            	d.markt_id ASC,
+                d.status_solliciatie ASC
+        ;';
+
+        $stmt = $this->getDoctrine()->getConnection()->executeQuery(
+            $sql,
+            ['dateStart' => $dateStart, 'dateEnd' => $dateEnd, 'marktIds' => $marktIds],
+            ['dateStart' => \PDO::PARAM_STR, 'dateEnd' => \PDO::PARAM_STR, 'marktIds' => \Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+        );
+
+        /** @var $repo \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\MarktRepository */
+        $repo = $this->get('appapi.repository.markt');
+        $results = $repo->findAll();
+        $markten = [];
+        foreach ($results as $markt) {
+            $markten[$markt->getId()] = $markt;
+        }
+
+        $rapport = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $key = $row['datum'] . '_' . $row['markt_id'];
+            if (isset($rapport[$key]) === false) {
+                $rapport[$key] = [
+                    'marktId' => $row['markt_id'],
+                    'marktNaam' => $markten[$row['markt_id']]->getNaam(),
+                    'datum' => $row['datum'],
+                    'week' => $row['week'],
+                    'maand' => $row['maand'],
+                    'jaar' => $row['jaar'],
+                    'dag' => $row['dag'],
+                    'capaciteitKramen' => $markten[$row['markt_id']]->getAantalKramen(),
+                    'capaciteitMeter' => $markten[$row['markt_id']]->getAantalMeter(),
+                    'aantalDagvergunningen' => 0,
+                    'totaalAantalKramen' => 0,
+                    'totaalAantalKramen%' => 0.0,
+                    'totaalAantalMeter' => 0,
+                    'totaalAantalMeter%' => 0.0,
+                    'vplAantalDagvergunningen' => 0,
+                    'vplAantalDagvergunningen%' => 0.0,
+                    'vplAantalKramen' => 0,
+                    'vplAantalKramen%' => 0.0,
+                    'vplAantalMeter' => 0,
+                    'vplAantalMeter%' => 0.0,
+                    'vkkAantalDagvergunningen' => 0,
+                    'vkkAantalDagvergunningen%' => 0.0,
+                    'vkkAantalKramen' => 0,
+                    'vkkAantalKramen%' => 0.0,
+                    'vkkAantalMeter' => 0,
+                    'vkkAantalMeter%' => 0.0,
+                    'sollAantalDagvergunningen' => 0,
+                    'sollAantalDagvergunningen%' => 0.0,
+                    'sollAantalKramen' => 0,
+                    'sollAantalKramen%' => 0.0,
+                    'sollAantalMeter' => 0,
+                    'sollAantalMeter%' => 0.0,
+                    'lotAantalDagvergunningen' => 0,
+                    'lotAantalDagvergunningen%' => 0.0,
+                    'lotAantalKramen' => 0,
+                    'lotAantalKramen%' => 0.0,
+                    'lotAantalMeter' => 0,
+                    'lotAantalMeter%' => 0.0,
+                ];
+            }
+
+            $rapport[$key]['aantalDagvergunningen'] = $rapport[$key]['aantalDagvergunningen'] + $row['aantal_dagvergunningen'];
+            $rapport[$key][ $row['status_solliciatie'] . 'AantalDagvergunningen' ] = $row['aantal_dagvergunningen'];
+            $rapport[$key][ $row['status_solliciatie'] . 'AantalKramen' ] = $row['aantal_3_meter_kramen'] + $row['aantal_4_meter_kramen'];
+            $rapport[$key][ $row['status_solliciatie'] . 'AantalMeter' ] = $row['totaal_aantal_meters'];
+        }
+
+        foreach ($rapport as $key => $row) {
+            $rapport[$key]['vplAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['vplAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
+            $rapport[$key]['vkkAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['vkkAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
+            $rapport[$key]['sollAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['sollAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
+            $rapport[$key]['lotAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['lotAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
+
+            $rapport[$key]['vplAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['vplAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
+            $rapport[$key]['vkkAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['vkkAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
+            $rapport[$key]['sollAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['sollAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
+            $rapport[$key]['lotAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['lotAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
+
+            $rapport[$key]['vplAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['vplAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
+            $rapport[$key]['vkkAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['vkkAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
+            $rapport[$key]['sollAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['sollAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
+            $rapport[$key]['lotAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['lotAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
+
+            $rapport[$key]['totaalAantalKramen'] = $rapport[$key]['vplAantalKramen'] + $rapport[$key]['vkkAantalKramen'] + $rapport[$key]['sollAantalKramen'] + $rapport[$key]['lotAantalKramen'];
+            $rapport[$key]['totaalAantalMeter'] = $rapport[$key]['vplAantalMeter'] + $rapport[$key]['vkkAantalMeter'] + $rapport[$key]['sollAantalMeter'] + $rapport[$key]['lotAantalMeter'];
+
+            $rapport[$key]['totaalAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['totaalAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
+            $rapport[$key]['totaalAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['totaalAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
+        }
+
+        // bouw abstract rapport model
+        $model = new AbstractRapportModel();
+        $model->type = 'marktcapaciteit';
+        $model->generationDate = date('Y-m-d H:i:s');
+        $model->input = ['marktIds' => $marktIds, 'dagStart' => $dateStart, 'dagEind' =>  $dateEnd];
+        $model->output = array_values($rapport);
+
+        return new JsonResponse($model, Response::HTTP_OK, ['X-Api-ListSize' => count($model->output)]);
+    }
 }

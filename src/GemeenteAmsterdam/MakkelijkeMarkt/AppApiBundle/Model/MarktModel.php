@@ -62,4 +62,14 @@ class MarktModel
      * @var number
      */
     public $perfectViewNummer;
+
+    /**
+     * @var number
+     */
+    public $aantalKramen;
+
+    /**
+     * @var number
+     */
+    public $aantalMeter;
 }

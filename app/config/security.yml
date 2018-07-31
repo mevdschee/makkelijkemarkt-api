@@ -5,7 +5,8 @@ security:
     role_hierarchy:
         ROLE_SERVICE: ~
         ROLE_USER: ~
-        ROLE_ADMIN: ~
+        ROLE_ADMIN: [ROLE_USER, ROLE_SENIOR]
+        ROLE_SENIOR: [ROLE_USER]
     providers:
         in_memory:
             memory: ~

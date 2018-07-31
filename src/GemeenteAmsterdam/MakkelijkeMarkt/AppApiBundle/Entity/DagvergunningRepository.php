@@ -28,7 +28,7 @@ class DagvergunningRepository extends EntityRepository
     }
 
    /**
-     * @param array $q Key/Value pair with query arguments, supported keys: marktId, dag, koopmanId, erkenningsnummer, doorgehaald
+     * @param array $q Key/Value pair with query arguments, supported keys: marktId, dag, koopmanId, erkenningsnummer, doorgehaald, dagRange
      * @param number $offset
      * @param number $size
      * @return \Doctrine\ORM\Tools\Pagination\Paginator|Dagvergunning[]
@@ -52,6 +52,12 @@ class DagvergunningRepository extends EntityRepository
         {
             $qb->andWhere('dvg.dag = :dag');
             $qb->setParameter('dag', $q['dag']);
+        }
+        if (isset($q['dagRange']) === true && $q['dagRange'] !== null && count($q['dagRange']) !== 0)
+        {
+            $qb->andWhere('dvg.dag BETWEEN :dagStart AND :dagEind');
+            $qb->setParameter('dagStart', $q['dagRange'][0]);
+            $qb->setParameter('dagEind', $q['dagRange'][1]);
         }
         if (isset($q['koopmanId']) === true && $q['koopmanId'] !== null && $q['koopmanId'] !== '')
         {
