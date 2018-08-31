@@ -76,6 +76,7 @@ class KoopmanMapper
     {
         $object = new KoopmanModel();
         $object->voorletters = $e->getVoorletters();
+        $object->tussenvoegsels = $e->getTussenvoegsels();
         $object->achternaam = $e->getAchternaam();
         $object->telefoon = $e->getTelefoon();
         $object->email = $e->getEmail();
@@ -101,6 +102,7 @@ class KoopmanMapper
     {
         $object = new SimpleKoopmanModel();
         $object->voorletters = $e->getVoorletters();
+        $object->tussenvoegsels = $e->getTussenvoegsels();
         $object->achternaam = $e->getAchternaam();
         $object->id = $e->getId();
         $object->erkenningsnummer = $e->getErkenningsnummer();
