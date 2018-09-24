@@ -68,7 +68,7 @@ class PerfectViewKoopmanImport
     public function execute($perfectViewRecords)
     {
         $headings = $perfectViewRecords->getHeadings();
-        $requiredHeadings = ['Kaartnr', 'Erkenningsnummer', 'ACHTERNAAM', 'email', 'Telefoonnummer', 'Voorletters', 'Status', 'NFCHEX'];
+        $requiredHeadings = ['Kaartnr', 'Erkenningsnummer', 'ACHTERNAAM', 'email', 'Telefoonnummer', 'Voorletters', 'Status', 'NFCHEX', 'Tussenvoegsels'];
         foreach ($requiredHeadings as $requiredHeading) {
             if (in_array($requiredHeading, $headings) === false) {
                 throw new \RuntimeException('Missing column "' . $requiredHeading . '" in import file');
@@ -114,6 +114,7 @@ class PerfectViewKoopmanImport
             $this->setValue($qb, 'email',                \PDO::PARAM_STR,  utf8_encode($pvRecord['email']));
             $this->setValue($qb, 'telefoon',             \PDO::PARAM_STR,  str_replace('.', '', $pvRecord['Telefoonnummer']));
             $this->setValue($qb, 'voorletters',          \PDO::PARAM_STR,  utf8_encode(str_replace('.', '', $pvRecord['Voorletters'])));
+            $this->setValue($qb, 'tussenvoegsels',       \PDO::PARAM_STR,  utf8_encode($pvRecord['Tussenvoegsels']));
             $this->setValue($qb, 'status',               \PDO::PARAM_STR,  $this->convertKoopmanStatus($pvRecord['Status']));
             $this->setValue($qb, 'perfect_view_nummer',  \PDO::PARAM_INT,  $pvRecord['Kaartnr']);
             $this->setValue($qb, 'pas_uid',              \PDO::PARAM_STR,  strtoupper($pvRecord['NFCHEX']));

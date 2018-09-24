@@ -71,6 +71,13 @@ class Koopman
     /**
      * @var string
      *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $tussenvoegsels;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $achternaam;
@@ -185,6 +192,14 @@ class Koopman
     /**
      * @return string
      */
+    public function getTussenvoegsels()
+    {
+        return $this->tussenvoegsels;
+    }
+
+    /**
+     * @return string
+     */
     public function getAchternaam()
     {
         return $this->achternaam;
@@ -260,6 +275,14 @@ class Koopman
     public function setVoorletters($voorletters)
     {
         $this->voorletters = $voorletters;
+    }
+
+    /**
+     * @param string $tussenvoegsels
+     */
+    public function setTussenvoegsels($tussenvoegsels)
+    {
+        $this->tussenvoegsels = $tussenvoegsels;
     }
 
     /**

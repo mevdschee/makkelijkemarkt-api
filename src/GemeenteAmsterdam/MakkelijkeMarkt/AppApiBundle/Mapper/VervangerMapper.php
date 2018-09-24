@@ -37,6 +37,7 @@ class VervangerMapper
         $object->status = KoopmanMapper::$statussen[$e->getVervanger()->getStatus()];
         $object->telefoon = $e->getVervanger()->getTelefoon();
         $object->voorletters = $e->getVervanger()->getVoorletters();
+        $object->tussenvoegsels = $e->getVervanger()->getTussenvoegsels();
 
         return $object;
     }
