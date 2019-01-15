@@ -70,8 +70,12 @@ class LoginController extends Controller
         if ($account === null)
             throw $this->createAccessDeniedException('Account unknown');
 
-        if ($account->getLocked()) {
+        if ($account->getLocked() === true) {
             return new JsonResponse('Account is locked', Response::HTTP_LOCKED, []);
+        }
+
+        if ($account->getActive() === false) {
+            return new JsonResponse('Account is not active', Response::HTTP_FORBIDDEN, []);
         }
 
         $token->setAccount($account);
@@ -146,9 +150,12 @@ class LoginController extends Controller
         if ($account === null)
             throw $this->createAccessDeniedException('Account unknown');
 
-
-        if ($account->getLocked()) {
+        if ($account->getLocked() === true) {
             return new JsonResponse('Account is locked', Response::HTTP_LOCKED, []);
+        }
+
+        if ($account->getActive() === false) {
+            return new JsonResponse('Account is not active', Response::HTTP_FORBIDDEN, []);
         }
 
         $token->setAccount($account);

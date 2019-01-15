@@ -13,7 +13,6 @@ namespace GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass="AccountRepository")
@@ -80,6 +79,12 @@ class Account implements UserInterface, \Serializable
      * @ORM\Column(type="boolean")
      */
     private $locked;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $active;
 
     /**
      * @return number
@@ -266,5 +271,20 @@ class Account implements UserInterface, \Serializable
     public function getLocked()
     {
         return $this->locked;
+    }
+
+    public function isActive()
+    {
+        return $this->getActive();
+    }
+
+    public function setActive($active)
+    {
+        $this->active = $active;
+    }
+
+    public function getActive()
+    {
+        return $this->active;
     }
 }

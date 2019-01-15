@@ -33,7 +33,7 @@ class AccountRepository extends EntityRepository
     }
 
    /**
-     * @param array $q Key/Value pair with query arguments, supported keys: naam
+     * @param array $q Key/Value pair with query arguments, supported keys: naam, active, locked
      * @param number $offset
      * @param number $size
      * @return \Doctrine\ORM\Tools\Pagination\Paginator|Account[]
@@ -48,6 +48,16 @@ class AccountRepository extends EntityRepository
         {
             $qb->andWhere('LOWER(account.naam) LIKE LOWER(:naam)');
             $qb->setParameter('naam', '%' . $q['naam'] . '%');
+        }
+        if (isset($q['active']) === true && $q['active'] !== null && $q['active'] !== '')
+        {
+            $qb->andWhere('account.active = :active');
+            $qb->setParameter('active', $q['active']);
+        }
+        if (isset($q['locked']) === true && $q['locked'] !== null && $q['locked'] !== '')
+        {
+            $qb->andWhere('account.locked = :locked');
+            $qb->setParameter('locked', $q['locked']);
         }
 
         // sort

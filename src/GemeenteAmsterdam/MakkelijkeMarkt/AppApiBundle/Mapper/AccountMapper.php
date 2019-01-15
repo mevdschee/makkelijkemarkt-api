@@ -29,6 +29,7 @@ class AccountMapper
         $object->username = $e->getUsername();
         $object->roles = $e->getRoles();
         $object->locked = $e->getLocked();
+        $object->active = $e->getActive();
         return $object;
     }
 

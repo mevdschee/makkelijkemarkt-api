@@ -64,7 +64,7 @@ class KoopmanController extends Controller
         if ($request->query->has('erkenningsnummer') === true)
             $q['erkenningsnummer'] = str_replace('.', '', $request->query->get('erkenningsnummer'));
         if ($request->query->has('status') === true)
-            $q['status'] = str_replace('.', '', $request->query->get('status'));
+            $q['status'] = $request->query->get('status');
 
         $results = $repo->search($q, $request->query->get('listOffset'), $request->query->get('listLength', 100));
 
@@ -157,10 +157,19 @@ class KoopmanController extends Controller
         /* @var $repo \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\KoopmanRepository */
         $repo = $this->get('appapi.repository.koopman');
 
-
         $object = $repo->findOneByPasUid(strtoupper($pasUid));
-        if ($object === null)
-            throw $this->createNotFoundException('Not found koopman with pasUid ' . $pasUid);
+        if ($object === null) {
+            // dit is geen bekende koop OF een vervangers pas
+            $repo = $this->get('appapi.repository.vervanger');
+            $object = $repo->findOneByPasUid(strtoupper($pasUid));
+            if ($object === null) {
+                // ook geen vervanger
+                throw $this->createNotFoundException('Not found koopman with pasUid ' . $pasUid);
+            }
+
+            // convert vervangersvermelding in koopman
+            $object = $object->getVervanger();
+        }
 
         /* @var $mapper \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\KoopmanMapper */
         $mapper = $this->get('appapi.mapper.koopman');

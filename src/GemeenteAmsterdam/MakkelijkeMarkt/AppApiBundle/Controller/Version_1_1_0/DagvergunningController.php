@@ -265,6 +265,8 @@ class DagvergunningController extends Controller
      *  filters={
      *      {"name"="marktId", "dataType"="integer", "description"="ID van de markt"},
      *      {"name"="dag", "dataType"="string", "description"="Als yyyy-mm-dd"},
+     *      {"name"="dagStart", "dateType"="string", "description"="Als yyyy-mm-dd, alleen i.c.m. dagEind"},
+     *      {"name"="dagEind", "dateType"="string", "description"="Als yyyy-mm-dd, alleen i.c.m. dagStart"},
      *      {"name"="koopmanId", "dataType"="integer", "description"="Id van de koopman"},
      *      {"name"="erkenningsnummer", "dataType"="integer", "description"="Nummer van koopman waarop vergunning is uitgeschreven"},
      *      {"name"="doorgehaald", "dataType"="integer", "description"="Indien niet opgenomen of leeg of 0 enkel niet doorgehaalde dagvergunningen, indien opgenomen en 1 dan enkel doorgehaalde dagvergunningen"},
@@ -286,6 +288,8 @@ class DagvergunningController extends Controller
             $q['marktId'] = $request->query->get('marktId');
         if ($request->query->has('dag') === true)
             $q['dag'] = $request->query->get('dag');
+        if ($request->query->has('dagStart') === true && $request->query->has('dagEind') === true)
+            $q['dagRange'] = [$request->query->get('dagStart'), $request->query->get('dagEind')];
         if ($request->query->has('koopmanId') === true)
             $q['koopmanId'] = $request->query->get('koopmanId');
         if ($request->query->has('erkenningsnummer') === true)
@@ -312,7 +316,7 @@ class DagvergunningController extends Controller
      *  section="Dagvergunning",
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
      */
     public function listByDateAction(Request $request, $koopmanId, $startDate, $endDate)
     {

@@ -34,8 +34,8 @@ class KoopmanRepository extends EntityRepository
         if (isset($q['freeSearch']) === true && $q['freeSearch'] !== null && $q['freeSearch'] !== '')
         {
             $qb->andWhere($qb->expr()->orX(
-                $qb->expr()->like('reg.voorletters', ':freeSearch_voorletters'),
-                $qb->expr()->like('reg.achternaam', ':freeSearch_achternaam'),
+                $qb->expr()->like('LOWER(reg.voorletters)', 'LOWER(:freeSearch_voorletters)'),
+                $qb->expr()->like('LOWER(reg.achternaam)', 'LOWER(:freeSearch_achternaam)'),
                 $qb->expr()->like('reg.telefoon', ':freeSearch_telefoon'),
                 $qb->expr()->like('reg.email', ':freeSearch_email'),
                 $qb->expr()->like('reg.erkenningsnummer', ':freeSearch_erkenningsnummer')
@@ -48,12 +48,12 @@ class KoopmanRepository extends EntityRepository
         }
         if (isset($q['voorletters']) === true && $q['voorletters'] !== null && $q['voorletters'] !== '')
         {
-            $qb->andWhere('reg.voorletters LIKE :voorletters');
+            $qb->andWhere('LOWER(reg.voorletters) LIKE LOWER(:voorletters)');
             $qb->setParameter('voorletters', '%' . $q['voorletters'] . '%');
         }
         if (isset($q['achternaam']) === true && $q['achternaam'] !== null && $q['achternaam'] !== '')
         {
-            $qb->andWhere('reg.achternaam LIKE :achternaam');
+            $qb->andWhere('LOWER(reg.achternaam) LIKE LOWER(:achternaam)');
             $qb->setParameter('achternaam', '%' . $q['achternaam'] . '%');
         }
         if (isset($q['telefoon']) === true && $q['telefoon'] !== null && $q['telefoon'] !== '')

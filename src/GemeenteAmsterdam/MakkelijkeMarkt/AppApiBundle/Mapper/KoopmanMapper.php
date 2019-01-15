@@ -21,7 +21,7 @@ class KoopmanMapper
     /**
      * @var multitype:string
      */
-    protected $statussen = [
+    static public $statussen = [
         Koopman::STATUS_ACTIEF => 'Actief',
         Koopman::STATUS_ONBEKEND => 'Onbekend',
         Koopman::STATUS_VERWIJDERD => 'Verwijderd',
@@ -76,6 +76,7 @@ class KoopmanMapper
     {
         $object = new KoopmanModel();
         $object->voorletters = $e->getVoorletters();
+        $object->tussenvoegsels = $e->getTussenvoegsels();
         $object->achternaam = $e->getAchternaam();
         $object->telefoon = $e->getTelefoon();
         $object->email = $e->getEmail();
@@ -86,10 +87,9 @@ class KoopmanMapper
             $object->fotoUrl = $this->imagineCacheManager->getBrowserPath('koopman-fotos/' . $e->getFoto(), 'koopman_rect_small');
         if ($e->getFoto() !== '' && $e->getFoto() !== null)
             $object->fotoMediumUrl = $this->imagineCacheManager->getBrowserPath('koopman-fotos/' . $e->getFoto(), 'koopman_rect_medium');
-        $object->status = $this->statussen[$e->getStatus()];
+        $object->status = self::$statussen[$e->getStatus()];
         $object->sollicitaties = $this->mapperSollicitatie->multipleEntityToSimpleModel($e->getSollicitaties());
         $object->pasUid = $e->getPasUid();
-        $object->status = $this->statussen[$e->getStatus()];
         $object->vervangers = $this->mapperVervanger->multipleEntityToModel($e->getVervangersVan());
         return $object;
     }
@@ -102,6 +102,7 @@ class KoopmanMapper
     {
         $object = new SimpleKoopmanModel();
         $object->voorletters = $e->getVoorletters();
+        $object->tussenvoegsels = $e->getTussenvoegsels();
         $object->achternaam = $e->getAchternaam();
         $object->id = $e->getId();
         $object->erkenningsnummer = $e->getErkenningsnummer();
@@ -109,7 +110,7 @@ class KoopmanMapper
             $object->fotoUrl = $this->imagineCacheManager->getBrowserPath('koopman-fotos/' . $e->getFoto(), 'koopman_rect_small');
         if ($e->getFoto() !== '' && $e->getFoto() !== null)
             $object->fotoMediumUrl = $this->imagineCacheManager->getBrowserPath('koopman-fotos/' . $e->getFoto(), 'koopman_rect_medium');
-        $object->status = $this->statussen[$e->getStatus()];
+        $object->status = self::$statussen[$e->getStatus()];
         $object->telefoon = $e->getTelefoon();
         $object->email = $e->getEmail();
         $object->pasUid = $e->getPasUid();

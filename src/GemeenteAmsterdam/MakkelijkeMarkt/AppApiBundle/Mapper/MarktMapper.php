@@ -33,9 +33,12 @@ class MarktMapper
         $object->standaardKraamAfmeting = $e->getStandaardKraamAfmeting();
         $object->extraMetersMogelijk = $e->getExtraMetersMogelijk();
         $object->aanwezigeOpties = [];
-        foreach ($e->getAanwezigeOpties() as $key)
+        foreach ($e->getAanwezigeOpties() as $key) {
             $object->aanwezigeOpties[$key] = true;
+        }
         $object->perfectViewNummer = $e->getPerfectViewNummer();
+        $object->aantalKramen = $e->getAantalKramen();
+        $object->aantalMeter = $e->getAantalMeter();
         return $object;
     }
 

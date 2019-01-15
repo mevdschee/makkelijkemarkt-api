@@ -1,4 +1,3 @@
-syntax: glob
 app/bootstrap.php.cache
 app/config/parameters.yml
 app/phpunit.xml
@@ -11,3 +10,10 @@ web/bundles/
 app/data/*
 .buildpath
 .idea
+.hg/*
+.hgignore
+.hgtags
+web/iirf.ini
+web/download/*
+web/media/cache/*
+web/config.php

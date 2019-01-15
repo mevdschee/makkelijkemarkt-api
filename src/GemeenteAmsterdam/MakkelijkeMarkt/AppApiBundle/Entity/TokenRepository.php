@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
+ * Repository for Token entity
  */
 class TokenRepository extends EntityRepository
 {
@@ -25,5 +26,26 @@ class TokenRepository extends EntityRepository
     public function getByUuid($uuid)
     {
         return $this->find($uuid);
+    }
+
+    /**
+     * @param Account $account
+     * @param number $listOffset
+     * @param number $listLength
+     * @return Token[]|Paginator
+     */
+    public function search(Account $account, $listOffset, $listLength)
+    {
+        $qb = $this->createQueryBuilder('token');
+        $qb->andWhere('token.account = :account');
+        $qb->setParameter('account', $account);
+        $qb->addOrderBy('token.creationDate', 'DESC');
+        $qb->addOrderBy('token.uuid', 'ASC');
+        $qb->setFirstResult($listOffset);
+        $qb->setMaxResults($listLength);
+
+        $query = $qb->getQuery();
+
+        return new Paginator($query);
     }
 }
