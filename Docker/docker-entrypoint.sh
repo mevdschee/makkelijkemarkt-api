@@ -4,13 +4,10 @@ echo Starting server
 set -u
 set -e
 
-DB_HOST=${MM_API__DATABASE__HOST:-makkelijkemarkt-db.service.consul}
-DB_PORT=${MM_API__DATABASE__PORT:-5432}
-
 cat > /app/app/config/parameters.yml <<EOF
 parameters:
-    database_host:      ${DB_HOST}
-    database_port:      ${DB_PORT}
+    database_host:      ${MM_API__DATABASE__HOST}
+    database_port:      ${MM_API__DATABASE__PORT}
     database_name:      ${MM_API__DATABASE__NAME}
     database_user:      ${MM_API__DATABASE__USER}
     database_password:  ${MM_API__DATABASE__PASSWORD}
@@ -37,5 +34,5 @@ php console cache:warmup --env=prod
 chown -R www-data:www-data /app/app/cache && find /app/app/cache -type d -exec chmod -R 0770 {} \; && find /app/app/cache -type f -exec chmod -R 0660 {} \;
 php console assetic:dump --env=prod
 
-service php7.0-fpm start
-nginx -g "daemon off;"
+nginx
+php-fpm -F
