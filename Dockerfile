@@ -10,6 +10,8 @@ RUN apk add bash
 
 RUN apk add nginx && mkdir /run/nginx
 
+RUN apk add postgresql-dev && docker-php-ext-install pdo_pgsql pgsql
+
 COPY . /app
 
 COPY Docker/docker-entrypoint.sh /app/docker-entrypoint.sh
