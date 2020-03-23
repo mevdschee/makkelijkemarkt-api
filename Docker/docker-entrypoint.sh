@@ -34,4 +34,5 @@ php console cache:warmup --env=prod
 chown -R www-data:www-data /app/app/cache && find /app/app/cache -type d -exec chmod -R 0770 {} \; && find /app/app/cache -type f -exec chmod -R 0660 {} \;
 php console assetic:dump --env=prod
 
-nginx -g "daemon off;"
+nginx
+php-fpm -F
