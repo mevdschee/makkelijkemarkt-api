@@ -16,14 +16,6 @@ COPY . /app
 
 COPY Docker/docker-entrypoint.sh /app/docker-entrypoint.sh
 
-RUN chown -R www-data:www-data /app/app/cache \
-    && chmod 770 /app/app/cache \
-    && chown -R www-data:www-data /app/app/logs \
-    && chmod 770 /app/app/logs \
-    && chown -R www-data:www-data /app/web/media \
-    && chmod 770 /app/web/media \
-    && chmod 777 /app/docker-entrypoint.sh
-
 COPY Docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY Docker/nginx/conf.d/makkelijkemarkt-api.conf /etc/nginx/conf.d/makkelijkemarkt-api.conf
 
