@@ -54,9 +54,9 @@ if (BRANCH == "${PRODUCTION_BRANCH}") {
 
                 build job: 'Subtask_Openstack_Playbook',
                 parameters: [
-                    [$class: 'StringParameterValue', name: 'INFRASTRUCTURE', value: '${INFRASTRUCTURE}'],
+                    [$class: 'StringParameterValue', name: 'INFRASTRUCTURE', value: "${INFRASTRUCTURE}"],
                     [$class: 'StringParameterValue', name: 'INVENTORY', value: 'acceptance'],
-                    [$class: 'StringParameterValue', name: 'PLAYBOOK', value: '${PLAYBOOK}'],
+                    [$class: 'StringParameterValue', name: 'PLAYBOOK', value: "${PLAYBOOK}"],
                 ]
             }
         }
@@ -77,9 +77,9 @@ if (BRANCH == "${PRODUCTION_BRANCH}") {
 
                 build job: 'Subtask_Openstack_Playbook',
                 parameters: [
-                    [$class: 'StringParameterValue', name: 'INFRASTRUCTURE', value: '${INFRASTRUCTURE}'],
+                    [$class: 'StringParameterValue', name: 'INFRASTRUCTURE', value: "${INFRASTRUCTURE}"],
                     [$class: 'StringParameterValue', name: 'INVENTORY', value: 'production'],
-                    [$class: 'StringParameterValue', name: 'PLAYBOOK', value: '${PLAYBOOK}'],
+                    [$class: 'StringParameterValue', name: 'PLAYBOOK', value: "${PLAYBOOK}"],
                 ]
             }
         }

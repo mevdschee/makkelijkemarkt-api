@@ -26,7 +26,6 @@ EOF
 php composer.phar install
 
 cd /app/app
-php console doctrine:query:sql "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
 php console doctrine:migrations:status
 #php console --no-interaction doctrine:migrations:migrate
 php console cache:clear --env=prod
