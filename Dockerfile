@@ -25,7 +25,6 @@ RUN chown -R www-data:www-data /app/app/cache \
     && chmod 777 /app/docker-entrypoint.sh
 
 COPY Docker/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY Docker/nginx/conf.d/server_header.conf /etc/nginx/conf.d/server_header.conf
 COPY Docker/nginx/conf.d/makkelijkemarkt-api.conf /etc/nginx/conf.d/makkelijkemarkt-api.conf
 
 COPY Docker/php/php.ini /usr/local/etc/php/php.ini
