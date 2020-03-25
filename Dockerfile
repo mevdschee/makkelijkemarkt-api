@@ -10,7 +10,8 @@ RUN apk add bash
 
 RUN apk add nginx && mkdir /run/nginx
 
-RUN apk add postgresql-dev && docker-php-ext-install pdo_pgsql pgsql
+RUN apk add postgresql-dev bzip2-dev libpng-dev libintl gettext gettext-dev gmp gmp-dev icu-dev libmcrypt-dev libxml2-dev libxslt-dev && \
+    docker-php-ext-install pdo_pgsql pgsql bcmath bz2 calendar exif gd gettext gmp intl mcrypt pcntl shmop soap sockets sysvmsg sysvsem sysvshm wddx xmlrpc xsl zip
 
 COPY . /app
 
