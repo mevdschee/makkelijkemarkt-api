@@ -33,5 +33,16 @@ php console cache:warmup --env=prod
 chown -R www-data:www-data /app/app/cache && find /app/app/cache -type d -exec chmod -R 0770 {} \; && find /app/app/cache -type f -exec chmod -R 0660 {} \;
 php console assetic:dump --env=prod
 
+# Make sure log files exist, so tail won't return a non-zero exitcode
+touch /app/app/dev.log
+touch /app/app/prod.log
+touch /var/log/nginx/access.log
+touch /var/log/nginx/error.log
+
+tail -f logs/dev.log &
+tail -f logs/prod.log &
+tail -f /var/log/nginx/access.log &
+tail -f /var/log/nginx/error.log &
+
 nginx
 php-fpm -F
