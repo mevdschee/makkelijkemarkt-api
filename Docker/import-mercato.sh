@@ -6,12 +6,12 @@ set -e
 SRC_DIR=/app/data
 DST_DIR=/app/mercato
 
-mkdir -p $DST_DIR
+mkdir -p $DST_DIR/fotos
 
 # Unzip datafiles from Mercato stored in makkelijkemarkt objectstore
 pushd $SRC_DIR
-unzip -o Bestanden.zip $DST_DIR
-unzip -o Pasfotos.zip $DST_DIR/fotos
+unzip -o Bestanden.zip -d $DST_DIR/
+unzip -o Pasfotos.zip -d $DST_DIR/fotos/
 popd
 
 # Import the CSV data into the database
