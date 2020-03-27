@@ -17,6 +17,8 @@ COPY . /app
 
 COPY Docker/docker-entrypoint.sh /app/docker-entrypoint.sh
 
+COPY Docker/import-mercato.sh /app/import-mercato.sh
+
 COPY Docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY Docker/nginx/conf.d/makkelijkemarkt-api.conf /etc/nginx/conf.d/makkelijkemarkt-api.conf
 
