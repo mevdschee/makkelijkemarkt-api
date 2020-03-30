@@ -19,11 +19,11 @@ COPY Docker/docker-entrypoint.sh /app/docker-entrypoint.sh
 
 COPY Docker/import-mercato.sh /app/import-mercato.sh
 
-COPY Docker/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY Docker/nginx/conf.d/makkelijkemarkt-api.conf /etc/nginx/conf.d/makkelijkemarkt-api.conf
+COPY Docker/report.sh /app/report.sh
 
-COPY Docker/php/php.ini /usr/local/etc/php/php.ini
-COPY Docker/php/conf.d/10-opcache.ini /usr/local/etc/php/conf.d/10-opcache.ini
+COPY Docker/nginx/ /etc/nginx/
+
+COPY Docker/php/ /usr/local/etc/php/
 
 WORKDIR /app
 
@@ -36,6 +36,7 @@ RUN chown -R www-data:www-data /app/app/cache \
     && chown -R www-data:www-data /app/web/media \
     && chmod 770 /app/web/media \
     && chmod 775 /app/docker-entrypoint.sh \
-    && chmod 775 /app/import-mercato.sh
+    && chmod 775 /app/import-mercato.sh \
+    && chmod 775 /app/report.sh
 
 CMD /app/docker-entrypoint.sh

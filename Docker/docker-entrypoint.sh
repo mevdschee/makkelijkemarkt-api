@@ -33,6 +33,10 @@ php console cache:warmup --env=prod
 chown -R www-data:www-data /app/app/cache && find /app/app/cache -type d -exec chmod -R 0770 {} \; && find /app/app/cache -type f -exec chmod -R 0660 {} \;
 php console assetic:dump --env=prod
 
+# Configure access to /download URL
+mkdir -p /etc/nginx/htpasswd.d
+echo $MM_API__NGINX_HTPASSWD > /etc/nginx/htpasswd.d/makkelijkemarkt-api.amsterdam.nl
+
 # Make sure log files exist, so tail won't return a non-zero exitcode
 touch /app/app/logs/dev.log
 touch /app/app/logs/prod.log
