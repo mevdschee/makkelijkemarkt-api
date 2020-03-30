@@ -35,6 +35,7 @@ RUN chown -R www-data:www-data /app/app/cache \
     && chmod 770 /app/app/logs \
     && chown -R www-data:www-data /app/web/media \
     && chmod 770 /app/web/media \
-    && chmod 777 /app/docker-entrypoint.sh
+    && chmod 775 /app/docker-entrypoint.sh \
+    && chmod 775 /app/import-mercato.sh
 
 CMD /app/docker-entrypoint.sh
