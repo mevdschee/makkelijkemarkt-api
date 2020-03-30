@@ -21,10 +21,16 @@ class MarktExtraData
 {
     /**
      * @var number
-     * @ORM\Id
-     * @ORM\Column(type="integer", nullable=false)
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $perfectViewNummer;
+
+    /**
+     * @var string
+     * @ORM\Id
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private $afkorting;
 
     /**
      * @var string

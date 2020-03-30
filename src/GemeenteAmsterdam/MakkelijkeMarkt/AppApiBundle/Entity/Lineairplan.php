@@ -67,6 +67,12 @@ class Lineairplan
     private $eenmaligElektra;
 
     /**
+     * @var float
+     * @ORM\Column(type="decimal", precision=10, scale=2)
+     */
+    private $elektra;
+
+    /**
      * @var Tariefplan
      * @ORM\OneToOne(targetEntity="Tariefplan", inversedBy="lineairplan")
      * @ORM\JoinColumn(name="tariefplan_id", referencedColumnName="id")
@@ -283,5 +289,29 @@ class Lineairplan
     public function getEenmaligElektra()
     {
         return $this->eenmaligElektra;
+    }
+
+    /**
+     * Set elektra
+     *
+     * @param string $elektra
+     *
+     * @return Lineairplan
+     */
+    public function setElektra($elektra)
+    {
+        $this->elektra = $elektra;
+
+        return $this;
+    }
+
+    /**
+     * Get elektra
+     *
+     * @return string
+     */
+    public function getElektra()
+    {
+        return $this->elektra;
     }
 }

@@ -147,7 +147,7 @@ class FactuurService {
         }
 
         // set geolocatie
-        $point = $this->parseGeolocation($registratieGeolocatie);
+        $point = self::parseGeolocation($registratieGeolocatie);
         $dagvergunning->setRegistratieGeolocatie($point[0], $point[1]);
 
         // set dag
@@ -184,7 +184,7 @@ class FactuurService {
             $dagvergunning->setAfvaleilandVast($sollicitatie->getAantalAfvaleilanden());
             $dagvergunning->setSollicitatie($sollicitatie);
         }
-        $dagvergunning->setStatusSollicitatie($sollicitatie !== null ? $sollicitatie->getStatus() : 'lot');
+        $dagvergunning->setStatusSolliciatie($sollicitatie !== null ? $sollicitatie->getStatus() : 'lot');
 
         return $dagvergunning;
     }
@@ -194,7 +194,7 @@ class FactuurService {
      * @param mixed $geoInput
      * @return array tupple
      */
-    protected function parseGeolocation($geoInput)
+    public static function parseGeolocation($geoInput)
     {
         if ($geoInput === '' || $geoInput === null)
             return [null,null];

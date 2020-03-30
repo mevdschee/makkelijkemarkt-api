@@ -39,6 +39,22 @@ class MarktMapper
         $object->perfectViewNummer = $e->getPerfectViewNummer();
         $object->aantalKramen = $e->getAantalKramen();
         $object->aantalMeter = $e->getAantalMeter();
+        $object->auditMax = $e->getAuditMax();
+        $object->kiesJeKraamActief = $e->getKiesJeKraamActief();
+        $object->kiesJeKraamFase = $e->getKiesJeKraamFase();
+        $object->kiesJeKraamMededelingActief = $e->getKiesJeKraamMededelingActief();
+        $object->kiesJeKraamMededelingTekst = $e->getKiesJeKraamMededelingTekst();
+        $object->kiesJeKraamMededelingTitel = $e->getKiesJeKraamMededelingTitel();
+        $object->kiesJeKraamGeblokkeerdePlaatsen = $e->getKiesJeKraamGeblokkeerdePlaatsen();
+        $object->kiesJeKraamEmailKramenzetter = $e->getKiesJeKraamEmailKramenzetter();
+        $object->kiesJeKraamGeblokkeerdePlaatsen = $e->getKiesJeKraamGeblokkeerdePlaatsen();
+        $object->makkelijkeMarktActief = $e->getMakkelijkeMarktActief();
+        $object->indelingsTijdstipTekst = $e->getIndelingsTijdstipTekst();
+        $object->marktDagenTekst = $e->getMarktDagenTekst();
+        $object->telefoonNummerContact = $e->getTelefoonNummerContact();
+        $object->kiesJeKraamGeblokkeerdeData = $e->getKiesJeKraamGeblokkeerdeData();
+        $object->indelingstype = $e->getIndelingstype();
+        $object->isABlijstIndeling = $e->getIndelingstype() === 'A/B-lijst';
         return $object;
     }
 

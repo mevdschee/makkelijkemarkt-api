@@ -40,18 +40,30 @@ class SollicitatieRepository extends EntityRepository
      * @param Markt $markt
      * @param number $offset
      * @param number $size
+     * @param bool $includeDoorgehaald
      * @return \Doctrine\ORM\Tools\Pagination\Paginator|Sollicitatie[]
      */
-    public function findByMarkt(Markt $markt, $offset = 0, $size = 10)
+    public function findByMarkt(Markt $markt, $offset = 0, $size = 10, $includeDoorgehaald = true)
     {
         $qb = $this
             ->createQueryBuilder('sollicitatie')
             ->select('sollicitatie')
             ->addSelect('koopman')
+            ->addSelect('vervanger')
+            ->addSelect('vervangerKoopman')
             ->join('sollicitatie.koopman', 'koopman')
+            ->leftJoin('koopman.vervangersVan', 'vervanger')
+            ->leftJoin('vervanger.vervanger', 'vervangerKoopman')
             ->andWhere('sollicitatie.markt = :markt')
             ->setParameter('markt', $markt)
             ->addOrderBy('sollicitatie.sollicitatieNummer', 'ASC');
+
+        if ($includeDoorgehaald === false) {
+            $qb->andWhere('koopman.status <> :notStatus');
+            $qb->setParameter('notStatus', Koopman::STATUS_VERWIJDERD);
+            $qb->andWhere('sollicitatie.doorgehaald = :doorgehaald');
+            $qb->setParameter('doorgehaald', false);
+        }
 
         // pagination
         $qb->setMaxResults($size);
@@ -134,7 +146,8 @@ class SollicitatieRepository extends EntityRepository
                 JOIN k.dagvergunningen d
                 WITH s = d.sollicitatie
                 WHERE d.markt = :markt
-                AND d.doorgehaald = false';
+                AND d.doorgehaald = false
+                AND s.doorgehaald = false';
 
         $parameters = array('markt' => $markt);
 

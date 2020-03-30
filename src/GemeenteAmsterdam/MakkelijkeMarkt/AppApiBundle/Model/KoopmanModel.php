@@ -49,6 +49,11 @@ class KoopmanModel
     /**
      * @var string
      */
+    public $handhavingsVerzoek;
+
+    /**
+     * @var string
+     */
     public $fotoUrl;
 
     /**
@@ -65,6 +70,11 @@ class KoopmanModel
      * @var number
      */
     public $perfectViewNummer;
+
+    /**
+     * @var float
+     */
+    public $weging;
 
     /**
      * @var string

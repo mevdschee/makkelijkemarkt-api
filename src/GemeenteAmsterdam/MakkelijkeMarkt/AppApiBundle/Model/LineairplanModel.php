@@ -53,4 +53,9 @@ class LineairplanModel
      * @var number
      */
     public $eenmaligElektra;
+
+    /**
+     * @var number
+     */
+    public $elektra;
 }

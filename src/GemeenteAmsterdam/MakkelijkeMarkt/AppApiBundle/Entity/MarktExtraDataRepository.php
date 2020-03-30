@@ -26,4 +26,9 @@ class MarktExtraDataRepository extends EntityRepository
     {
         return $this->find($kaartnr);
     }
+
+    public function getByAfkorting($afkorting)
+    {
+        return $this->find($afkorting);
+    }
 }

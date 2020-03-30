@@ -68,7 +68,7 @@ class PerfectViewKoopmanImport
     public function execute($perfectViewRecords)
     {
         $headings = $perfectViewRecords->getHeadings();
-        $requiredHeadings = ['Kaartnr', 'Erkenningsnummer', 'ACHTERNAAM', 'email', 'Telefoonnummer', 'Voorletters', 'Status', 'NFCHEX', 'Tussenvoegsels'];
+        $requiredHeadings = ['Erkenningsnummer', 'ACHTERNAAM', 'email', 'Telefoonnummer', 'Voorletters', 'Status', 'NFCHEX', 'Tussenvoegsels'];
         foreach ($requiredHeadings as $requiredHeading) {
             if (in_array($requiredHeading, $headings) === false) {
                 throw new \RuntimeException('Missing column "' . $requiredHeading . '" in import file');
@@ -87,16 +87,16 @@ class PerfectViewKoopmanImport
                 continue;
             }
 
-            $this->logger->info('Handle PerfectView record', ['Kaartnr' => $pvRecord['Kaartnr'], 'Erkenningsnummer' => $pvRecord['Erkenningsnummer']]);
+            $this->logger->info('Handle PerfectView record', ['Erkenningsnummer' => $pvRecord['Erkenningsnummer']]);
 
             // get the record from the database (if it is already in the database)
-            $koopmanRecord = $this->getKoopmanRecord($pvRecord['Kaartnr']);
+            $koopmanRecord = $this->getKoopmanRecord($pvRecord['Erkenningsnummer']);
             // prepare query builder
             $qb = $this->conn->createQueryBuilder();
 
             if (($koopmanRecord !== null)) {
                 // update
-                $this->logger->info('Record found in database', ['id' => $koopmanRecord['id']]);
+                $this->logger->info('Record found in database', ['id' => $koopmanRecord['id'], 'db-erkenningsnummer' => $koopmanRecord['erkenningsnummer'], 'file-erkenningsnummer' => $pvRecord['Erkenningsnummer'], 'db-achternaam' => $koopmanRecord['achternaam'], 'file-achternaam' => $pvRecord['ACHTERNAAM'] ]);
                 $qb->update('koopman', 'e');
                 $qb->where('e.id = :id')->setParameter('id', $koopmanRecord['id']);
                 $aantalNieuw ++;
@@ -116,7 +116,7 @@ class PerfectViewKoopmanImport
             $this->setValue($qb, 'voorletters',          \PDO::PARAM_STR,  utf8_encode(str_replace('.', '', $pvRecord['Voorletters'])));
             $this->setValue($qb, 'tussenvoegsels',       \PDO::PARAM_STR,  utf8_encode($pvRecord['Tussenvoegsels']));
             $this->setValue($qb, 'status',               \PDO::PARAM_STR,  $this->convertKoopmanStatus($pvRecord['Status']));
-            $this->setValue($qb, 'perfect_view_nummer',  \PDO::PARAM_INT,  $pvRecord['Kaartnr']);
+            //$this->setValue($qb, 'perfect_view_nummer',  \PDO::PARAM_INT,  $pvRecord['Kaartnr']);
             $this->setValue($qb, 'pas_uid',              \PDO::PARAM_STR,  strtoupper($pvRecord['NFCHEX']));
 
             // execute insert/update query
@@ -130,13 +130,15 @@ class PerfectViewKoopmanImport
     }
 
     /**
-     * @param string $perfectViewNummer
+     * @param string $erkenningsnummer
      * @return NULL|array Koopman-record
      */
-    protected function getKoopmanRecord($perfectViewNummer)
+    protected function getKoopmanRecord($erkenningsnummer)
     {
+        $erkenningsnummer = str_replace('.', '', $erkenningsnummer);
+
         $qb = $this->conn->createQueryBuilder()->select('e.*')->from('koopman', 'e');
-        $qb->where('e.perfect_view_nummer = :perfect_view_nummer')->setParameter('perfect_view_nummer', $perfectViewNummer);
+        $qb->where('e.erkenningsnummer = :erkenningsnummer')->setParameter('erkenningsnummer', $erkenningsnummer);
 
         $stmt = $this->conn->executeQuery($qb->getSQL(), $qb->getParameters());
 

@@ -87,7 +87,8 @@ class MarktController extends Controller
      *  section="Markt",
      *  parameters={
      *      {"name"="aantalKramen", "dataType"="integer", "required"=true, "description"="Aantal kramen op de markt (capaciteit)"},
-     *      {"name"="aantalMeter", "dataType"="integer", "required"=true, "description"="Aantal meter op de markt (capaciteit)"}
+     *      {"name"="aantalMeter", "dataType"="integer", "required"=true, "description"="Aantal meter op de markt (capaciteit)"},
+     *      {"name"="auditMax", "dataType"="integer", "required"=true, "description"="Aantal plaatsen op de audit lijst"}
      *  }
      * )
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
@@ -106,6 +107,20 @@ class MarktController extends Controller
 
         $markt->setAantalKramen($message['aantalKramen']);
         $markt->setAantalMeter($message['aantalMeter']);
+        $markt->setAuditMax($message['auditMax']);
+        $markt->setKiesJeKraamActief($message['kiesJeKraamActief']);
+        $markt->setKiesJeKraamFase($message['kiesJeKraamFase']);
+        $markt->setKiesJeKraamMededelingActief($message['kiesJeKraamMededelingActief']);
+        $markt->setKiesJeKraamMededelingTekst($message['kiesJeKraamMededelingTekst']);
+        $markt->setKiesJeKraamMededelingTitel($message['kiesJeKraamMededelingTitel']);
+        $markt->setKiesJeKraamGeblokkeerdePlaatsen($message['kiesJeKraamGeblokkeerdePlaatsen']);
+        $markt->setKiesJeKraamGeblokkeerdeData($message['kiesJeKraamGeblokkeerdeData']);
+        $markt->setKiesJeKraamEmailKramenzetter($message['kiesJeKraamEmailKramenzetter']);
+        $markt->setMakkelijkeMarktActief($message['makkelijkeMarktActief']);
+        $markt->setMarktDagenTekst($message['marktDagenTekst']);
+        $markt->setIndelingsTijdstipTekst($message['indelingsTijdstipTekst']);
+        $markt->setTelefoonNummerContact($message['telefoonNummerContact']);
+        $markt->setIndelingstype($message['indelingstype']);
 
         $this->getDoctrine()->getEntityManager()->flush();
 

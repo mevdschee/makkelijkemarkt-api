@@ -78,7 +78,7 @@ class AccountController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SENIOR')")
      */
     public function getAction(Request $request, $id)
     {
@@ -236,7 +236,65 @@ class AccountController extends Controller
     }
 
     /**
-     * Maak een nieuw account
+     * Update passwords
+     *
+     * @Method("PUT")
+     * @Route("/account_password/{id}")
+     * @ApiDoc(
+     *  section="Account",
+     *  parameters={
+     *      {"name"="password", "dataType"="string", "required"="true"},
+     *  },
+     *  views = { "default", "1.1.0" }
+     * )
+     * @Security("has_role('ROLE_SENIOR')")
+     */
+    public function updatePasswordAction(Request $request, $id)
+    {
+        // parse body content
+        $message = json_decode($request->getContent(false), true);
+
+        // validate message
+        if ($message === null) {
+            return new JsonResponse(['error' => json_last_error_msg()]);
+        }
+        if (isset($message['password']) === false) {
+            return new JsonResponse(['error' => 'Password field is missing']);
+        }
+
+        $em = $this->get('doctrine')->getManager();
+        $repo = $em->getRepository(Account::class);
+
+        $account = $repo->find($id);
+        if (null === $account) {
+            return new JsonResponse(['error' => 'Account not found']);
+        }
+        /**
+         * @var Account $account
+         */
+
+        if ('ROLE_ADMIN' === $account->getRole() && 'ROLE_ADMIN' !== $this->getUser()->getRole()) {
+            return new JsonResponse(['error' => 'Access denied']);
+        }
+
+        // encrypt password
+        $unencryptedPassword = $message['password'];
+        $encoder = $this->container->get('security.password_encoder');
+        $encryptedPassword = $encoder->encodePassword($account, $unencryptedPassword);
+
+        $account->setPassword($encryptedPassword);
+
+        $em->flush();
+
+        // return
+        $result = $this->get('appapi.mapper.account')->singleEntityToModel($account);
+
+        return new JsonResponse($result, Response::HTTP_OK);
+    }
+
+
+    /**
+     * Unlock an account
      *
      * @Method("POST")
      * @Route("/account/unlock/{id}")
@@ -247,7 +305,7 @@ class AccountController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SENIOR')")
      */
     public function unlockAction(Request $request, $id)
     {

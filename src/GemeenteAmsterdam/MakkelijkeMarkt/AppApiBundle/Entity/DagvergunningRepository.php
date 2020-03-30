@@ -12,6 +12,7 @@
 namespace GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
@@ -41,6 +42,11 @@ class DagvergunningRepository extends EntityRepository
         $qb->addSelect('koopman');
         $qb->join('dvg.markt', 'mkt');
         $qb->leftJoin('dvg.koopman', 'koopman');
+        $maandGeleden = new \DateTime();
+        $maandGeleden->modify('-1 month');
+        $maandGeleden->setTime(0,0,0);
+        $qb->leftJoin('koopman.dagvergunningen', 'vergunningen', Join::WITH, sprintf('vergunningen.dag >= \'%s\'', $maandGeleden->format('Y-m-d')));
+        $qb->leftJoin('vergunningen.vergunningControles', 'controles');
 
         // search
         if (isset($q['marktId']) === true && $q['marktId'] !== null && $q['marktId'] !== '')
@@ -305,6 +311,39 @@ class DagvergunningRepository extends EntityRepository
                 'startDate'   => $startDate,
                 'endDate'   => $endDate,
                 'koopman' => $koopman
+            ));
+
+        return $query->getResult();
+    }
+
+
+    /**
+     * @param Markt $markt
+     * @param \DateTime $dag
+     * @return Dagvergunning[]
+     */
+    public function findForWeightCalculation(Markt $markt, \DateTime $dag) {
+        $em = $this->getEntityManager();
+
+        $maandGeleden = new \DateTime();
+        $maandGeleden->modify('-1 month');
+        $maandGeleden->setTime(0,0,0);
+
+        $dql = 'SELECT d, k, v
+                FROM AppApiBundle:Dagvergunning d
+                JOIN d.koopman k
+                LEFT JOIN k.dagvergunningen v WITH v.dag >= :maandGeleden
+                WHERE d.doorgehaald = false
+                AND d.markt = :markt
+                AND d.dag = :dag
+                ';
+
+
+        $query = $em->createQuery($dql)
+            ->setParameters(array(
+                'maandGeleden'   => $maandGeleden,
+                'markt'   => $markt,
+                'dag' => $dag
             ));
 
         return $query->getResult();

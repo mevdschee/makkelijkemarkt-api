@@ -189,7 +189,22 @@ class DagvergunningModel
     public $doorgehaald;
 
     /**
+     * @var boolean
+     */
+    public $audit;
+
+    /**
      * @var FactuurModel
      */
     public $factuur;
+
+    /**
+     * @var
+     */
+    public $loten;
+
+    /**
+     * @var
+     */
+    public $auditReason;
 }

@@ -41,19 +41,26 @@ class DagvergunningMapper
      */
     protected $mapperAccount;
 
+    /**
+     * @var VergunningControleMapper
+     */
+    protected $mapperVergunningControle;
+
     public function __construct(
         MarktMapper $marktMapper,
         KoopmanMapper $koopmanMapper,
         SollicitatieMapper $sollicitatieMapper,
         AccountMapper $accountMapper,
-        FactuurMapper $factuurMapper
+        FactuurMapper $factuurMapper,
+        VergunningControleMapper $vergunningControleMapper
     )
     {
-        $this->mapperMarkt        = $marktMapper;
-        $this->mapperKoopman      = $koopmanMapper;
-        $this->mapperSollicitatie = $sollicitatieMapper;
-        $this->mapperAccount      = $accountMapper;
-        $this->mapperFactuur      = $factuurMapper;
+        $this->mapperMarkt              = $marktMapper;
+        $this->mapperKoopman            = $koopmanMapper;
+        $this->mapperSollicitatie       = $sollicitatieMapper;
+        $this->mapperAccount            = $accountMapper;
+        $this->mapperFactuur            = $factuurMapper;
+        $this->mapperVergunningControle = $vergunningControleMapper;
     }
 
     /**
@@ -96,7 +103,10 @@ class DagvergunningMapper
         $object->aantalElektraVast = $e->getAantalElektraVast();
         $object->krachtstroomVast = $e->getKrachtstroomVast();
         $object->afvaleilandVast = $e->getAfvaleilandVast();
-        $object->status = $e->getStatusSollicitatie();
+        $object->loten = $e->getLoten();
+        $object->audit = $e->getAudit();
+        $object->auditReason = $e->getAuditReason();
+        $object->status = $e->getStatusSolliciatie();
         if ($e->getSollicitatie() !== null)
             $object->sollicitatie = $this->mapperSollicitatie->singleEntityToSimpleModel($e->getSollicitatie());
         $object->doorgehaald = $e->isDoorgehaald();
@@ -108,6 +118,11 @@ class DagvergunningMapper
             $object->doorgehaaldAccount = $this->mapperAccount->singleEntityToModel($e->getDoorgehaaldAccount());
         $factuur = $e->getFactuur();
         $object->factuur = null !== $factuur ? $this->mapperFactuur->singleEntityToModel($factuur) : null;
+
+        if (count($e->getVergunningControles())) {
+            $object->controles = $this->mapperVergunningControle->multipleEntityToModel($e->getVergunningControles());
+        }
+
         return $object;
     }
 

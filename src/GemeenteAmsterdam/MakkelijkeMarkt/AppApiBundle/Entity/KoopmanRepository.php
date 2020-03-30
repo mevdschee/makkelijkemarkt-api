@@ -147,4 +147,22 @@ class KoopmanRepository extends EntityRepository
     {
         return $this->findBy([], ['achternaam' => 'ASC', 'voorletters' => 'ASC', 'erkenningsnummer' => 'ASC']);
     }
+    
+    public function findWithNietZelfAanwezigInPeriode(array $koopmanIds, \DateTime $start, \DateTime $eind)
+    {
+        $qb = $this->createQueryBuilder('koopman');
+        $qb->join('koopman.dagvergunning', 'dagvergunning');
+        $qb->andWhere('dagvergunning.doorgehaald = :doorgehaald');
+        $qb->setParameter('doorgehaald', false);
+        $qb->andWhere('koopman.id IN (:koopmanIds)');
+        $qb->setParameter('koopmanIds', $koopmanIds);
+        $qb->andWhere('dagvergunning.dag BETWEEN :start AND :eind');
+        $qb->setParameter('start', $start);
+        $qb->setParameter('eind', $eind);
+        $qb->leftJoin('dagvergunning.vergunningControles', 'controle');
+        $qb->andWhere('(dagvergunning.aanwezig != :zelf1 OR controle.aanwezig != :zelf2)');
+        $qb->setParameter('zelf1', 'zelf');
+        $qb->setParameter('zelf2', 'zelf');
+        return $qb->getQuery()->execute();
+    }
 }

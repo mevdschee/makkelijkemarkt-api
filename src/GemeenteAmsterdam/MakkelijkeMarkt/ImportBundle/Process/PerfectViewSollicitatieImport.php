@@ -58,7 +58,7 @@ class PerfectViewSollicitatieImport
     public function execute(CsvIterator $content)
     {
         $headings = $content->getHeadings();
-        $requiredHeadings = ['Kaartnr', 'Marktnaam', 'Erkenningsnummer', 'SollicitantenNummer', 'MarktStatus', 'PreDoorhaalStatus', 'Aantal3', 'Aantal4', 'Aantal1', 'Aantelek', 'Krachtstroom', 'DoorHaalReden', 'PLTSNR1', 'PLTSNR2', 'PLTSNR3', 'PLTSNR4', 'PLTSNR5', 'PLTSNR6', 'PLTSNR7', 'PLTSNR8'];
+        $requiredHeadings = ['Afkorting', 'Erkenningsnummer', 'SollicitantenNummer', 'MarktStatus', 'PreDoorhaalStatus', 'Aantal3', 'Aantal4', 'Aantal1', 'Aantelek', 'Krachtstroom', 'DoorHaalReden', 'PLTSNR1', 'PLTSNR2', 'PLTSNR3', 'PLTSNR4', 'PLTSNR5', 'PLTSNR6', 'PLTSNR7', 'PLTSNR8', 'Koppelveld'];
         foreach ($requiredHeadings as $requiredHeading) {
             if (in_array($requiredHeading, $headings) === false) {
                 throw new \RuntimeException('Missing column "' . $requiredHeading . '" in import file');
@@ -73,17 +73,17 @@ class PerfectViewSollicitatieImport
                 $this->logger->info('Skip, record is empty');
                 continue;
             }
-            $this->logger->info('Handle PerfectView record', ['Kaartnr' => $pvRecord['Kaartnr'], 'Marktnaam' => $pvRecord['Marktnaam'], 'Erkenningsnummer' => $pvRecord['Erkenningsnummer']]);
+            $this->logger->info('Handle PerfectView record', ['Koppelveld' => $pvRecord['Koppelveld'], 'Markt afkorting' => $pvRecord['Afkorting'], 'Erkenningsnummer' => $pvRecord['Erkenningsnummer']]);
 
             // get relation fields
-            $markt = $this->getMarktRecord($pvRecord['Marktnaam']);
+            $markt = $this->getMarktRecord($pvRecord['Afkorting']);
             if ($markt === null) {
-                $this->logger->warning('Skip record, MARKT not found in database', ['Kaartnr' => $pvRecord['Kaartnr'], 'Marktnaam' => $pvRecord['Marktnaam']]);
+                $this->logger->warning('Skip record, MARKT not found in database', ['Koppelveld' => $pvRecord['Koppelveld'], 'Markt afkorting' => $pvRecord['Afkorting']]);
                 continue;
             }
             $koopman = $this->getKoopmanRecord($pvRecord['Erkenningsnummer']);
             if ($koopman === null) {
-                $this->logger->warning('Skip record, KOOPMAN not found in database', ['Kaartnr' => $pvRecord['Kaartnr'], 'Erkenningsnummer' => $pvRecord['Erkenningsnummer']]);
+                $this->logger->warning('Skip record, KOOPMAN not found in database', ['Koppelveld' => $pvRecord['Koppelveld'], 'Erkenningsnummer' => $pvRecord['Erkenningsnummer']]);
                 continue;
             }
             if ($pvRecord['SollicitantenNummer'] === '' || $pvRecord['SollicitantenNummer'] === null) {
@@ -94,9 +94,13 @@ class PerfectViewSollicitatieImport
                 $this->logger->warning('Skip record, Erkenningsnummer is empty');
                 continue;
             }
+            if ($pvRecord['Koppelveld'] === '' || $pvRecord['Koppelveld'] === null) {
+                $this->logger->warning('Skip record, Koppelveld is empty');
+                continue;
+            }
 
             // get the record from the database (if it is already in the database)
-            $solliciatieRecord = $this->getSolliciatieRecord($pvRecord['Kaartnr']);
+            $solliciatieRecord = $this->getSolliciatieRecord($pvRecord['Koppelveld']);
             // prepare query builder
             $qb = $this->conn->createQueryBuilder();
 
@@ -117,7 +121,7 @@ class PerfectViewSollicitatieImport
             $this->setValue($qb, 'koopman_id',              \PDO::PARAM_INT,  $koopman['id']);
             $this->setValue($qb, 'sollicitatie_nummer',     \PDO::PARAM_INT,  $pvRecord['SollicitantenNummer']);
             $this->setValue($qb, 'status',                  \PDO::PARAM_STR,  $this->convertMarktstatus((($pvRecord['MarktStatus'] === 'Doorgehaald') ? $pvRecord['PreDoorhaalStatus'] : $pvRecord['MarktStatus'])));
-            $this->setValue($qb, 'vaste_plaatsen',          \PDO::PARAM_STR,  implode(',', $this->getVastePlaatsenArray($pvRecord)));
+            $this->setValue($qb, 'vaste_plaatsen',          \PDO::PARAM_STR,  utf8_encode(implode(',', $this->getVastePlaatsenArray($pvRecord))));
             $this->setValue($qb, 'aantal_3meter_kramen',    \PDO::PARAM_INT,  intval($pvRecord['Aantal3']));
             $this->setValue($qb, 'aantal_4meter_kramen',    \PDO::PARAM_INT,  intval($pvRecord['Aantal4']));
             $this->setValue($qb, 'aantal_extra_meters',     \PDO::PARAM_INT,  intval($pvRecord['Aantal1']));
@@ -126,8 +130,9 @@ class PerfectViewSollicitatieImport
             $this->setValue($qb, 'krachtstroom',            \PDO::PARAM_BOOL, in_array($pvRecord['Krachtstroom'], ['True', '1', 1]));
             $this->setValue($qb, 'inschrijf_datum',         \PDO::PARAM_STR,  $this->convertToDateTimeString($pvRecord['Inschrijfdatum'] . ' ' . $pvRecord['Inschrijftijd']));
             $this->setValue($qb, 'doorgehaald',             \PDO::PARAM_BOOL, $pvRecord['MarktStatus'] === 'Doorgehaald');
-            $this->setValue($qb, 'doorgehaald_reden',       \PDO::PARAM_STR,  $pvRecord['DoorHaalReden']);
-            $this->setValue($qb, 'perfect_view_nummer',     \PDO::PARAM_INT,  $pvRecord['Kaartnr']);
+            $this->setValue($qb, 'doorgehaald_reden',       \PDO::PARAM_STR,  utf8_encode($pvRecord['DoorHaalReden']));
+            //$this->setValue($qb, 'perfect_view_nummer',     \PDO::PARAM_INT,  $pvRecord['Kaartnr']);
+            $this->setValue($qb, 'koppelveld',              \PDO::PARAM_STR,  $pvRecord['Koppelveld']);
 
             // execute insert/update query
             $result = $this->conn->executeUpdate($qb->getSQL(), $qb->getParameters(), $qb->getParameterTypes());
@@ -137,13 +142,13 @@ class PerfectViewSollicitatieImport
     }
 
     /**
-     * @param string $perfectViewNummer
+     * @param string $koppelveld
      * @return NULL|array Sollicitatie-record
      */
-    protected function getSolliciatieRecord($perfectViewNummer)
+    protected function getSolliciatieRecord($koppelveld)
     {
         $qb = $this->conn->createQueryBuilder()->select('e.*')->from('sollicitatie', 'e');
-        $qb->where('e.perfect_view_nummer = :perfect_view_nummer')->setParameter('perfect_view_nummer', $perfectViewNummer);
+        $qb->where('e.koppelveld = :koppelveld')->setParameter('koppelveld', $koppelveld);
 
         $stmt = $this->conn->executeQuery($qb->getSQL(), $qb->getParameters());
 
@@ -154,17 +159,18 @@ class PerfectViewSollicitatieImport
     }
 
     /**
-     * @param number $perfectViewNummer
+     * @param number $afkorting
      * @return array Markt-record
      */
-    protected function getMarktRecord($perfectViewNummer)
+    protected function getMarktRecord($afkorting)
     {
+        $afkorting = strtoupper($afkorting);
         $this->preloadMarkten();
 
-        if (isset($this->markten[$perfectViewNummer]) === false)
+        if (isset($this->markten[$afkorting]) === false)
             return null;
 
-        return $this->markten[$perfectViewNummer];
+        return $this->markten[$afkorting];
     }
 
     /**
@@ -180,7 +186,7 @@ class PerfectViewSollicitatieImport
 
         $this->markten = [];
         while ($record = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $this->markten[$record['perfect_view_nummer']] = $record;
+            $this->markten[$record['afkorting']] = $record;
         }
     }
 
@@ -210,8 +216,16 @@ class PerfectViewSollicitatieImport
      */
     private function convertMarktstatus($status)
     {
-        if (in_array($status, ['vpl', 'vkk', 'soll']) === true)
-            return $status;
+        if (in_array(strtolower($status), ['vpl', 'vkk', 'soll']) === true)
+            return strtolower($status);
+        if (strtolower($status) == 'tvpl')
+            return 'tvpl';
+        if (strtolower($status) == 'exp. zone')
+            return 'exp';
+        if (strtolower($status) == 'tvplz')
+            return 'tvplz';
+        if (strtolower($status) == 'exp. zonef')
+            return 'expf';
         return '?';
     }
 

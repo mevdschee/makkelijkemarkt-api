@@ -19,6 +19,12 @@ services:
     class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\AccountMapper
   appapi.mapper.btwtarief:
     class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\BtwTariefMapper
+  appapi.mapper.vergunningcontrole:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\VergunningControleMapper
+    arguments:
+      - '@appapi.mapper.koopman'
+      - '@appapi.mapper.sollicitatie'
+      - '@appapi.mapper.account'
   appapi.mapper.token:
     class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\TokenMapper
     calls:
@@ -48,6 +54,7 @@ services:
       - '@appapi.mapper.sollicitatie'
       - '@appapi.mapper.account'
       - '@appapi.mapper.factuur'
+      - '@appapi.mapper.vergunningcontrole'
   appapi.mapper.vervanger:
     class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\VervangerMapper
     calls:
@@ -142,3 +149,11 @@ services:
     arguments:
       - '@doctrine.orm.entity_manager'
       - '@appapi.factuurservice'
+  GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Controller\Version_1_1_0\AuditController:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Controller\Version_1_1_0\AuditController
+    arguments:
+      - '@appapi.repository.dagvergunning'
+      - '@appapi.repository.markt'
+      - '@appapi.repository.koopman'
+      - '@doctrine.orm.entity_manager'
+      - '@appapi.mapper.dagvergunning'
