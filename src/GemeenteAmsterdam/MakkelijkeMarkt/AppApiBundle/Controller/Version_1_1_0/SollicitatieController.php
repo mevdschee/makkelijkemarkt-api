@@ -38,7 +38,8 @@ class SollicitatieController extends Controller
      *  },
      *  filters={
      *      {"name"="listOffset", "dataType"="integer"},
-     *      {"name"="listLength", "dataType"="integer", "description"="Default=100"}
+     *      {"name"="listLength", "dataType"="integer", "description"="Default=100"},
+     *      {"name"="includeDoorgehaald", "dataType"="integer", "description"="Default=1"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -55,7 +56,7 @@ class SollicitatieController extends Controller
         if ($markt === null)
             throw $this->createNotFoundException('Not found markt with id ' . $marktId);
 
-        $results = $repoSollicitatie->findByMarkt($markt, $request->query->get('listOffset'), $request->query->get('listLength', 100));
+        $results = $repoSollicitatie->findByMarkt($markt, $request->query->get('listOffset'), $request->query->get('listLength', 100), $request->query->getBoolean('includeDoorgehaald', true));
 
         /* @var $mapper \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\SollicitatieMapper */
         $mapper = $this->get('appapi.mapper.sollicitatie');

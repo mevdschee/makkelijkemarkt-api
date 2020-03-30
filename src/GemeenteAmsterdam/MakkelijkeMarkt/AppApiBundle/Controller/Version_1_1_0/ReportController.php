@@ -117,20 +117,22 @@ class ReportController extends Controller
 
     /**
      * @Method("GET")
-     * @Route("/rapport/staanverplichting/{marktId}/{dagStart}/{dagEind}/{vergunningType}")
+     * @Route("/rapport/staanverplichting/{dagStart}/{dagEind}/{vergunningType}")
      * @ApiDoc(
      *  section="Rapport",
      *  requirements={
-     *      {"name"="marktId", "required"="true", "dataType"="integer", "description"="ID van markt"},
      *      {"name"="dagStart", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
      *      {"name"="dagEind", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
      *      {"name"="vergunningType", "required"="true", "dataType"="string", "description"="alle|soll|vkk|vpl|lot"}
+     *  },
+     *  filters={
+     *      {"name"="marktId[]", "dataType"="integer", "description"="ID van markt"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
      * @Security("has_role('ROLE_ADMIN') || has_role('ROLE_SENIOR')")
      */
-    public function staanverplichtingRapportAction($marktId, $dagStart, $dagEind, $vergunningType)
+    public function staanverplichtingRapportAction(Request $request, $dagStart, $dagEind, $vergunningType)
     {
         /** @var $koopmanMapper \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\KoopmanMapper */
         $koopmanMapper = $this->get('appapi.mapper.koopman');
@@ -138,17 +140,21 @@ class ReportController extends Controller
         $sollicitatieMapper = $this->get('appapi.mapper.sollicitatie');
 
         // get the right markt
-        $markt = $this->getDoctrine()->getRepository('AppApiBundle:Markt')->find($marktId);
-        if ($markt === null) {
-            throw $this->createNotFoundException('Markt unknown');
+        $marktIds = $request->query->get('marktId', []);
+        if (is_array($marktIds) === false) {
+            $marktIds = explode(',', $marktIds);
         }
+        $marktIds = array_values($marktIds);
 
         /** @var $qb QueryBuilder */
         $qb = $this->getDoctrine()->getManager()->getRepository('AppApiBundle:Sollicitatie')->createQueryBuilder('s');
         $qb->select('s.id AS sollicitatie_id');
         $qb->innerJoin('s.koopman', 'k');
-        $qb->andWhere('s.markt = :markt');
-        $qb->setParameter('markt', $markt);
+        $qb->innerJoin('s.markt', 'markt');
+        if (count($marktIds) > 0) {
+            $qb->andWhere($qb->expr()->in('markt.id', ':marktIds'));
+            $qb->setParameter('marktIds', $marktIds);
+        }
         $qb->andWhere('s.doorgehaald = :sdoorgehaald');
         $qb->setParameter('sdoorgehaald', false);
         $qb->andWhere('k.status <> :kstatus');
@@ -173,17 +179,24 @@ class ReportController extends Controller
         $model = new AbstractRapportModel();
         $model->type = 'staanverplichting';
         $model->generationDate = date('Y-m-d H:i:s');
-        $model->input = ['marktId' => $marktId, 'dagStart' => $dagStart, 'dagEind' =>  $dagEind];
+        $model->input = ['marktId' => $marktIds, 'dagStart' => $dagStart, 'dagEind' =>  $dagEind];
         $model->output = [];
 
         // make a indexed quick lookup array of koopmannen
         $sollicitaties = [];
         $qb = $this->getDoctrine()->getRepository('AppApiBundle:Sollicitatie')->createQueryBuilder('s');
         $qb->select('s');
+        $qb->innerJoin('s.markt', 'markt');
         $qb->join('s.koopman', 'k');
+        $qb->leftJoin('k.vervangersVan', 'vervanger');
+        $qb->addSelect('vervanger');
+        $qb->leftJoin('vervanger.vervanger', 'vervangerKoopman');
+        $qb->addSelect('vervangerKoopman');
         $qb->addSelect('k');
-        $qb->andWhere('s.markt = :markt');
-        $qb->setParameter('markt', $markt);
+        if (count($marktIds) > 0) {
+            $qb->andWhere($qb->expr()->in('markt.id', ':marktIds'));
+            $qb->setParameter('marktIds', $marktIds);
+        }
         $unindexedSollicitaties = $qb->getQuery()->execute();
         foreach ($unindexedSollicitaties as $sollicitatie) {
             $sollicitaties[$sollicitatie->getId()] = $sollicitatie;
@@ -196,6 +209,77 @@ class ReportController extends Controller
             $formattedRecord['percentageAanwezig'] = $record['aantalActieveDagvergunningen'] > 0  ? (round($record['aantalActieveDagvergunningenZelfAanwezig'] / $record['aantalActieveDagvergunningen'], 2)) : 0;
             $formattedRecord['koopman'] = $koopmanMapper->singleEntityToSimpleModel($sollicitaties[$record['sollicitatie_id']]->getKoopman());
             $formattedRecord['sollicitatie'] = $sollicitatieMapper->singleEntityToSimpleModel($sollicitaties[$record['sollicitatie_id']]);
+            
+            $controle_rondes = [];
+            
+            // per sollicitatie
+            $qb2 = $this->getDoctrine()->getRepository('AppApiBundle:Dagvergunning')->createQueryBuilder('d');
+            $qb2->select('d.dag');
+            $qb2->addSelect('d.aanwezig');
+            $qb2->join('d.sollicitatie', 's');
+            $qb2->andWhere('d.sollicitatie = :sollicitatie');
+            $qb2->setParameter('sollicitatie', $sollicitaties[$record['sollicitatie_id']]);
+            $qb2->andWhere('d.dag BETWEEN :dagStart3 AND :dagEind3');
+            $qb2->setParameter('dagStart3', new \DateTime($dagStart));
+            $qb2->setParameter('dagEind3', new \DateTime($dagEind));
+            $qb2->andWhere('s.doorgehaald = :sdoorgehaald');
+            $qb2->setParameter('sdoorgehaald', false);
+            $qb2->andWhere('d.doorgehaald = :ddoorgehaald');
+            $qb2->setParameter('ddoorgehaald', false);
+            $dagvergunning_records = $qb2->getQuery()->execute();
+            foreach ($dagvergunning_records as $row) {
+                $row['dag'] = $row['dag']->format('Y-m-d');
+                if (isset($controle_rondes[$row['dag']]) === false) {
+                    $controle_rondes[$row['dag']] = ['zelf' => 0, 'andere' => 0];
+                }
+                if ($row['aanwezig'] === 'zelf') {
+                    $controle_rondes[$row['dag']]['zelf'] ++;
+                } else {
+                    $controle_rondes[$row['dag']]['andere'] ++;
+                }
+            }
+            
+            
+            $qb3 = $this->getDoctrine()->getRepository('AppApiBundle:VergunningControle')->createQueryBuilder('vc');
+            $qb3->select('d.dag');
+            $qb3->addSelect('vc.aanwezig');
+            $qb3->join('vc.dagvergunning', 'd');
+            $qb3->join('d.sollicitatie', 's');
+            $qb3->andWhere('d.sollicitatie = :sollicitatie');
+            $qb3->andWhere('d.dag BETWEEN :dagStart3 AND :dagEind3');
+            $qb3->setParameter('sollicitatie', $sollicitaties[$record['sollicitatie_id']]);
+            $qb3->setParameter('dagStart3', new \DateTime($dagStart));
+            $qb3->setParameter('dagEind3', new \DateTime($dagEind));
+            $qb3->andWhere('s.doorgehaald = :sdoorgehaald');
+            $qb3->setParameter('sdoorgehaald', false);
+            $qb3->andWhere('d.doorgehaald = :ddoorgehaald');
+            $qb3->setParameter('ddoorgehaald', false);
+            $controle_rondes_temp = $qb3->getQuery()->execute();
+            
+            foreach ($controle_rondes_temp as $row) {
+                $row['dag'] = $row['dag']->format('Y-m-d');
+                if (isset($controle_rondes[$row['dag']]) === false) {
+                    $controle_rondes[$row['dag']] = ['zelf' => 0, 'andere' => 0];
+                }
+                if ($row['aanwezig'] === 'zelf') {
+                    $controle_rondes[$row['dag']]['zelf'] ++;
+                } else {
+                    $controle_rondes[$row['dag']]['andere'] ++;
+                }
+            }
+            
+            $formattedRecord['aantalActieveDagvergunningenNietZelfAanwezigNaControle'] = 0;
+            $formattedRecord['aantalActieveDagvergunningenZelfAanwezigNaControle'] = 0;
+            foreach ($controle_rondes as $dag => $stats) {
+                if ($stats['zelf'] >= $stats['andere']) {
+                    $formattedRecord['aantalActieveDagvergunningenZelfAanwezigNaControle'] ++;
+                } else {
+                    $formattedRecord['aantalActieveDagvergunningenNietZelfAanwezigNaControle'] ++;
+                }
+            }
+            
+            $formattedRecord['percentageAanwezigNaControle'] = $record['aantalActieveDagvergunningen'] > 0  ? (round($formattedRecord['aantalActieveDagvergunningenZelfAanwezigNaControle'] / $record['aantalActieveDagvergunningen'], 2)) : 0;
+            
             $model->output[] = $formattedRecord;
         }
 

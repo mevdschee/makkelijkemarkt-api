@@ -82,6 +82,12 @@ class KoopmanMapper
         $object->email = $e->getEmail();
         $object->id = $e->getId();
         $object->erkenningsnummer = $e->getErkenningsnummer();
+        $object->weging = $e->calculateWeging();
+
+        if ($e->getHandhavingsVerzoek() !== null) {
+            $object->handhavingsVerzoek = $e->getHandhavingsVerzoek()->format('Y-m-d');
+        }
+
         $object->perfectViewNummer = $e->getPerfectViewNummer();
         if ($e->getFoto() !== '' && $e->getFoto() !== null)
             $object->fotoUrl = $this->imagineCacheManager->getBrowserPath('koopman-fotos/' . $e->getFoto(), 'koopman_rect_small');
@@ -115,6 +121,9 @@ class KoopmanMapper
         $object->email = $e->getEmail();
         $object->pasUid = $e->getPasUid();
         $object->vervangers = $this->mapperVervanger->multipleEntityToModel($e->getVervangersVan());
+        if ($e->getHandhavingsVerzoek() !== null) {
+            $object->handhavingsVerzoek = $e->getHandhavingsVerzoek()->format('Y-m-d');
+        }
         return $object;
     }
 

@@ -19,6 +19,8 @@ use Doctrine\ORM\Mapping as ORM;
  *  @ORM\Index(name="sollicitatieSollicitatieNummer", columns={"sollicitatie_nummer"}),
  *  @ORM\Index(name="sollicitatieMarktSollicitatieNummer", columns={"markt_id", "sollicitatie_nummer"}),
  *  @ORM\Index(name="sollicitatiePerfectViewNumber", columns={"perfect_view_nummer"})
+ * }, uniqueConstraints={
+ *  @ORM\UniqueConstraint(name="sollicitatieKoppelveld", columns={"koppelveld"})
  * })
  */
 class Sollicitatie
@@ -68,7 +70,7 @@ class Sollicitatie
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=4, nullable=false)
+     * @ORM\Column(type="string", length=15, nullable=false)
      */
     private $status;
 
@@ -144,6 +146,12 @@ class Sollicitatie
      * @ORM\Column(type="integer", nullable=true)
      */
     private $perfectViewNummer;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $koppelveld;
 
     /**
      * Init
@@ -421,5 +429,15 @@ class Sollicitatie
     public function getAantalAfvaleilanden()
     {
         return $this->aantalAfvaleilanden;
+    }
+
+    public function setKoppelveld($koppelveld)
+    {
+        $this->koppelveld = $koppelveld;
+    }
+
+    public function getKoppelveld()
+    {
+        return $this->koppelveld;
     }
 }

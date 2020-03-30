@@ -64,6 +64,7 @@ class SollicitatieMapper
         $object->krachtstroom = $e->getKrachtstroom();
         $object->doorgehaald = $e->getDoorgehaald();
         $object->doorgehaaldReden = $e->getDoorgehaaldReden();
+        $object->koppelveld = $e->getKoppelveld();
         return $object;
     }
 
@@ -87,6 +88,7 @@ class SollicitatieMapper
         $object->doorgehaald = $e->getDoorgehaald();
         $object->doorgehaaldReden = $e->getDoorgehaaldReden();
         $object->markt = $this->mapperMarkt->singleEntityToSimpleModel($e->getMarkt());
+        $object->koppelveld = $e->getKoppelveld();
         return $object;
     }
 

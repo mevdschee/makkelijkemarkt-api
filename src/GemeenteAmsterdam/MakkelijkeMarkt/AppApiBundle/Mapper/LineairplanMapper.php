@@ -24,6 +24,7 @@ class LineairplanMapper
         $object->promotieGeldenPerKraam            = $e->getPromotieGeldenPerKraam();
         $object->afvaleiland                       = $e->getAfvaleiland();
         $object->eenmaligElektra                   = $e->getEenmaligElektra();
+        $object->elektra                           = $e->getElektra();
 
         return $object;
     }

@@ -72,4 +72,79 @@ class MarktModel
      * @var number
      */
     public $aantalMeter;
+
+    /**
+     * @var integer
+     */
+    public $auditMax;
+    
+    /**
+     * @var bool
+     */
+    public $kiesJeKraamMededelingActief;
+    
+    /**
+     * @var string
+     */
+    public $kiesJeKraamMededelingTitel;
+    
+    /**
+     * @var string
+     */
+    public $kiesJeKraamMededelingTekst;
+    
+    /**
+     * @var bool
+     */
+    public $kiesJeKraamActief;
+    
+    /**
+     * @var string
+     */
+    public $kiesJeKraamFase;
+    
+    /**
+     * @var string
+     */
+    public $kiesJeKraamGeblokkeerdePlaatsen;
+    
+    /**
+     * @var array|string[]
+     */
+    public $kiesJeKraamGeblokkeerdeData;
+    
+    /**
+     * @var string
+     */
+    public $kiesJeKraamEmailKramenzetter;
+    
+    /**
+     * @var string
+     */
+    public $marktDagenTekst;
+    
+    /**
+     * @var string
+     */
+    public $indelingsTijdstipTekst;
+    
+    /**
+     * @var string
+     */
+    public $telefoonNummerContact;
+    
+    /**
+     * @var bool
+     */
+    public $makkelijkeMarktActief;
+    
+    /**
+     * @var string
+     */
+    public $indelingstype;
+    
+    /**
+     * @var boolean
+     */
+    public $isABlijstIndeling;
 }

@@ -73,7 +73,7 @@ class PerfectViewMarktImport
     public function execute($perfectViewRecords)
     {
         $headings = $perfectViewRecords->getHeadings();
-        $requiredHeadings = ['KAARTNR', 'AFKORTING', 'MARKTNAAM', 'SOORT_MARK', 'A1_METER', 'A3_METER', 'A4_METER', 'ELEKTRA', 'KRACHTROOM'];
+        $requiredHeadings = ['AFKORTING', 'MARKTNAAM', 'SOORT_MARK', 'A1_METER', 'A3_METER', 'A4_METER', 'ELEKTRA', 'KRACHTROOM'];
         foreach ($requiredHeadings as $requiredHeading) {
             if (in_array($requiredHeading, $headings) === false) {
                 throw new \RuntimeException('Missing column "' . $requiredHeading . '" in import file');
@@ -88,24 +88,23 @@ class PerfectViewMarktImport
                 continue;
             }
 
-            $this->logger->info('PerfectView record import', ['kaartnr' => $pvRecord['KAARTNR']]);
-            $markt = $this->marktRepository->getByPerfectViewNummer($pvRecord['KAARTNR']);
+            $this->logger->info('PerfectView record import', ['afkorting' => $pvRecord['AFKORTING']]);
+            $markt = $this->marktRepository->getByAfkorting($pvRecord['AFKORTING']);
 
             // create new markt
             if ($markt === null)
             {
-                $this->logger->info('Nieuwe markt, aanmaken in database', ['kaartnr' => $pvRecord['KAARTNR']]);
+                $this->logger->info('Nieuwe markt, aanmaken in database', ['afkorting' => $pvRecord['AFKORTING']]);
                 $markt = new Markt();
-                $markt->setPerfectViewNummer($pvRecord['KAARTNR']);
                 $this->em->persist($markt);
             }
             else
             {
-                $this->logger->info('Bestaande markt, bijwerken in database', ['kaartnr' => $pvRecord['KAARTNR'], 'id' => $markt->getId()]);
+                $this->logger->info('Bestaande markt, bijwerken in database', ['afkorting' => $pvRecord['AFKORTING'], 'id' => $markt->getId()]);
             }
 
             // update markt
-            $markt->setAfkorting($pvRecord['AFKORTING']);
+            $markt->setAfkorting(strtoupper($pvRecord['AFKORTING']));
             $markt->setNaam($pvRecord['MARKTNAAM']);
             $markt->setSoort($this->soortMarkConversion[$pvRecord['SOORT_MARK']]);
             $markt->setExtraMetersMogelijk($pvRecord['A1_METER'] === 'True');
@@ -129,12 +128,12 @@ class PerfectViewMarktImport
             $markt->setAanwezigeOpties($opties);
 
             // load additional data
-            $marktExtraData = $this->marktExtraDataRepository->getByPerfectViewNumber($pvRecord['KAARTNR']);
+            $marktExtraData = $this->marktExtraDataRepository->getByPerfectViewNumber($pvRecord['AFKORTING']);
 
             // if extra data found, attach it
             if ($marktExtraData !== null)
             {
-                $this->logger->info('Extra marktdata gevonden', ['kaartnr' => $pvRecord['KAARTNR']]);
+                $this->logger->info('Extra marktdata gevonden', ['afkorting' => $pvRecord['AFKORTING']]);
                 $markt->setGeoArea($marktExtraData->getGeoArea());
                 $markt->setMarktdagen($marktExtraData->getMarktdagen());
                 $markt->setAanwezigeOpties(array_merge($opties, $marktExtraData->getAanwezigeOpties()));

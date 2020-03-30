@@ -72,4 +72,9 @@ class SimpleSollicitatieModel
      * @var SimpleMarktModel
      */
     public $markt;
+    
+    /**
+     * @var string
+     */
+    public $koppelveld;
 }

@@ -173,6 +173,7 @@ class TariefplanController extends Controller
      *      {"name"="promotieGeldenPerKraam", "dataType"="string", "required"="true"},
      *      {"name"="afvaleiland", "dataType"="string", "required"="true"},
      *      {"name"="eenmaligElektra", "dataType"="string", "required"="true"},
+     *      {"name"="elektra", "dataType"="string", "required"="true"},
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -283,6 +284,7 @@ class TariefplanController extends Controller
         $lineairplan->setPromotieGeldenPerKraam($message['promotieGeldenPerKraam']);
         $lineairplan->setAfvaleiland($message['afvaleiland']);
         $lineairplan->setEenmaligElektra($message['eenmaligElektra']);
+        $lineairplan->setElektra($message['elektra']);
     }
 
 

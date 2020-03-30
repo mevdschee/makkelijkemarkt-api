@@ -35,6 +35,15 @@ class MarktRepository extends EntityRepository
     {
         return $this->findOneBy(['perfectViewNummer' => $kaartnr]);
     }
+    
+    /**
+     * @param string $afkorting
+     * @return Markt|NULL
+     */
+    public function getByAfkorting($afkorting)
+    {
+        return $this->findOneBy(['afkorting' => strtoupper($afkorting)]);
+    }
 
     /**
      * (non-PHPdoc)

@@ -50,6 +50,7 @@ class LineairplanFactuurService {
         list($totaalMeters, $totaalKramen) = $this->berekenMeters($dagvergunning, $btw);
 
         $this->berekenElektra($dagvergunning, $btw);
+        $this->berekenKrachtstroom($dagvergunning, $btw);
         $this->berekenEenmaligElektra($dagvergunning, $btw);
 
         $this->berekenAfvaleilanden($dagvergunning, $btw);
@@ -120,14 +121,43 @@ class LineairplanFactuurService {
 
         return [$totaalMeters, $totaalKramen];
     }
-
-    protected function berekenElektra(Dagvergunning $dagvergunning, $btw) {
+    
+    protected function berekenKrachtstroom(Dagvergunning $dagvergunning, $btw) {
         $lineairplan = $this->tariefplan->getLineairplan();
 
         $vast   = $dagvergunning->getAantalElektraVast();
         $afname = $dagvergunning->getAantalElektra();
         $kosten = $lineairplan->getToeslagKrachtstroomPerAansluiting();
-        if (null !== $kosten && $kosten > 0 && $afname  >= 1) {
+        if (null !== $kosten && $kosten > 0 && $afname  >= 1 && $dagvergunning->getKrachtstroom() === true) {
+            if ($vast >= 1) {
+                $afname = $afname - $vast;
+                $product = new Product();
+                $product->setNaam('elektra krachtstroom (vast)');
+                $product->setBedrag(0);
+                $product->setFactuur($this->factuur);
+                $product->setAantal($vast);
+                $product->setBtwHoog(0);
+                $this->factuur->addProducten($product);
+            }
+            if ($afname >= 1) {
+                $product = new Product();
+                $product->setNaam('elektra krachtstroom');
+                $product->setBedrag($kosten);
+                $product->setFactuur($this->factuur);
+                $product->setAantal($afname);
+                $product->setBtwHoog($btw);
+                $this->factuur->addProducten($product);
+            }
+        }
+    }
+    
+    protected function berekenElektra(Dagvergunning $dagvergunning, $btw) {
+        $lineairplan = $this->tariefplan->getLineairplan();
+
+        $vast   = $dagvergunning->getAantalElektraVast();
+        $afname = $dagvergunning->getAantalElektra();
+        $kosten = $lineairplan->getElektra();
+        if (null !== $kosten && $kosten > 0 && $afname  >= 1 && $dagvergunning->getKrachtstroom() === false) {
             if ($vast >= 1) {
                 $afname = $afname - $vast;
                 $product = new Product();

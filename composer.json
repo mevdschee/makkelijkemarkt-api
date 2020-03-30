@@ -8,7 +8,7 @@
         }
     },
     "require": {
-        "php": ">=5.3.9",
+        "php": ">=7.0",
         "ext-fileinfo": "*",
         "symfony/symfony": "2.7.*",
         "doctrine/orm": "~2.5",

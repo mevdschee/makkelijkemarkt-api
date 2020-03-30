@@ -139,6 +139,12 @@ class Koopman
     private $perfectViewNummer;
 
     /**
+     * @var \DateTime
+     * @ORM\Column(type="date", nullable=true, options={"default": null})
+     */
+    private $handhavingsVerzoek;
+
+    /**
      * @var Dagvergunning[]
      * @ORM\OneToMany(targetEntity="Dagvergunning", mappedBy="koopman", fetch="LAZY", orphanRemoval=true)
      */
@@ -163,6 +169,7 @@ class Koopman
     {
         $this->sollicitaties   = new ArrayCollection();
         $this->dagvergunningen = new ArrayCollection();
+        $this->handhavingsVerzoek = null;
     }
 
     /**
@@ -536,5 +543,55 @@ class Koopman
     public function getVervangerVoor()
     {
         return $this->vervangerVoor;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getHandhavingsVerzoek()
+    {
+        return $this->handhavingsVerzoek;
+    }
+
+    /**
+     * @param \DateTime $handhavingsVerzoek
+     * @return Koopman
+     */
+    public function setHandhavingsVerzoek($handhavingsVerzoek)
+    {
+        $this->handhavingsVerzoek = $handhavingsVerzoek;
+
+        return $this;
+    }
+
+
+    /**
+     * @return float
+     */
+    public function calculateWeging() {
+        $maandGeleden = new \DateTime();
+        $maandGeleden->modify('-1 month');
+        $maandGeleden->setTime(0,0,0);
+
+        $dagvergunningen = 0;
+        $afwezig = 0;
+
+        foreach ($this->dagvergunningen as $dagvergunning) {
+            if ($dagvergunning->getDag() < $maandGeleden) {
+                continue;
+            }
+
+            $dagvergunningen++;
+
+            foreach ($dagvergunning->getVergunningControles() as $controle) {
+                if ('vervanger_zonder_toestemming' === $controle->getAanwezig()) {
+                    $afwezig++;
+                }
+            }
+        }
+        if (0 === $dagvergunningen || 0 === $afwezig) {
+            return 0;
+        }
+        return $afwezig / $dagvergunningen / 2;
     }
 }

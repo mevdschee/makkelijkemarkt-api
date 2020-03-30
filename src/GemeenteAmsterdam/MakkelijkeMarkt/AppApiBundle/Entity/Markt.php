@@ -17,8 +17,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 /**
  * @ORM\Entity(repositoryClass="MarktRepository")
  * @ORM\Table(indexes={
- *  @ORM\Index(name="marktAfkorting", columns={"afkorting"}),
  *  @ORM\Index(name="marktPerfectViewNumber", columns={"perfect_view_nummer"})
+ * }, uniqueConstraints={
+ *  @ORM\UniqueConstraint(name="marktAfkorting", columns={"afkorting"})
  * })
  */
 class Markt
@@ -37,6 +38,26 @@ class Markt
      * @var string
      */
     const SOORT_SEIZOEN = 'seizoen';
+    
+    /**
+     * @var string
+     */
+    const KIESJEKRAAM_FASE_VOORBEREIDING = 'voorbereiding';
+    
+    /**
+     * @var string
+     */
+    const KIESJEKRAAM_FASE_ACTIVATIE = 'activatie';
+    
+    /**
+     * @var string
+     */
+    const KIESJEKRAAM_FASE_WENPERIODE = 'wenperiode';
+    
+    /**
+     * @var string
+     */
+    const KIESJEKRAAM_FASE_LIVE = 'live';
 
     /**
      * @var number
@@ -127,11 +148,100 @@ class Markt
     private $aantalMeter;
 
     /**
+     * @var integer
+     * @ORM\Column(type="integer", nullable=false, options={"default": 10})
+     */
+    private $auditMax;
+    
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $kiesJeKraamMededelingActief;
+    
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $kiesJeKraamMededelingTitel;
+    
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $kiesJeKraamMededelingTekst;
+    
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $kiesJeKraamActief;
+    
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    private $kiesJeKraamFase;
+    
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $kiesJeKraamGeblokkeerdePlaatsen;
+    
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $kiesJeKraamGeblokkeerdeData;
+    
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $kiesJeKraamEmailKramenzetter;
+    
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $marktDagenTekst;
+    
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $indelingsTijdstipTekst;
+    
+    /**
+     * @var string
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $telefoonNummerContact;
+    
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $makkelijkeMarktActief;
+    
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=255, nullable=false)
+     */
+    private $indelingstype;
+
+    /**
      * Init
      */
     public function __construct()
     {
+        $this->auditMax = 10;
         $this->sollicitaties = new ArrayCollection();
+        $this->kiesJeKraamActief = false;
+        $this->makkelijkeMarktActief = true;
+        $this->kiesJeKraamMededelingActief = false;
+        $this->indelingstype = 'a/b-lijst';
     }
 
     /**
@@ -406,4 +516,269 @@ class Markt
         $this->aantalMeter = $aantalMeter;
     }
 
+    /**
+     * @return int
+     */
+    public function getAuditMax()
+    {
+        return $this->auditMax;
+    }
+
+    /**
+     * @param int $auditMax
+     * @return Markt
+     */
+    public function setAuditMax($auditMax)
+    {
+        $this->auditMax = $auditMax;
+
+        return $this;
+    }
+    
+    /**
+     * @return boolean
+     */
+    public function getKiesJeKraamMededelingActief()
+    {
+        return $this->kiesJeKraamMededelingActief;
+    }
+    
+    /**
+     * @param string $kiesJeKraamMededelingActief
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setKiesJeKraamMededelingActief($kiesJeKraamMededelingActief)
+    {
+        $this->kiesJeKraamMededelingActief = $kiesJeKraamMededelingActief;
+        
+        return $this;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getKiesJeKraamMededelingTitel()
+    {
+        return $this->kiesJeKraamMededelingTitel;
+    }
+    
+    /**
+     * @param string $kiesJeKraamMededelingTitel
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setKiesJeKraamMededelingTitel($kiesJeKraamMededelingTitel)
+    {
+        $this->kiesJeKraamMededelingTitel = $kiesJeKraamMededelingTitel;
+        
+        return $this;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getKiesJeKraamMededelingTekst()
+    {
+        return $this->kiesJeKraamMededelingTekst;
+    }
+    
+    /**
+     * @param string $kiesJeKraamMededelingTekst
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setKiesJeKraamMededelingTekst($kiesJeKraamMededelingTekst)
+    {
+        $this->kiesJeKraamMededelingTekst = $kiesJeKraamMededelingTekst;
+        
+        return $this;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getKiesJeKraamGeblokkeerdePlaatsen()
+    {
+        return $this->kiesJeKraamGeblokkeerdePlaatsen;
+    }
+    
+    /**
+     * @param string $kiesJeKraamGeblokkeerdePlaatsen
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setKiesJeKraamGeblokkeerdePlaatsen($kiesJeKraamGeblokkeerdePlaatsen)
+    {
+        $this->kiesJeKraamGeblokkeerdePlaatsen = $kiesJeKraamGeblokkeerdePlaatsen;
+        
+        return $this;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getKiesJeKraamGeblokkeerdeData()
+    {
+        return $this->kiesJeKraamGeblokkeerdeData;
+    }
+    
+    /**
+     * @param string $kiesJeKraamGeblokkeerdeData
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setKiesJeKraamGeblokkeerdeData($kiesJeKraamGeblokkeerdeData)
+    {
+        $this->kiesJeKraamGeblokkeerdeData = $kiesJeKraamGeblokkeerdeData;
+        
+        return $this;
+    }
+    
+    /**
+     * @return boolean
+     */
+    public function getKiesJeKraamActief()
+    {
+        return $this->kiesJeKraamActief;
+    }
+    
+    /**
+     * @param string $kiesJeKraamActief
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setKiesJeKraamActief($kiesJeKraamActief)
+    {
+        $this->kiesJeKraamActief = $kiesJeKraamActief;
+        
+        return $this;
+    }
+    
+    /**
+     * @return boolean
+     */
+    public function getMakkelijkeMarktActief()
+    {
+        return $this->makkelijkeMarktActief;
+    }
+    
+    /**
+     * @param string $makkelijkeMarktActief
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setMakkelijkeMarktActief($makkelijkeMarktActief)
+    {
+        $this->makkelijkeMarktActief = $makkelijkeMarktActief;
+        
+        return $this;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getKiesJeKraamFase()
+    {
+        return $this->kiesJeKraamFase;
+    }
+    
+    /**
+     * @param string $kiesJeKraamFase
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setKiesJeKraamFase($kiesJeKraamFase)
+    {
+        $this->kiesJeKraamFase = $kiesJeKraamFase;
+        
+        return $this;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getKiesJeKraamEmailKramenzetter()
+    {
+        return $this->kiesJeKraamEmailKramenzetter;
+    }
+    
+    /**
+     * @param string $kiesJeKraamEmailKramenzetter
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setKiesJeKraamEmailKramenzetter($kiesJeKraamEmailKramenzetter = null)
+    {
+        $this->kiesJeKraamEmailKramenzetter = $kiesJeKraamEmailKramenzetter;
+        
+        return $this;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getMarktDagenTekst()
+    {
+        return $this->marktDagenTekst;
+    }
+    
+    /**
+     * @param string $marktDagenTekst
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setMarktDagenTekst($marktDagenTekst)
+    {
+        $this->marktDagenTekst = $marktDagenTekst;
+        
+        return $this;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getIndelingsTijdstipTekst()
+    {
+        return $this->indelingsTijdstipTekst;
+    }
+    
+    /**
+     * @param string $indelingsTijdstipTekst
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setIndelingsTijdstipTekst($indelingsTijdstipTekst)
+    {
+        $this->indelingsTijdstipTekst = $indelingsTijdstipTekst;
+        
+        return $this;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getTelefoonNummerContact()
+    {
+        return $this->telefoonNummerContact;
+    }
+    
+    /**
+     * @param string $telefoonNummerContact
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setTelefoonNummerContact($telefoonNummerContact)
+    {
+        $this->telefoonNummerContact = $telefoonNummerContact;
+        
+        return $this;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getIndelingstype()
+    {
+        return $this->indelingstype;
+    }
+    
+    /**
+     * @param string $indelingstype
+     * @return \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Markt
+     */
+    public function setIndelingstype($indelingstype)
+    {
+        $this->indelingstype = $indelingstype;
+        
+        return $this;
+    }
 }

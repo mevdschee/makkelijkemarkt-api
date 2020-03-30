@@ -11,6 +11,7 @@
 
 namespace GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Controller\Version_1_1_0;
 
+use GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\Koopman;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -205,6 +206,45 @@ class KoopmanController extends Controller
         /* @var $mapper \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\KoopmanMapper */
         $mapper = $this->get('appapi.mapper.koopman');
         $response = $mapper->singleEntityToModel($object);
+
+        return new JsonResponse($response, Response::HTTP_OK, []);
+    }
+
+    /**
+     * Toggle Handhavingsverzoek
+     *
+     * @Method("POST")
+     * @Route("/koopman/toggle_handhavingsverzoek/{id}/{date}")
+     * @ApiDoc(
+     *  section="Koopman",
+     *  requirements={
+     *      {"name"="id", "dataType"="integer"},
+     *      {"name"="date", "dataType"="string yyyy-mm-dd"},
+     *  },
+     *  views = { "default", "1.1.0" }
+     * )
+     * @Security("has_role('ROLE_SENIOR')")
+     */
+    public function toggleHandhavingsVerzoekAction($id,$date)
+    {
+        /* @var $repo \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Entity\KoopmanRepository */
+        $repo = $this->get('appapi.repository.koopman');
+
+        $koopman = $repo->find($id);
+        if ($koopman === null) {
+            throw $this->createNotFoundException('Koopman not found');
+        }
+        /**
+         * @var Koopman $koopman
+         */
+
+        $date = new \DateTime($date);
+
+        $koopman->setHandhavingsVerzoek($date);
+        $this->getDoctrine()->getManager()->flush();
+
+        $mapper = $this->get('appapi.mapper.koopman');
+        $response = $mapper->singleEntityToModel($koopman);
 
         return new JsonResponse($response, Response::HTTP_OK, []);
     }
