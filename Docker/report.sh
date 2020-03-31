@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 startYear=$(date +'%Y')
 startDate="$startYear-01-01"
