@@ -35,7 +35,7 @@ php console assetic:dump --env=prod
 
 # Configure access to /download URL
 mkdir -p /etc/nginx/htpasswd.d
-echo $MM_API__NGINX_HTPASSWD > /etc/nginx/htpasswd.d/makkelijkemarkt-api.amsterdam.nl
+echo -e $MM_API__NGINX_HTPASSWD > /etc/nginx/htpasswd.d/makkelijkemarkt-api.amsterdam.nl
 
 # Make sure log files exist, so tail won't return a non-zero exitcode
 touch /app/app/logs/dev.log
