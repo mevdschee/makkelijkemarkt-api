@@ -4,7 +4,6 @@
 String PROJECTNAME = "makkelijkemarkt-api"
 String CONTAINERDIR = "."
 String PRODUCTION_BRANCH = "master"
-String INFRASTRUCTURE = 'secure'
 String PLAYBOOK = 'deploy-makkelijkemarkt-api.yml'
 
 // All other data uses variables, no changes needed for static
@@ -54,9 +53,9 @@ if (BRANCH == "${PRODUCTION_BRANCH}") {
 
                 build job: 'Subtask_Openstack_Playbook',
                 parameters: [
-                    [$class: 'StringParameterValue', name: 'INFRASTRUCTURE', value: "${INFRASTRUCTURE}"],
                     [$class: 'StringParameterValue', name: 'INVENTORY', value: 'acceptance'],
                     [$class: 'StringParameterValue', name: 'PLAYBOOK', value: "${PLAYBOOK}"],
+                    [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=app_${PROJECTNAME}"],
                 ]
             }
         }
@@ -77,9 +76,9 @@ if (BRANCH == "${PRODUCTION_BRANCH}") {
 
                 build job: 'Subtask_Openstack_Playbook',
                 parameters: [
-                    [$class: 'StringParameterValue', name: 'INFRASTRUCTURE', value: "${INFRASTRUCTURE}"],
                     [$class: 'StringParameterValue', name: 'INVENTORY', value: 'production'],
                     [$class: 'StringParameterValue', name: 'PLAYBOOK', value: "${PLAYBOOK}"],
+                    [$class: 'StringParameterValue', name: 'PLAYBOOKPARAMS', value: "-e cmdb_id=app_${PROJECTNAME}"],
                 ]
             }
         }
