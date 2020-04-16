@@ -209,9 +209,9 @@ class ReportController extends Controller
             $formattedRecord['percentageAanwezig'] = $record['aantalActieveDagvergunningen'] > 0  ? (round($record['aantalActieveDagvergunningenZelfAanwezig'] / $record['aantalActieveDagvergunningen'], 2)) : 0;
             $formattedRecord['koopman'] = $koopmanMapper->singleEntityToSimpleModel($sollicitaties[$record['sollicitatie_id']]->getKoopman());
             $formattedRecord['sollicitatie'] = $sollicitatieMapper->singleEntityToSimpleModel($sollicitaties[$record['sollicitatie_id']]);
-
+            
             $controle_rondes = [];
-
+            
             // per sollicitatie
             $qb2 = $this->getDoctrine()->getRepository('AppApiBundle:Dagvergunning')->createQueryBuilder('d');
             $qb2->select('d.dag');
@@ -238,8 +238,8 @@ class ReportController extends Controller
                     $controle_rondes[$row['dag']]['andere'] ++;
                 }
             }
-
-
+            
+            
             $qb3 = $this->getDoctrine()->getRepository('AppApiBundle:VergunningControle')->createQueryBuilder('vc');
             $qb3->select('d.dag');
             $qb3->addSelect('vc.aanwezig');
@@ -255,7 +255,7 @@ class ReportController extends Controller
             $qb3->andWhere('d.doorgehaald = :ddoorgehaald');
             $qb3->setParameter('ddoorgehaald', false);
             $controle_rondes_temp = $qb3->getQuery()->execute();
-
+            
             foreach ($controle_rondes_temp as $row) {
                 $row['dag'] = $row['dag']->format('Y-m-d');
                 if (isset($controle_rondes[$row['dag']]) === false) {
@@ -267,7 +267,7 @@ class ReportController extends Controller
                     $controle_rondes[$row['dag']]['andere'] ++;
                 }
             }
-
+            
             $formattedRecord['aantalActieveDagvergunningenNietZelfAanwezigNaControle'] = 0;
             $formattedRecord['aantalActieveDagvergunningenZelfAanwezigNaControle'] = 0;
             foreach ($controle_rondes as $dag => $stats) {
@@ -277,9 +277,9 @@ class ReportController extends Controller
                     $formattedRecord['aantalActieveDagvergunningenNietZelfAanwezigNaControle'] ++;
                 }
             }
-
+            
             $formattedRecord['percentageAanwezigNaControle'] = $record['aantalActieveDagvergunningen'] > 0  ? (round($formattedRecord['aantalActieveDagvergunningenZelfAanwezigNaControle'] / $record['aantalActieveDagvergunningen'], 2)) : 0;
-
+            
             $model->output[] = $formattedRecord;
         }
 
@@ -515,56 +515,24 @@ class ReportController extends Controller
                     'totaalAantalKramen%' => 0.0,
                     'totaalAantalMeter' => 0,
                     'totaalAantalMeter%' => 0.0,
-
                     'vplAantalDagvergunningen' => 0,
                     'vplAantalDagvergunningen%' => 0.0,
                     'vplAantalKramen' => 0,
                     'vplAantalKramen%' => 0.0,
                     'vplAantalMeter' => 0,
                     'vplAantalMeter%' => 0.0,
-
                     'vkkAantalDagvergunningen' => 0,
                     'vkkAantalDagvergunningen%' => 0.0,
                     'vkkAantalKramen' => 0,
                     'vkkAantalKramen%' => 0.0,
                     'vkkAantalMeter' => 0,
                     'vkkAantalMeter%' => 0.0,
-
-                    'tvplAantalDagvergunningen' => 0,
-                    'tvplAantalDagvergunningen%' => 0.0,
-                    'tvplAantalKramen' => 0,
-                    'tvplAantalKramen%' => 0.0,
-                    'tvplAantalMeter' => 0,
-                    'tvplAantalMeter%' => 0.0,
-
-                    'tvplzAantalDagvergunningen' => 0,
-                    'tvplzAantalDagvergunningen%' => 0.0,
-                    'tvplzAantalKramen' => 0,
-                    'tvplzAantalKramen%' => 0.0,
-                    'tvplzAantalMeter' => 0,
-                    'tvplzAantalMeter%' => 0.0,
-
-                    'expAantalDagvergunningen' => 0,
-                    'expAantalDagvergunningen%' => 0.0,
-                    'expAantalKramen' => 0,
-                    'expAantalKramen%' => 0.0,
-                    'expAantalMeter' => 0,
-                    'expAantalMeter%' => 0.0,
-
-                    'expfAantalDagvergunningen' => 0,
-                    'expfAantalDagvergunningen%' => 0.0,
-                    'expfAantalKramen' => 0,
-                    'expfAantalKramen%' => 0.0,
-                    'expfAantalMeter' => 0,
-                    'expfAantalMeter%' => 0.0,
-
                     'sollAantalDagvergunningen' => 0,
                     'sollAantalDagvergunningen%' => 0.0,
                     'sollAantalKramen' => 0,
                     'sollAantalKramen%' => 0.0,
                     'sollAantalMeter' => 0,
                     'sollAantalMeter%' => 0.0,
-
                     'lotAantalDagvergunningen' => 0,
                     'lotAantalDagvergunningen%' => 0.0,
                     'lotAantalKramen' => 0,
@@ -583,33 +551,21 @@ class ReportController extends Controller
         foreach ($rapport as $key => $row) {
             $rapport[$key]['vplAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['vplAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
             $rapport[$key]['vkkAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['vkkAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
-            $rapport[$key]['tvplAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['tvplAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
-            $rapport[$key]['tvplzAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['tvplzAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
-            $rapport[$key]['expAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['expAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
-            $rapport[$key]['expfAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['expfAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
             $rapport[$key]['sollAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['sollAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
             $rapport[$key]['lotAantalDagvergunningen%'] = $rapport[$key]['aantalDagvergunningen'] > 0 ? $rapport[$key]['lotAantalDagvergunningen'] / $rapport[$key]['aantalDagvergunningen'] : 0;
 
             $rapport[$key]['vplAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['vplAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
             $rapport[$key]['vkkAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['vkkAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
-            $rapport[$key]['tvplAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['tvplAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
-            $rapport[$key]['tvplzAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['tvplzAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
-            $rapport[$key]['expAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['expAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
-            $rapport[$key]['expfAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['expfAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
             $rapport[$key]['sollAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['sollAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
             $rapport[$key]['lotAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['lotAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
 
             $rapport[$key]['vplAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['vplAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
             $rapport[$key]['vkkAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['vkkAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
-            $rapport[$key]['tvplAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['tvplAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
-            $rapport[$key]['tvplzAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['tvplzAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
-            $rapport[$key]['expAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['expAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
-            $rapport[$key]['expfAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['expfAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
             $rapport[$key]['sollAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['sollAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
             $rapport[$key]['lotAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['lotAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
 
-            $rapport[$key]['totaalAantalKramen'] = $rapport[$key]['vplAantalKramen'] + $rapport[$key]['vkkAantalKramen'] + $rapport[$key]['tvplAantalKramen'] + $rapport[$key]['tvplzAantalKramen'] + $rapport[$key]['expAantalKramen'] + $rapport[$key]['expfAantalKramen']  + $rapport[$key]['sollAantalKramen'] + $rapport[$key]['lotAantalKramen'];
-            $rapport[$key]['totaalAantalMeter'] = $rapport[$key]['vplAantalMeter'] + $rapport[$key]['vkkAantalMeter'] + $rapport[$key]['tvplAantalMeter'] + $rapport[$key]['tvplzAantalMeter'] + $rapport[$key]['expAantalMeter'] + $rapport[$key]['expfAantalMeter'] + $rapport[$key]['sollAantalMeter'] + $rapport[$key]['lotAantalMeter'];
+            $rapport[$key]['totaalAantalKramen'] = $rapport[$key]['vplAantalKramen'] + $rapport[$key]['vkkAantalKramen'] + $rapport[$key]['sollAantalKramen'] + $rapport[$key]['lotAantalKramen'];
+            $rapport[$key]['totaalAantalMeter'] = $rapport[$key]['vplAantalMeter'] + $rapport[$key]['vkkAantalMeter'] + $rapport[$key]['sollAantalMeter'] + $rapport[$key]['lotAantalMeter'];
 
             $rapport[$key]['totaalAantalKramen%'] = $rapport[$key]['capaciteitKramen'] > 0 ? (($rapport[$key]['totaalAantalKramen'] / $rapport[$key]['capaciteitKramen'])) : 0;
             $rapport[$key]['totaalAantalMeter%'] = $rapport[$key]['capaciteitMeter'] > 0 ? (($rapport[$key]['totaalAantalMeter'] / $rapport[$key]['capaciteitMeter'])) : 0;
