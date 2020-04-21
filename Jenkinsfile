@@ -4,7 +4,7 @@
 String PROJECTNAME = "makkelijkemarkt-api"
 String CONTAINERDIR = "."
 String PRODUCTION_BRANCH = "master"
-String PLAYBOOK = 'deploy-makkelijkemarkt-api.yml'
+String PLAYBOOK = 'deploy.yml'
 
 // All other data uses variables, no changes needed for static
 String CONTAINERNAME = "fixxx/makkelijkemarkt-api:${env.BUILD_NUMBER}"
