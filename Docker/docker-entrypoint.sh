@@ -48,5 +48,12 @@ tail -f /app/app/logs/prod.log &
 tail -f /var/log/nginx/access.log &
 tail -f /var/log/nginx/error.log &
 
+chgrp www-data /app/app/logs/*.log
+chmod 775 /app/app/logs/*.log
+
 nginx
+
+chgrp -R www-data /var/lib/nginx
+chmod -R 775 /var/lib/nginx/tmp
+
 php-fpm -F
