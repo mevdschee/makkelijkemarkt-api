@@ -57,7 +57,7 @@ class AccountController extends Controller
             $q['active'] = ($request->query->getInt('active') === 1);
         if ($request->query->getInt('locked', -1) !== -1)
             $q['locked'] = ($request->query->getInt('locked') === 1);
-        $results = $repo->search($q, $request->query->get('listOffset'), $request->query->get('listLength', 100));
+        $results = $repo->search($q, $request->query->get('listOffset'), $request->query->get('listLength', 200));
 
         /* @var $mapper \GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\AccountMapper */
         $mapper = $this->get('appapi.mapper.account');

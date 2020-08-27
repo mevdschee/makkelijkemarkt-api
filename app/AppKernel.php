@@ -23,6 +23,7 @@ class AppKernel extends Kernel
             new Liip\ImagineBundle\LiipImagineBundle(),
             new GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\AppApiBundle(),
             new GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\ImportBundle(),
+            new WhiteOctober\TCPDFBundle\WhiteOctoberTCPDFBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

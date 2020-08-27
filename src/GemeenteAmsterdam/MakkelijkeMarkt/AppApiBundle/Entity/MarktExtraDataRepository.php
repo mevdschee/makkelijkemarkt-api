@@ -24,7 +24,7 @@ class MarktExtraDataRepository extends EntityRepository
      */
     public function getByPerfectViewNumber($kaartnr)
     {
-        return $this->find($kaartnr);
+        return $this->find(strtoupper($kaartnr));
     }
 
     public function getByAfkorting($afkorting)
