@@ -164,7 +164,6 @@ class PerfectViewSollicitatieImport
      */
     protected function getMarktRecord($afkorting)
     {
-        $afkorting = strtoupper($afkorting);
         $this->preloadMarkten();
 
         if (isset($this->markten[$afkorting]) === false)

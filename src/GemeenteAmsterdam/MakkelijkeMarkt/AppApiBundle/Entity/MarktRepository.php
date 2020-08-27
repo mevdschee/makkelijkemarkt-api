@@ -42,7 +42,7 @@ class MarktRepository extends EntityRepository
      */
     public function getByAfkorting($afkorting)
     {
-        return $this->findOneBy(['afkorting' => strtoupper($afkorting)]);
+        return $this->findOneBy(['afkorting' => $afkorting]);
     }
 
     /**

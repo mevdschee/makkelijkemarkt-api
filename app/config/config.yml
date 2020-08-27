@@ -79,6 +79,8 @@ swiftmailer:
     username:  "%mailer_user%"
     password:  "%mailer_password%"
     spool:     { type: memory }
+    encryption: "%mailer_enc%"
+    port: "%mailer_port%"
 
 # Doctrine migrations
 doctrine_migrations:

@@ -14,6 +14,10 @@ services:
     class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Service\LineairplanFactuurService
     arguments:
       - '@doctrine.orm.entity_manager'
+  pdf_factuur:
+    class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Service\PdfFactuurService
+    arguments:
+      - '@service_container'
   # mapper
   appapi.mapper.account:
     class: GemeenteAmsterdam\MakkelijkeMarkt\AppApiBundle\Mapper\AccountMapper

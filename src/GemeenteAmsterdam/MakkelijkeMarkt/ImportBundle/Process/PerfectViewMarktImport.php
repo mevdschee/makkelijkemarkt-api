@@ -104,7 +104,7 @@ class PerfectViewMarktImport
             }
 
             // update markt
-            $markt->setAfkorting(strtoupper($pvRecord['AFKORTING']));
+            $markt->setAfkorting($pvRecord['AFKORTING']);
             $markt->setNaam($pvRecord['MARKTNAAM']);
             $markt->setSoort($this->soortMarkConversion[$pvRecord['SOORT_MARK']]);
             $markt->setExtraMetersMogelijk($pvRecord['A1_METER'] === 'True');
