@@ -18,8 +18,8 @@ parameters:
     mailer_port:        ${MM_API__MAILER__PORT}
     mailer_encryption:  ${MM_API__MAILER__ENCRYPTION}
     secret:             ${MM_API__SECRET}
-    android_version:    1.0.5
-    android_build:      2016050517
+    android_version:    1.4.6
+    android_build:      2017020244
     mm_app_key:         ${MM_API__APP_KEY}
 EOF
 
