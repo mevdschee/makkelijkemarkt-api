@@ -19,6 +19,6 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret:            ThisTokenIsNotSoSecretChangeIt
-    android_version: 1.0.5
-    android_build:   2016050517
+    android_version: 1.4.6
+    android_build:   2017020244
     mm_app_key: testkey
