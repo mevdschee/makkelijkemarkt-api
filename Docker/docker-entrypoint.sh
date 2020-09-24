@@ -21,6 +21,7 @@ parameters:
     android_version:    1.4.6
     android_build:      2017020244
     mm_app_key:         ${MM_API__APP_KEY}
+    trusted_proxies: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
 EOF
 
 php composer.phar install
