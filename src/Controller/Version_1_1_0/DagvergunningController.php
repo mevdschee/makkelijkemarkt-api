@@ -18,6 +18,8 @@ use App\Repository\DagvergunningRepository;
 use App\Repository\KoopmanRepository;
 use App\Service\FactuurService;
 use Doctrine\ORM\EntityManagerInterface;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,7 +54,7 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="aanwezig", in="body", required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd", @OA\Schema(type="string"))
      * @OA\Parameter(name="notitie", in="body", required="false", description="Vrij notitie veld", @OA\Schema(type="string"))
      * @OA\Parameter(name="registratieDatumtijd", in="body", required="false", description="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt", @OA\Schema(type="string"))
-     * @OA\Parameter(name="registratieGeolocatie", in="body", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string")}
+     * @OA\Parameter(name="registratieGeolocatie", in="body", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string"))
      * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
@@ -190,7 +192,7 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="aanwezig", in="body", required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd", @OA\Schema(type="string"))
      * @OA\Parameter(name="notitie", in="body", required="false", description="Vrij notitie veld", @OA\Schema(type="string"))
      * @OA\Parameter(name="registratieDatumtijd", in="body", required="false", description="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt", @OA\Schema(type="string"))
-     * @OA\Parameter(name="registratieGeolocatie", in="body", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string")}
+     * @OA\Parameter(name="registratieGeolocatie", in="body", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string"))
      * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
@@ -324,7 +326,7 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="doorgehaald", in="query", required="false", description="Indien niet opgenomen of leeg of 0 enkel niet doorgehaalde dagvergunningen, indien opgenomen en 1 dan enkel doorgehaalde dagvergunningen", @OA\Schema(type="integer"))
      * @OA\Parameter(name="accountId", in="query", required="false", description="Filter op de persoon die de dagvergunning uitgegeven heeft", @OA\Schema(type="integer"))
      * @OA\Parameter(name="listOffset", in="query", required="false", description="", @OA\Schema(type="integer"))
-     * @OA\Parameter(name="listLength", in="query", required="false", description="Default=100", @OA\Schema(type="integer")}
+     * @OA\Parameter(name="listLength", in="query", required="false", description="Default=100", @OA\Schema(type="integer"))
      * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
@@ -473,7 +475,7 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="aanwezig", required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd", @OA\Schema(type="string"))
      * @OA\Parameter(name="notitie", required="false", description="Vrij notitie veld", @OA\Schema(type="string"))
      * @OA\Parameter(name="registratieDatumtijd", required="false", description="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt", @OA\Schema(type="string"))
-     * @OA\Parameter(name="registratieGeolocatie", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string")}
+     * @OA\Parameter(name="registratieGeolocatie", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string"))
      * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
@@ -601,8 +603,7 @@ class DagvergunningController extends AbstractController
     /**
      * Haal de details van een dagvergunning op
      *
-     * @Method("GET")
-     * @Route("/dagvergunning/{id}")
+     * @Route("/dagvergunning/{id}", methods={"GET"})
      * @OA\Parameter(name="id", in="path", required="true", description="Dagvergunning id", @OA\Schema(type="integer"))
      * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")

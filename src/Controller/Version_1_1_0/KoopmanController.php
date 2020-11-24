@@ -12,6 +12,8 @@
 namespace App\Controller\Version_1_1_0;
 
 use App\Entity\Koopman;
+use App\Mapper\KoopmanMapper;
+use App\Repository\KoopmanRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -47,11 +49,8 @@ class KoopmanController extends AbstractController
      * )
      * @IsGranted("ROLE_USER")
      */
-    public function listAction(Request $request)
+    public function listAction(KoopmanRepository $repo, KoopmanMapper $mapper, Request $request)
     {
-        /* @var $repo \App\Entity\KoopmanRepository */
-        $repo = $this->get('appapi.repository.koopman');
-
         $q = [];
         if ($request->query->has('freeSearch') === true) {
             $q['freeSearch'] = $request->query->get('freeSearch');
@@ -79,8 +78,6 @@ class KoopmanController extends AbstractController
 
         $results = $repo->search($q, $request->query->get('listOffset'), $request->query->get('listLength', 100));
 
-        /* @var $mapper \App\Mapper\KoopmanMapper */
-        $mapper = $this->get('appapi.mapper.koopman');
         $response = $mapper->multipleEntityToSimpleModel($results);
 
         return new JsonResponse($response, Response::HTTP_OK, ['X-Api-ListSize' => count($results)]);
