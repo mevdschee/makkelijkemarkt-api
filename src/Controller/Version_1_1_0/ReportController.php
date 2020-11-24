@@ -11,13 +11,15 @@
 
 namespace App\Controller\Version_1_1_0;
 
-use App\Entity\Dagvergunning;
 use App\Entity\Koopman;
+use App\Mapper\DagvergunningMapper;
 use App\Mapper\KoopmanMapper;
+use App\Mapper\SollicitatieMapper;
 use App\Model\AbstractRapportModel;
 use App\Repository\DagvergunningRepository;
 use App\Repository\KoopmanRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\SollicitatieRepository;
+use App\Repository\VergunningControleRepository;
 use Doctrine\ORM\Query;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,23 +31,17 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Rapport")
  */
 class ReportController extends AbstractController
 {
     /**
-     * @Method("GET")
-     * @Route("/rapport/dubbelstaan/{dag}")
-     * @ApiDoc(
-     *  section="Rapport",
-     *  requirements={
-     * @OA\Parameter(name="dag", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/rapport/dubbelstaan/{dag}", methods={"GET"})
+     * @OA\Parameter(name="dag", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
      * @IsGranted("ROLE_SENIOR")
      */
     public function dubbelstaanRaportAction(
-        Dagvergunning $dagvergunningMapper,
+        DagvergunningMapper $dagvergunningMapper,
         KoopmanMapper $koopmanMapper,
         DagvergunningRepository $dagvergunningRepository,
         KoopmanRepository $koopmanRepository,
@@ -120,29 +116,24 @@ class ReportController extends AbstractController
     }
 
     /**
-     * @Method("GET")
-     * @Route("/rapport/staanverplichting/{dagStart}/{dagEind}/{vergunningType}")
-     * @ApiDoc(
-     *  section="Rapport",
-     *  requirements={
-     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Parameter(name="vergunningType", required="true", @OA\Schema(type="string"), description="alle|soll|vkk|vpl|lot"}
-     *  },
-     *  filters={
-     * @OA\Parameter(name="marktId[]", @OA\Schema(type="integer"), description="ID van markt"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/rapport/staanverplichting/{dagStart}/{dagEind}/{vergunningType}", methods={"GET"})
+     * @OA\Parameter(name="dagStart", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="vergunningType", in="path", required="true", @OA\Schema(type="string"), description="alle|soll|vkk|vpl|lot"}
+     * @OA\Parameter(name="marktId[]", in="query", required="true", @OA\Schema(type="integer"), description="ID van markt"}
      * @IsGranted("ROLE_SENIOR")
      */
-    public function staanverplichtingRapportAction(EntityManagerInterface $em, Request $request, $dagStart, $dagEind, $vergunningType)
-    {
-        /** @var $koopmanMapper \App\Mapper\KoopmanMapper */
-        $koopmanMapper = $this->get('appapi.mapper.koopman');
-        /** @var $koopmanMapper \App\Mapper\SollicitatieMapper */
-        $sollicitatieMapper = $this->get('appapi.mapper.sollicitatie');
-
+    public function staanverplichtingRapportAction(
+        KoopmanMapper $koopmanMapper,
+        SollicitatieMapper $sollicitatieMapper,
+        SollicitatieRepository $sollicitatieRepository,
+        DagvergunningRepository $dagvergunningRepository,
+        VergunningControleRepository $vergunningControleRepository,
+        Request $request,
+        $dagStart,
+        $dagEind,
+        $vergunningType
+    ) {
         // get the right markt
         $marktIds = $request->query->get('marktId', []);
         if (is_array($marktIds) === false) {
@@ -150,8 +141,7 @@ class ReportController extends AbstractController
         }
         $marktIds = array_values($marktIds);
 
-        /** @var $qb QueryBuilder */
-        $qb = $em->getRepository('AppApiBundle:Sollicitatie')->createQueryBuilder('s');
+        $qb = $sollicitatieRepository->createQueryBuilder('s');
         $qb->select('s.id AS sollicitatie_id');
         $qb->innerJoin('s.koopman', 'k');
         $qb->innerJoin('s.markt', 'markt');
@@ -188,7 +178,7 @@ class ReportController extends AbstractController
 
         // make a indexed quick lookup array of koopmannen
         $sollicitaties = [];
-        $qb = $this->getDoctrine()->getRepository('AppApiBundle:Sollicitatie')->createQueryBuilder('s');
+        $qb = $sollicitatieRepository->createQueryBuilder('s');
         $qb->select('s');
         $qb->innerJoin('s.markt', 'markt');
         $qb->join('s.koopman', 'k');
@@ -217,7 +207,7 @@ class ReportController extends AbstractController
             $controle_rondes = [];
 
             // per sollicitatie
-            $qb2 = $this->getDoctrine()->getRepository('AppApiBundle:Dagvergunning')->createQueryBuilder('d');
+            $qb2 = $dagvergunningRepository->createQueryBuilder('d');
             $qb2->select('d.dag');
             $qb2->addSelect('d.aanwezig');
             $qb2->join('d.sollicitatie', 's');
@@ -243,7 +233,7 @@ class ReportController extends AbstractController
                 }
             }
 
-            $qb3 = $this->getDoctrine()->getRepository('AppApiBundle:VergunningControle')->createQueryBuilder('vc');
+            $qb3 = $vergunningControleRepository->createQueryBuilder('vc');
             $qb3->select('d.dag');
             $qb3->addSelect('vc.aanwezig');
             $qb3->join('vc.dagvergunning', 'd');
@@ -290,24 +280,20 @@ class ReportController extends AbstractController
     }
 
     /**
-     * @Method("GET")
-     * @Route("/rapport/frequentie/{marktId}/{type}/{dagStart}/{dagEind}")
-     * @ApiDoc(
-     *  section="Rapport",
-     *  requirements={
-     * @OA\Parameter(name="marktId", required="true", @OA\Schema(type="integer"), description="ID van markt")
-     * @OA\Parameter(name="type", required="true", @OA\Schema(type="string"), description="dag|week|soll")
-     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/rapport/frequentie/{marktId}/{type}/{dagStart}/{dagEind}", methods={"GET"})
+     * @OA\Parameter(name="marktId", in="path", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="type", in="path", required="true", @OA\Schema(type="string"), description="dag|week|soll")
+     * @OA\Parameter(name="dagStart", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
      * @IsGranted("ROLE_SENIOR")
      */
-    public function frequentieRapportAction($marktId, $type, $dagStart, $dagEind)
-    {
-        $repo = $this->getDoctrine()->getRepository('AppApiBundle:Dagvergunning');
-
+    public function frequentieRapportAction(
+        DagvergunningRepository $repo,
+        $marktId,
+        $type,
+        $dagStart,
+        $dagEind
+    ) {
         $response = array();
         if (in_array($type, array('dag', 'week'))) {
             $response = $repo->getMarktFrequentieDag($marktId, $dagStart, $dagEind);
@@ -319,23 +305,18 @@ class ReportController extends AbstractController
     }
 
     /**
-     * @Method("GET")
-     * @Route("/rapport/aanwezigheid/{marktId}/{dagStart}/{dagEind}")
-     * @ApiDoc(
-     *  section="Rapport",
-     *  requirements={
-     * @OA\Parameter(name="marktId", required="true", @OA\Schema(type="integer"), description="ID van markt")
-     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/rapport/aanwezigheid/{marktId}/{dagStart}/{dagEind}", methods={"GET"})
+     * @OA\Parameter(name="marktId", in="path", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="dagStart", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
      * @IsGranted("ROLE_SENIOR")
      */
-    public function persoonlijkeAanwezigheidRapportAction($marktId, $dagStart, $dagEind)
-    {
-        $repo = $this->getDoctrine()->getRepository('AppApiBundle:Dagvergunning');
-
+    public function persoonlijkeAanwezigheidRapportAction(
+        DagvergunningRepository $repo,
+        $marktId,
+        $dagStart,
+        $dagEind
+    ) {
         $response = $repo->getMarktPersoonlijkeAanwezigheid($marktId, $dagStart, $dagEind);
 
         return new JsonResponse($response, Response::HTTP_OK, ['X-Api-ListSize' => count($response)]);

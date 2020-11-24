@@ -21,14 +21,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Sollicitatie")
  */
 class SollicitatieController extends AbstractController
 {
     /**
      * Vraag sollicitaties op voor een markt
      *
-     * @Method("GET")
-     * @Route("/sollicitaties/markt/{marktId}")
+     * @Route("/sollicitaties/markt/{marktId}", methods={"GET"})
      * @ApiDoc(
      *  section="Sollicitatie",
      *  requirements={
