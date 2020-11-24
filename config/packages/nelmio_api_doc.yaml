@@ -1,9 +1,9 @@
 nelmio_api_doc:
     documentation:
         info:
-            title: My App
-            description: This is an awesome app!
-            version: 1.0.0
+            title: Makkelijke Markt API
+            description: API voor de Makkelijke Markt Android app
+            version: 1.1.0
     areas: # to filter documented areas
         path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+            - ^/1\.1\.0 # Accepts routes under /1.1.0

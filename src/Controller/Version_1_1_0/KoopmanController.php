@@ -32,14 +32,14 @@ class KoopmanController extends AbstractController
      * Zoek door alle koopmannen
      *
      * @Route("/koopman/", methods={"GET"})
-     * @OA\Parameter(name="freeSearch", @OA\Schema(type="string"))
-     * @OA\Parameter(name="voorletters", @OA\Schema(type="string"))
-     * @OA\Parameter(name="achternaam", @OA\Schema(type="string"))
-     * @OA\Parameter(name="email", @OA\Schema(type="string"))
-     * @OA\Parameter(name="erkenningsnummer", @OA\Schema(type="string"))
-     * @OA\Parameter(name="status", description="-1 = ignore, 0 = only removed, 1 = only active", @OA\Schema(type="integer"))
-     * @OA\Parameter(name="listOffset", @OA\Schema(type="integer"))
-     * @OA\Parameter(name="listLength", description="Default=100", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="freeSearch", in="query", required="false", @OA\Schema(type="string"))
+     * @OA\Parameter(name="voorletters", in="query", required="false", @OA\Schema(type="string"))
+     * @OA\Parameter(name="achternaam", in="query", required="false", @OA\Schema(type="string"))
+     * @OA\Parameter(name="email", in="query", required="false", @OA\Schema(type="string"))
+     * @OA\Parameter(name="erkenningsnummer", in="query", required="false", @OA\Schema(type="string"))
+     * @OA\Parameter(name="status", in="query", required="false", description="-1 = ignore, 0 = only removed, 1 = only active", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listOffset", in="query", required="false", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listLength", in="query", required="false", description="Default=100", @OA\Schema(type="integer"))
      * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */

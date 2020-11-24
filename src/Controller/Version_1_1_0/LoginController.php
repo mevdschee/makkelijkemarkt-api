@@ -33,17 +33,11 @@ class LoginController extends AbstractController
      *
      * @Method("POST")
      * @Route("/login/basicId/")
-     * @ApiDoc(
-     *  section="Login",
-     *  parameters={
      * @OA\Parameter(name="accountId", @OA\Schema(type="integer"), "required"=true, description="Account ID")
      * @OA\Parameter(name="password", @OA\Schema(type="string"), "required"=true, description="Password")
      * @OA\Parameter(name="deviceUuid", @OA\Schema(type="string"), "required"=false, description="UUID van het gebruikte device")
      * @OA\Parameter(name="clientApp", @OA\Schema(type="string"), "required"=false, description="Appliciatie type")
      * @OA\Parameter(name="clientVersion", @OA\Schema(type="string"), "required"=false, description="Versie van de client"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
      * @OA\Tag(name="Login")
      */
     public function basicIdAction(Request $request)
