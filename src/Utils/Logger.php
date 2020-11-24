@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2017 X Gemeente
+ *  Copyright (C) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -113,10 +113,8 @@ class Logger implements LoggerInterface
      */
     public function log($level, $message, array $context = array())
     {
-        foreach ($this->outputStreams as $outputStream)
-        {
-            switch (true)
-            {
+        foreach ($this->outputStreams as $outputStream) {
+            switch (true) {
                 case ($outputStream === 'stdout'):
                 case ($outputStream === 'STDOUT'):
                     echo '[' . $level . '] ' . $message . ' : ' . json_encode($context) . PHP_EOL;
@@ -128,8 +126,7 @@ class Logger implements LoggerInterface
                     $outputStream->log($level, $message, $context);
                     break;
                 case ($outputStream instanceof OutputInterface):
-                    switch ($level)
-                    {
+                    switch ($level) {
                         case 'emergency':
                         case 'alert':
                         case 'critical':
@@ -143,8 +140,10 @@ class Logger implements LoggerInterface
                             $outputStream->writeln('<info>' . $level . '</info>');
                     }
                     $outputStream->writeln($message);
-                    if ($context !== [])
+                    if ($context !== []) {
                         $outputStream->writeln(json_encode($context));
+                    }
+
                     break;
             }
         }

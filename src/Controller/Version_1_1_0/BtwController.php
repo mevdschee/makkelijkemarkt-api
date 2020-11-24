@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2017 X Gemeente
+ *  Copyright (C) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -12,13 +12,15 @@
 namespace App\Controller\Version_1_1_0;
 
 use App\Entity\BtwTarief;
+use App\Mapper\BtwTariefMapper;
+use App\Repository\BtwTariefRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -30,19 +32,13 @@ class BtwController extends AbstractController
     /**
      * Maake of update en btw tarief
      *
-     * @Method("POST")
-     * @Route("/btw/")
-     * @ApiDoc(
-     *  section="Btw",
-     *  parameters={
-     *      {"name"="jaar", "dataType"="integer", "required"=true, "description"="Jaar van het BTW tarief"},
-     *      {"name"="hoog", "dataType"="float", "required"=true, "description"="Btw tarief hoog"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/btw/", methods={"POST"})
+     * @OA\Parameter(name="jaar", in="body", required="true", description="Jaar van het BTW tarief", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="hoog", in="body", required="true", description="Btw tarief hoog", @OA\Schema(type="string"))
+     * @OA\Tag(name="Btw")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function createOrUpdateAction(EntityManagerInterface $em, Request $request)
+    public function createOrUpdateAction(EntityManagerInterface $em, BtwTariefRepository $repository, BtwTariefMapper $mapper, Request $request)
     {
         $message = json_decode($request->getContent(false), true);
 
@@ -59,9 +55,7 @@ class BtwController extends AbstractController
             return new JsonResponse(['error' => 'Required field hoog is missing']);
         }
 
-        $btwTariefRepo = $repo = $em->getRepository('AppApiBundle:BtwTarief');
-
-        $btwTarief = $btwTariefRepo->findOneBy(array('jaar' => $message['jaar']));
+        $btwTarief = $repository->findOneBy(array('jaar' => $message['jaar']));
 
         if (null === $btwTarief) {
             $btwTarief = new BtwTarief();
@@ -73,7 +67,6 @@ class BtwController extends AbstractController
 
         $em->flush();
 
-        $mapper = $this->get('appapi.mapper.btwtarief');
         $result = $mapper->singleEntityToModel($btwTarief);
 
         return new JsonResponse($result, Response::HTTP_OK);
@@ -82,14 +75,8 @@ class BtwController extends AbstractController
     /**
      * Zoek door alle markten
      *
-     * @Method("GET")
-     * @Route("/btw/")
-     * @ApiDoc(
-     *  section="Btw",
-     *  filters={
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/btw/", methods={"GET"})
+     * @OA\Tag(name="Btw")
      */
     public function listAction(EntityManagerInterface $em)
     {

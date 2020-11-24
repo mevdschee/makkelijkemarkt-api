@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2017 X Gemeente
+ *  Copyright (C) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -32,8 +32,10 @@ class CsvIterator implements \Iterator
 
     public function rewind()
     {
-        if ($this->stream !== null)
+        if ($this->stream !== null) {
             fclose($this->stream);
+        }
+
         $this->stream = fopen($this->file, 'r');
         $this->counter = 0;
 
@@ -55,7 +57,7 @@ class CsvIterator implements \Iterator
     public function next()
     {
         $this->currentLine = fgets($this->stream);
-        $this->counter ++;
+        $this->counter++;
     }
 
     public function valid()
@@ -70,17 +72,20 @@ class CsvIterator implements \Iterator
 
     protected function parseLine($line)
     {
-        if ($line === '' || $line === null)
+        if ($line === '' || $line === null) {
             return null;
+        }
 
         $values = str_getcsv($line, $this->csvDelimiter, $this->csvEnclosure, $this->csvEscape);
 
         $record = [];
         foreach ($this->headings as $pos => $name) {
-            if (isset($values[$pos]) === false)
+            if (isset($values[$pos]) === false) {
                 $record[$name] = null;
-            else
+            } else {
                 $record[$name] = trim($values[$pos]);
+            }
+
         }
 
         return $record;

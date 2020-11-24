@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2017 X Gemeente
+ *  Copyright (C) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -11,15 +11,13 @@
 
 namespace GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Command;
 
+use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\CsvIterator;
+use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\Logger;
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Process\PerfectViewMarktImport;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\Logger;
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\CsvIterator;
 
 class PerfectViewFotoImportCommand extends ContainerAwareCommand
 {

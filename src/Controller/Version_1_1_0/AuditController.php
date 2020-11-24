@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2017 X Gemeente
+ *  Copyright (C) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -18,7 +18,8 @@ use App\Repository\DagvergunningRepository;
 use App\Repository\MarktRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -73,14 +74,9 @@ class AuditController extends AbstractController
      * Haal de lijst van te auditen dagvergunning op
      *
      * @Route("/audit/{marktId}/{datum}", methods={"GET"})
-     * @ApiDoc(
-     *  section="Audit",
-     *  requirements={
-     *      {"name"="marktId", "dataType"="integer"},
-     *      {"name"="datum", "dataType"="string", "description"="datum YYYY-MM-DD"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="datum", in="path", required="true", description="datum YYYY-MM-DD", @OA\Schema(type="string"))
+     * @OA\Tag(name="Audit")
      * @IsGranted("ROLE_USER")
      */
     public function getAction(Request $request, $marktId, $datum)
@@ -107,14 +103,9 @@ class AuditController extends AbstractController
      * Haal de lijst van te auditen dagvergunning op
      *
      * @Route("/audit/{marktId}/{datum}", methods={"POST"})
-     * @ApiDoc(
-     *  section="Audit",
-     *  requirements={
-     *      {"name"="marktId", "dataType"="integer"},
-     *      {"name"="datum", "dataType"="string", "description"="datum YYYY-MM-DD"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="datum", in="path", required="true", description="datum YYYY-MM-DD", @OA\Schema(type="string"))
+     * @OA\Tag(name="Audit")
      * @IsGranted("ROLE_USER")
      */
     public function postAction($marktId, $datum)
@@ -233,14 +224,9 @@ class AuditController extends AbstractController
      * Reset te auditen dagvergunning op een markt en dag
      *
      * @Route("/audit_reset/{marktId}/{datum}", methods={"POST"})
-     * @ApiDoc(
-     *  section="Audit",
-     *  requirements={
-     *      {"name"="marktId", "dataType"="integer"},
-     *      {"name"="datum", "dataType"="string", "description"="datum YYYY-MM-DD"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="datum", in="path", required="true", description="datum YYYY-MM-DD", @OA\Schema(type="string"))
+     * @OA\Tag(name="Audit")
      * @IsGranted("ROLE_SENIOR")
      */
     public function resetAction($marktId, $datum)

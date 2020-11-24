@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2017 X Gemeente
+ *  Copyright (C) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -13,6 +13,7 @@ namespace App\Controller\Version_1_1_0;
 
 use App\Entity\Dagvergunning;
 use App\Exception\FactuurServiceException;
+use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -31,31 +32,25 @@ class DagvergunningController extends AbstractController
     /**
      * Geeft een nieuwe dagvergunnning uit
      *
-     * @Method("POST")
-     * @Route("/dagvergunning_concept/")
-     * @ApiDoc(
-     *  section="Dagvergunning",
-     *  parameters={
-     *      {"name"="marktId", "dataType"="integer", "required"=true, "description"="ID van de markt"},
-     *      {"name"="dag", "dataType"="string", "required"=true, "description"="Als yyyy-mm-dd"},
-     *      {"name"="aantal3MeterKramen", "dataType"="integer", "required"=false, "description"="Aantal 3 meter kramen"},
-     *      {"name"="aantal4MeterKramen", "dataType"="integer", "required"=false, "description"="Aantal 4 meter kramen"},
-     *      {"name"="extraMeters", "dataType"="integer", "required"=false, "description"="Extra meters"},
-     *      {"name"="aantalElektra", "dataType"="integer", "required"=false, "description"="Aantal elektra aansluitingen dat is afgenomen"},
-     *      {"name"="afvaleiland", "dataType"="string", "required"="true"},
-     *      {"name"="eenmaligElektra", "dataType"="boolean", "required"=false, "description"="Eenmalige elektra kosten ongeacht plekken"},
-     *      {"name"="krachtstroom", "dataType"="boolean", "required"=false, "description"="Is er een krachtstroom aansluiting afgenomen?"},
-     *      {"name"="reiniging", "dataType"="boolean", "required"=false, "description"="Is er reiniging afgenomen?"},
-     *      {"name"="erkenningsnummer", "dataType"="string", "required"=true, "description"="Nummer zoals ingevoerd"},
-     *      {"name"="vervangerErkenningsnummer", "dataType"="string", "required"=false, "description"="Nummer zoals ingevoerd"},
-     *      {"name"="erkenningsnummerInvoerMethode", "dataType"="string", "required"=false, "description"="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt."},
-     *      {"name"="aanwezig", "dataType"="string", "required"=false, "description"="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd"},
-     *      {"name"="notitie", "dataType"="string", "required"=false, "description"="Vrij notitie veld"},
-     *      {"name"="registratieDatumtijd", "dataType"="string", "required"=false, "description"="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt"},
-     *      {"name"="registratieGeolocatie", "dataType"="string", "required"=false, "description"="Geolocatie waar de registratie is ingevoerd, als lat,long"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/dagvergunning_concept/", methods={"POST"})
+     * @OA\Parameter(name="marktId", in="body", required="true", description="ID van de markt", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="dag", in="body", required="true", description="Als yyyy-mm-dd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="aantal3MeterKramen", in="body", required="false", description="Aantal 3 meter kramen", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="aantal4MeterKramen", in="body", required="false", description="Aantal 4 meter kramen", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="extraMeters", in="body", required="false", description="Extra meters", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="aantalElektra", in="body", required="false", description="Aantal elektra aansluitingen dat is afgenomen", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="afvaleiland", in="body", "required"="true", @OA\Schema(type="string"))
+     * @OA\Parameter(name="eenmaligElektra", in="body", required="false", description="Eenmalige elektra kosten ongeacht plekken", @OA\Schema(type="boolean"))
+     * @OA\Parameter(name="krachtstroom", in="body", required="false", description="Is er een krachtstroom aansluiting afgenomen?", @OA\Schema(type="boolean"))
+     * @OA\Parameter(name="reiniging", in="body", required="false", description="Is er reiniging afgenomen?", @OA\Schema(type="boolean"))
+     * @OA\Parameter(name="erkenningsnummer", in="body", required="true", description="Nummer zoals ingevoerd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="vervangerErkenningsnummer", in="body", required="false", description="Nummer zoals ingevoerd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="erkenningsnummerInvoerMethode", in="body", required="false", description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.", @OA\Schema(type="string"))
+     * @OA\Parameter(name="aanwezig", in="body", required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="notitie", in="body", required="false", description="Vrij notitie veld", @OA\Schema(type="string"))
+     * @OA\Parameter(name="registratieDatumtijd", in="body", required="false", description="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt", @OA\Schema(type="string"))
+     * @OA\Parameter(name="registratieGeolocatie", in="body", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string")}
+     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
     public function conceptAction(Request $request)
@@ -175,34 +170,28 @@ class DagvergunningController extends AbstractController
     /**
      * Geeft een nieuwe dagvergunnning uit
      *
-     * @Method("POST")
-     * @Route("/dagvergunning/")
-     * @ApiDoc(
-     *  section="Dagvergunning",
-     *  parameters={
-     *      {"name"="marktId", "dataType"="integer", "required"=true, "description"="ID van de markt"},
-     *      {"name"="dag", "dataType"="string", "required"=true, "description"="Als yyyy-mm-dd"},
-     *      {"name"="aantal3MeterKramen", "dataType"="integer", "required"=false, "description"="Aantal 3 meter kramen"},
-     *      {"name"="aantal4MeterKramen", "dataType"="integer", "required"=false, "description"="Aantal 4 meter kramen"},
-     *      {"name"="extraMeters", "dataType"="integer", "required"=false, "description"="Extra meters"},
-     *      {"name"="aantalElektra", "dataType"="integer", "required"=false, "description"="Aantal elektra aansluitingen dat is afgenomen"},
-     *      {"name"="afvaleiland", "dataType"="string", "required"="true"},
-     *      {"name"="eenmaligElektra", "dataType"="boolean", "required"=false, "description"="Eenmalige elektra kosten ongeacht plekken"},
-     *      {"name"="krachtstroom", "dataType"="boolean", "required"=false, "description"="Is er een krachtstroom aansluiting afgenomen?"},
-     *      {"name"="reiniging", "dataType"="boolean", "required"=false, "description"="Is er reiniging afgenomen?"},
-     *      {"name"="erkenningsnummer", "dataType"="string", "required"=true, "description"="Nummer zoals ingevoerd"},
-     *      {"name"="vervangerErkenningsnummer", "dataType"="string", "required"=false, "description"="Nummer zoals ingevoerd"},
-     *      {"name"="erkenningsnummerInvoerMethode", "dataType"="string", "required"=false, "description"="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt."},
-     *      {"name"="aanwezig", "dataType"="string", "required"=false, "description"="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd"},
-     *      {"name"="notitie", "dataType"="string", "required"=false, "description"="Vrij notitie veld"},
-     *      {"name"="registratieDatumtijd", "dataType"="string", "required"=false, "description"="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt"},
-     *      {"name"="registratieGeolocatie", "dataType"="string", "required"=false, "description"="Geolocatie waar de registratie is ingevoerd, als lat,long"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/dagvergunning/", methods={"POST"})
+     * @OA\Parameter(name="marktId", required="true", description="ID van de markt", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="dag", required="true", description="Als yyyy-mm-dd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="aantal3MeterKramen", required="false", description="Aantal 3 meter kramen", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="aantal4MeterKramen", required="false", description="Aantal 4 meter kramen", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="extraMeters", required="false", description="Extra meters", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="aantalElektra", required="false", description="Aantal elektra aansluitingen dat is afgenomen", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="afvaleiland", "required"="true", @OA\Schema(type="string"))
+     * @OA\Parameter(name="eenmaligElektra", required="false", description="Eenmalige elektra kosten ongeacht plekken", @OA\Schema(type="boolean"))
+     * @OA\Parameter(name="krachtstroom", required="false", description="Is er een krachtstroom aansluiting afgenomen?", @OA\Schema(type="boolean"))
+     * @OA\Parameter(name="reiniging", required="false", description="Is er reiniging afgenomen?", @OA\Schema(type="boolean"))
+     * @OA\Parameter(name="erkenningsnummer", required="true", description="Nummer zoals ingevoerd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="vervangerErkenningsnummer", required="false", description="Nummer zoals ingevoerd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="erkenningsnummerInvoerMethode", required="false", description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.", @OA\Schema(type="string"))
+     * @OA\Parameter(name="aanwezig", required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="notitie", required="false", description="Vrij notitie veld", @OA\Schema(type="string"))
+     * @OA\Parameter(name="registratieDatumtijd", required="false", description="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt", @OA\Schema(type="string"))
+     * @OA\Parameter(name="registratieGeolocatie", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string")}
+     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
-    public function createAction(Request $request)
+    public function createAction(EntityManagerInterface $em, Request $request)
     {
         $message = json_decode($request->getContent(false), true);
 
@@ -322,24 +311,18 @@ class DagvergunningController extends AbstractController
     /**
      * Geeft dagvergunningen
      *
-     * @Method("GET")
-     * @Route("/dagvergunning/")
-     * @ApiDoc(
-     *  section="Dagvergunning",
-     *  filters={
-     *      {"name"="marktId", "dataType"="integer", "description"="ID van de markt"},
-     *      {"name"="dag", "dataType"="string", "description"="Als yyyy-mm-dd"},
-     *      {"name"="dagStart", "dateType"="string", "description"="Als yyyy-mm-dd, alleen i.c.m. dagEind"},
-     *      {"name"="dagEind", "dateType"="string", "description"="Als yyyy-mm-dd, alleen i.c.m. dagStart"},
-     *      {"name"="koopmanId", "dataType"="integer", "description"="Id van de koopman"},
-     *      {"name"="erkenningsnummer", "dataType"="integer", "description"="Nummer van koopman waarop vergunning is uitgeschreven"},
-     *      {"name"="doorgehaald", "dataType"="integer", "description"="Indien niet opgenomen of leeg of 0 enkel niet doorgehaalde dagvergunningen, indien opgenomen en 1 dan enkel doorgehaalde dagvergunningen"},
-     *      {"name"="accountId", "dataType"="integer", "description"="Filter op de persoon die de dagvergunning uitgegeven heeft"},
-     *      {"name"="listOffset", "dataType"="integer"},
-     *      {"name"="listLength", "dataType"="integer", "description"="Default=100"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/dagvergunning/", methods={"GET"}))
+     * @OA\Parameter(name="marktId", description="ID van de markt", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="dag", description="Als yyyy-mm-dd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="dagStart", description="Als yyyy-mm-dd, alleen i.c.m. dagEind", @OA\Schema(type="string"))
+     * @OA\Parameter(name="dagEind", description="Als yyyy-mm-dd, alleen i.c.m. dagStart", @OA\Schema(type="string"))
+     * @OA\Parameter(name="koopmanId", description="Id van de koopman", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="erkenningsnummer", description="Nummer van koopman waarop vergunning is uitgeschreven", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="doorgehaald", description="Indien niet opgenomen of leeg of 0 enkel niet doorgehaalde dagvergunningen, indien opgenomen en 1 dan enkel doorgehaalde dagvergunningen", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="accountId", description="Filter op de persoon die de dagvergunning uitgegeven heeft", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listOffset", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listLength", description="Default=100", @OA\Schema(type="integer")}
+     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
     public function listAction(Request $request)
@@ -388,12 +371,8 @@ class DagvergunningController extends AbstractController
     /**
      * Geeft dagvergunningen terug per koopman en datum
      *
-     * @Method("GET")
-     * @Route("/dagvergunning_by_date/{koopmanId}/{startDate}/{endDate}")
-     * @ApiDoc(
-     *  section="Dagvergunning",
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/dagvergunning_by_date/{koopmanId}/{startDate}/{endDate}", methods={"GET"}))
+     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_SENIOR")
      */
     public function listByDateAction(Request $request, $koopmanId, $startDate, $endDate)
@@ -429,17 +408,17 @@ class DagvergunningController extends AbstractController
      * @ApiDoc(
      *  section="Dagvergunning",
      *  requirements={
-     *      {"name"="id", "dataType"="integer"},
+     * @OA\Parameter(name="id"},
      *  },
      *  parameters={
-     *      {"name"="doorgehaaldDatumtijd", "dataType"="string", "required"=false, "description"="Datum/tijd dat de doorhaling is uitgevoerd, indien niet opgegeven wordt het moment van de request gebruikt"},
-     *      {"name"="doorgehaaldGeolocatie", "dataType"="string", "required"=false, "description"="Geolocatie waar de doorhaling is uitgevoerd, als lat,long"}
+     * @OA\Parameter(name="doorgehaaldDatumtijd", required="false", description="Datum/tijd dat de doorhaling is uitgevoerd, indien niet opgegeven wordt het moment van de request gebruikt"},
+     * @OA\Parameter(name="doorgehaaldGeolocatie", required="false", description="Geolocatie waar de doorhaling is uitgevoerd, als lat,long"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
      * @IsGranted("ROLE_USER")
      */
-    public function deleteAction(Request $request, $id)
+    public function deleteAction(EntityManagerInterface $em, Request $request, $id)
     {
         /* @var $repoDagvergunning \App\Entity\DagvergunningRepository */
         $repoDagvergunning = $this->get('appapi.repository.dagvergunning');
@@ -491,34 +470,34 @@ class DagvergunningController extends AbstractController
      * @ApiDoc(
      *  section="Dagvergunning",
      *  parameters={
-     *      {"name"="marktId", "dataType"="integer", "required"=true, "description"="ID van de markt"},
-     *      {"name"="dag", "dataType"="string", "required"=true, "description"="Als yyyy-mm-dd"},
-     *      {"name"="aantal3MeterKramen", "dataType"="integer", "required"=false, "description"="Aantal 3 meter kramen"},
-     *      {"name"="aantal4MeterKramen", "dataType"="integer", "required"=false, "description"="Aantal 4 meter kramen"},
-     *      {"name"="extraMeters", "dataType"="integer", "required"=false, "description"="Extra meters"},
-     *      {"name"="aantalElektra", "dataType"="integer", "required"=false, "description"="Aantal elektra aansluitingen dat is afgenomen"},
-     *      {"name"="afvaleiland", "dataType"="string", "required"="true"},
-     *      {"name"="eenmaligElektra", "dataType"="boolean", "required"=false, "description"="Eenmalige elektra kosten ongeacht plekken"},
-     *      {"name"="krachtstroom", "dataType"="boolean", "required"=false, "description"="Is er een krachtstroom aansluiting afgenomen?"},
-     *      {"name"="reiniging", "dataType"="boolean", "required"=false, "description"="Is er reiniging afgenomen?"},
-     *      {"name"="erkenningsnummer", "dataType"="string", "required"=true, "description"="Nummer zoals ingevoerd"},
-     *      {"name"="vervangerErkenningsnummer", "dataType"="string", "required"=false, "description"="Nummer zoals ingevoerd"},
-     *      {"name"="erkenningsnummerInvoerMethode", "dataType"="string", "required"=false, "description"="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt."},
-     *      {"name"="aanwezig", "dataType"="string", "required"=false, "description"="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd"},
-     *      {"name"="notitie", "dataType"="string", "required"=false, "description"="Vrij notitie veld"},
-     *      {"name"="registratieDatumtijd", "dataType"="string", "required"=false, "description"="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt"},
-     *      {"name"="registratieGeolocatie", "dataType"="string", "required"=false, "description"="Geolocatie waar de registratie is ingevoerd, als lat,long"}
+     * @OA\Parameter(name="marktId", required="true", description="ID van de markt", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="dag", required="true", description="Als yyyy-mm-dd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="aantal3MeterKramen", required="false", description="Aantal 3 meter kramen", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="aantal4MeterKramen", required="false", description="Aantal 4 meter kramen", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="extraMeters", required="false", description="Extra meters", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="aantalElektra", required="false", description="Aantal elektra aansluitingen dat is afgenomen", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="afvaleiland", "required"="true", @OA\Schema(type="string"))
+     * @OA\Parameter(name="eenmaligElektra", required="false", description="Eenmalige elektra kosten ongeacht plekken", @OA\Schema(type="boolean"))
+     * @OA\Parameter(name="krachtstroom", required="false", description="Is er een krachtstroom aansluiting afgenomen?", @OA\Schema(type="boolean"))
+     * @OA\Parameter(name="reiniging", required="false", description="Is er reiniging afgenomen?", @OA\Schema(type="boolean"))
+     * @OA\Parameter(name="erkenningsnummer", required="true", description="Nummer zoals ingevoerd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="vervangerErkenningsnummer", required="false", description="Nummer zoals ingevoerd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="erkenningsnummerInvoerMethode", required="false", description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.", @OA\Schema(type="string"))
+     * @OA\Parameter(name="aanwezig", required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="notitie", required="false", description="Vrij notitie veld", @OA\Schema(type="string"))
+     * @OA\Parameter(name="registratieDatumtijd", required="false", description="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt", @OA\Schema(type="string"))
+     * @OA\Parameter(name="registratieGeolocatie", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string")}
      *  },
      *  views = { "default", "1.1.0" }
      * )
      * @IsGranted("ROLE_USER")
      */
-    public function updateAction(Request $request, $id)
+    public function updateAction(EntityManagerInterface $em, Request $request, $id)
     {
         $request->query->set('doorgehaaldDatumtijd', $request->query->get('registratieDatumtijd'));
         $request->query->set('doorgehaaldGeolocatie', $request->query->get('registratieGeolocatie'));
 
-        $this->deleteAction($request, $id);
+        $this->deleteAction($em, $request, $id);
 
         //////
 
@@ -645,7 +624,7 @@ class DagvergunningController extends AbstractController
      * @ApiDoc(
      *  section="Dagvergunning",
      *  requirements={
-     *      {"name"="id", "dataType"="integer"},
+     * @OA\Parameter(name="id", @OA\Schema(type="integer"))
      *  },
      *  views = { "default", "1.1.0" }
      * )

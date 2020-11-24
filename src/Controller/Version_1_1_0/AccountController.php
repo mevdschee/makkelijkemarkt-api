@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2017 X Gemeente
+ *  Copyright (C) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -66,7 +66,7 @@ class AccountController extends AbstractController
      * Geeft informatie over specifiek account
      *
      * @Route("/account/{id}", methods={"GET"})
-     * @OA\Parameter(name="id", in="path", description="Account id", @OA\Schema(type="string"))
+     * @OA\Parameter(name="id", in="path", required="true", description="Account id", @OA\Schema(type="string"))
      * @OA\Tag(name="Account")
      * @IsGranted("ROLE_SENIOR")
      */
@@ -89,11 +89,11 @@ class AccountController extends AbstractController
      * Slaat informatie over een account op
      *
      * @Route("/account/{id}", methods={"PUT"})
-     * @OA\Parameter(name="id", in="path", description="Account id", @OA\Schema(type="string"))
-     * @OA\Parameter(name="naam", in="body", @OA\Schema(type="string"))
-     * @OA\Parameter(name="email", in="body", @OA\Schema(type="string"))
-     * @OA\Parameter(name="username", in="body", @OA\Schema(type="string"))
-     * @OA\Parameter(name="password", in="body", @OA\Schema(type="string"))
+     * @OA\Parameter(name="id", in="path", required="true", description="Account id", @OA\Schema(type="string"))
+     * @OA\Parameter(name="naam", in="body", required="true", @OA\Schema(type="string"))
+     * @OA\Parameter(name="email", in="body", required="true", @OA\Schema(type="string"))
+     * @OA\Parameter(name="username", in="body", required="true", @OA\Schema(type="string"))
+     * @OA\Parameter(name="password", in="body", required="true", @OA\Schema(type="string"))
      * @OA\Tag(name="Account")
      * @IsGranted("ROLE_ADMIN")
      */
@@ -232,8 +232,8 @@ class AccountController extends AbstractController
      * Update passwords
      *
      * @Route("/account_password/{id}", methods={"PUT"})
-     * @OA\Parameter(name="id", in="path", description="Account id", @OA\Schema(type="string"))
-     * @OA\Parameter(name="password", in="body", @OA\Schema(type="string"))
+     * @OA\Parameter(name="id", in="path", required="true", description="Account id", @OA\Schema(type="string"))
+     * @OA\Parameter(name="password", in="body", required="true", @OA\Schema(type="string"))
      * @OA\Tag(name="Account")
      * @IsGranted("ROLE_SENIOR")
      */
@@ -281,7 +281,7 @@ class AccountController extends AbstractController
      * Unlock an account
      *
      * @Route("/account/unlock/{id}", methods={"POST"})
-     * @OA\Parameter(name="id", in="path", description="Account id", @OA\Schema(type="string"))
+     * @OA\Parameter(name="id", in="path", required="true", description="Account id", @OA\Schema(type="string"))
      * @OA\Tag(name="Account")
      * @IsGranted("ROLE_SENIOR")
      */
