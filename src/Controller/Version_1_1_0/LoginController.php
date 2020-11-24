@@ -12,16 +12,18 @@
 namespace App\Controller\Version_1_1_0;
 
 use App\Entity\Token;
+use App\Entity\TokenRepository;
 use App\Enum\Roles;
+use App\Mapper\AccountMapper;
+use App\Mapper\TokenMapper;
 use Doctrine\ORM\EntityManagerInterface;
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Method;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * @Route("1.1.0")
@@ -31,16 +33,15 @@ class LoginController extends AbstractController
     /**
      * Genereert een nieuw token op accountId + password
      *
-     * @Method("POST")
-     * @Route("/login/basicId/")
-     * @OA\Parameter(name="accountId", @OA\Schema(type="integer"), "required"=true, description="Account ID")
-     * @OA\Parameter(name="password", @OA\Schema(type="string"), "required"=true, description="Password")
-     * @OA\Parameter(name="deviceUuid", @OA\Schema(type="string"), "required"=false, description="UUID van het gebruikte device")
-     * @OA\Parameter(name="clientApp", @OA\Schema(type="string"), "required"=false, description="Appliciatie type")
-     * @OA\Parameter(name="clientVersion", @OA\Schema(type="string"), "required"=false, description="Versie van de client"}
+     * @Route("/login/basicId/", methods={"POST"})
+     * @OA\Parameter(name="accountId", @OA\Schema(type="integer"), required="true", description="Account ID")
+     * @OA\Parameter(name="password", @OA\Schema(type="string"), required="true", description="Password")
+     * @OA\Parameter(name="deviceUuid", @OA\Schema(type="string"), required="false", description="UUID van het gebruikte device")
+     * @OA\Parameter(name="clientApp", @OA\Schema(type="string"), required="false", description="Appliciatie type")
+     * @OA\Parameter(name="clientVersion", @OA\Schema(type="string"), required="false", description="Versie van de client")
      * @OA\Tag(name="Login")
      */
-    public function basicIdAction(Request $request)
+    public function basicIdAction(TokenMapper $mapper, Request $request)
     {
         $message = json_decode($request->getContent(false), true);
         if ($message === null) {
@@ -99,8 +100,6 @@ class LoginController extends AbstractController
         $em->persist($token);
         $em->flush();
 
-        /* @var $mapper \App\Mapper\TokenMapper */
-        $mapper = $this->get('appapi.mapper.token');
         $response = $mapper->singleEntityToModel($token);
 
         return new JsonResponse($response, Response::HTTP_OK, []);
@@ -109,22 +108,15 @@ class LoginController extends AbstractController
     /**
      * Genereert een nieuw token op username + password
      *
-     * @Method("POST")
-     * @Route("/login/basicUsername/")
-     * @ApiDoc(
-     *  section="Login",
-     *  parameters={
-     * @OA\Parameter(name="username", @OA\Schema(type="string"), "required"=true, description="Username")
-     * @OA\Parameter(name="password", @OA\Schema(type="string"), "required"=true, description="Password")
-     * @OA\Parameter(name="deviceUuid", @OA\Schema(type="string"), "required"=false, description="UUID van het gebruikte device")
-     * @OA\Parameter(name="clientApp", @OA\Schema(type="string"), "required"=false, description="Appliciatie type")
-     * @OA\Parameter(name="clientVersion", @OA\Schema(type="string"), "required"=false, description="Versie van de client"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/login/basicUsername/", methods={"POST"})
+     * @OA\Parameter(name="username", @OA\Schema(type="string"), required="true", description="Username")
+     * @OA\Parameter(name="password", @OA\Schema(type="string"), required="true", description="Password")
+     * @OA\Parameter(name="deviceUuid", @OA\Schema(type="string"), required="false", description="UUID van het gebruikte device")
+     * @OA\Parameter(name="clientApp", @OA\Schema(type="string"), required="false", description="Appliciatie type")
+     * @OA\Parameter(name="clientVersion", @OA\Schema(type="string"), required="false", description="Versie van de client")
      * @OA\Tag(name="Login")
      */
-    public function basicUsernameAction(Request $request)
+    public function basicUsernameAction(TokenMapper $mapper, Request $request)
     {
         $message = json_decode($request->getContent(false), true);
         if ($message === null) {
@@ -183,46 +175,32 @@ class LoginController extends AbstractController
         $em->persist($token);
         $em->flush();
 
-        /* @var $mapper \App\Mapper\TokenMapper */
-        $mapper = $this->get('appapi.mapper.token');
         $response = $mapper->singleEntityToModel($token);
 
         return new JsonResponse($response, Response::HTTP_OK, []);
     }
 
     /**
-     * @Method("GET")
-     * @Route("/login/whoami/")
-     * @ApiDoc(
-     *  section="Login",
-     *  parameters={},
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/login/whoami/", methods={"GET"})
      * @OA\Tag(name="Login")
      * @IsGranted("ROLE_USER")
      */
-    public function whoamiAction(Request $request)
+    public function whoamiAction(AccountMapper $mapper, Request $request)
     {
         $account = $this->getUser();
         if ($account === null) {
             return new JsonResponse(['account' => null, 'authorization-header' => $request->headers->get('Authorization')], Response::HTTP_NOT_FOUND, []);
         }
 
-        $result = $this->get('appapi.mapper.account')->singleEntityToModel($account);
+        $result = $mapper->singleEntityToModel($account);
         return new JsonResponse(['account' => $result, 'authorization-header' => $request->headers->get('Authorization')], Response::HTTP_OK, []);
     }
 
     /**
-     * @Method("GET")
-     * @Route("/logout/")
-     * @ApiDoc(
-     *  section="Login",
-     *  parameters={},
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/logout/", methods={"GET"})
      * @OA\Tag(name="Login")
      */
-    public function logoutAction(EntityManagerInterface $em, Request $request)
+    public function logoutAction(TokenRepository $repository, TokenMapper $mapper, EntityManagerInterface $em, Request $request)
     {
         $request->headers->get('Authorization');
 
@@ -240,26 +218,18 @@ class LoginController extends AbstractController
             return new JsonResponse(['msg' => 'Authorization header not containing ID'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        $token = $this->get('appapi.repository.token')->getByUuid($header[1]);
+        $token = $repository->getByUuid($header[1]);
         $token->setLifeTime(0);
 
         $em->flush();
 
-        /* @var $mapper \App\Mapper\TokenMapper */
-        $mapper = $this->get('appapi.mapper.token');
         $response = $mapper->singleEntityToModel($token);
 
         return new JsonResponse($response, Response::HTTP_OK, []);
     }
 
     /**
-     * @Method("GET")
-     * @Route("/login/roles")
-     * @ApiDoc(
-     *  section="Login",
-     *  parameters={},
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/login/roles", methods={"GET"})
      * @OA\Tag(name="Login")
      */
     public function rolesListAction()

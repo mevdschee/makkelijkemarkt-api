@@ -37,24 +37,24 @@ class VergunningControleController extends AbstractController
      * @ApiDoc(
      *  section="Controle",
      *  parameters={
-     * @OA\Parameter(name="dagvergunningId", @OA\Schema(type="integer"), "required"=true, description="ID van de dagvergunning")
-     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), "required"=false, description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
-     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), "required"=false, description="Geolocatie waar de registratie is ingevoerd, als lat,long")
-     * @OA\Parameter(name="aantal3MeterKramen", @OA\Schema(type="integer"), "required"=false, description="Aantal 3 meter kramen")
-     * @OA\Parameter(name="aantal4MeterKramen", @OA\Schema(type="integer"), "required"=false, description="Aantal 4 meter kramen")
-     * @OA\Parameter(name="extraMeters", @OA\Schema(type="integer"), "required"=false, description="Extra meters")
-     * @OA\Parameter(name="aantalElektra", @OA\Schema(type="integer"), "required"=false, description="Aantal elektra aansluitingen dat is afgenomen")
+     * @OA\Parameter(name="dagvergunningId", @OA\Schema(type="integer"), required="true", description="ID van de dagvergunning")
+     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
+     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
+     * @OA\Parameter(name="aantal3MeterKramen", @OA\Schema(type="integer"), required="false", description="Aantal 3 meter kramen")
+     * @OA\Parameter(name="aantal4MeterKramen", @OA\Schema(type="integer"), required="false", description="Aantal 4 meter kramen")
+     * @OA\Parameter(name="extraMeters", @OA\Schema(type="integer"), required="false", description="Extra meters")
+     * @OA\Parameter(name="aantalElektra", @OA\Schema(type="integer"), required="false", description="Aantal elektra aansluitingen dat is afgenomen")
      * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="boolean"), "required"=false, description="Eenmalige elektra kosten ongeacht plekken")
-     * @OA\Parameter(name="krachtstroom", @OA\Schema(type="boolean"), "required"=false, description="Is er een krachtstroom aansluiting afgenomen?")
-     * @OA\Parameter(name="reiniging", @OA\Schema(type="boolean"), "required"=false, description="Is er reiniging afgenomen?")
-     * @OA\Parameter(name="erkenningsnummer", @OA\Schema(type="string"), "required"=true, description="Nummer zoals ingevoerd")
-     * @OA\Parameter(name="vervangerErkenningsnummer", @OA\Schema(type="string"), "required"=false, description="Nummer zoals ingevoerd")
-     * @OA\Parameter(name="erkenningsnummerInvoerMethode", @OA\Schema(type="string"), "required"=false, description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.")
-     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), "required"=false, description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
-     * @OA\Parameter(name="notitie", @OA\Schema(type="string"), "required"=false, description="Vrij notitie veld")
-     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), "required"=false, description="Geolocatie waar de registratie is ingevoerd, als lat,long")
-     * @OA\Parameter(name="ronde", "dataType"="int", "required"=false, description="Ronde nummer"}
+     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="boolean"), required="false", description="Eenmalige elektra kosten ongeacht plekken")
+     * @OA\Parameter(name="krachtstroom", @OA\Schema(type="boolean"), required="false", description="Is er een krachtstroom aansluiting afgenomen?")
+     * @OA\Parameter(name="reiniging", @OA\Schema(type="boolean"), required="false", description="Is er reiniging afgenomen?")
+     * @OA\Parameter(name="erkenningsnummer", @OA\Schema(type="string"), required="true", description="Nummer zoals ingevoerd")
+     * @OA\Parameter(name="vervangerErkenningsnummer", @OA\Schema(type="string"), required="false", description="Nummer zoals ingevoerd")
+     * @OA\Parameter(name="erkenningsnummerInvoerMethode", @OA\Schema(type="string"), required="false", description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.")
+     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
+     * @OA\Parameter(name="notitie", @OA\Schema(type="string"), required="false", description="Vrij notitie veld")
+     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
+     * @OA\Parameter(name="ronde", "dataType"="int", required="false", description="Ronde nummer"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -171,23 +171,23 @@ class VergunningControleController extends AbstractController
      * @ApiDoc(
      *  section="Controle",
      *  parameters={
-     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), "required"=false, description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
-     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), "required"=false, description="Geolocatie waar de registratie is ingevoerd, als lat,long")
-     * @OA\Parameter(name="aantal3MeterKramen", @OA\Schema(type="integer"), "required"=false, description="Aantal 3 meter kramen")
-     * @OA\Parameter(name="aantal4MeterKramen", @OA\Schema(type="integer"), "required"=false, description="Aantal 4 meter kramen")
-     * @OA\Parameter(name="extraMeters", @OA\Schema(type="integer"), "required"=false, description="Extra meters")
-     * @OA\Parameter(name="aantalElektra", @OA\Schema(type="integer"), "required"=false, description="Aantal elektra aansluitingen dat is afgenomen")
+     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
+     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
+     * @OA\Parameter(name="aantal3MeterKramen", @OA\Schema(type="integer"), required="false", description="Aantal 3 meter kramen")
+     * @OA\Parameter(name="aantal4MeterKramen", @OA\Schema(type="integer"), required="false", description="Aantal 4 meter kramen")
+     * @OA\Parameter(name="extraMeters", @OA\Schema(type="integer"), required="false", description="Extra meters")
+     * @OA\Parameter(name="aantalElektra", @OA\Schema(type="integer"), required="false", description="Aantal elektra aansluitingen dat is afgenomen")
      * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="boolean"), "required"=false, description="Eenmalige elektra kosten ongeacht plekken")
-     * @OA\Parameter(name="krachtstroom", @OA\Schema(type="boolean"), "required"=false, description="Is er een krachtstroom aansluiting afgenomen?")
-     * @OA\Parameter(name="reiniging", @OA\Schema(type="boolean"), "required"=false, description="Is er reiniging afgenomen?")
-     * @OA\Parameter(name="erkenningsnummer", @OA\Schema(type="string"), "required"=true, description="Nummer zoals ingevoerd")
-     * @OA\Parameter(name="vervangerErkenningsnummer", @OA\Schema(type="string"), "required"=false, description="Nummer zoals ingevoerd")
-     * @OA\Parameter(name="erkenningsnummerInvoerMethode", @OA\Schema(type="string"), "required"=false, description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.")
-     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), "required"=false, description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
-     * @OA\Parameter(name="notitie", @OA\Schema(type="string"), "required"=false, description="Vrij notitie veld")
-     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), "required"=false, description="Geolocatie waar de registratie is ingevoerd, als lat,long")
-     * @OA\Parameter(name="ronde", "dataType"="int", "required"=false, description="Ronde nummer"}
+     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="boolean"), required="false", description="Eenmalige elektra kosten ongeacht plekken")
+     * @OA\Parameter(name="krachtstroom", @OA\Schema(type="boolean"), required="false", description="Is er een krachtstroom aansluiting afgenomen?")
+     * @OA\Parameter(name="reiniging", @OA\Schema(type="boolean"), required="false", description="Is er reiniging afgenomen?")
+     * @OA\Parameter(name="erkenningsnummer", @OA\Schema(type="string"), required="true", description="Nummer zoals ingevoerd")
+     * @OA\Parameter(name="vervangerErkenningsnummer", @OA\Schema(type="string"), required="false", description="Nummer zoals ingevoerd")
+     * @OA\Parameter(name="erkenningsnummerInvoerMethode", @OA\Schema(type="string"), required="false", description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.")
+     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
+     * @OA\Parameter(name="notitie", @OA\Schema(type="string"), required="false", description="Vrij notitie veld")
+     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
+     * @OA\Parameter(name="ronde", "dataType"="int", required="false", description="Ronde nummer"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
