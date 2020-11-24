@@ -12,48 +12,45 @@
 namespace App\Controller\Version_1_1_0;
 
 use App\Entity\Concreetplan;
-use App\Entity\Dagvergunning;
 use App\Entity\Factuur;
 use App\Entity\Lineairplan;
-use App\Entity\Markt;
 use App\Entity\Product;
 use App\Entity\Tariefplan;
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use App\Mapper\FactuurMapper;
+use App\Mapper\MarktMapper;
+use App\Mapper\TariefplanMapper;
+use App\Repository\DagvergunningRepository;
+use App\Repository\FactuurRepository;
+use App\Repository\MarktRepository;
+use App\Repository\TariefplanRepository;
+use App\Service\FactuurService;
+use Doctrine\ORM\EntityManagerInterface;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class TariefplanController
- * @package App\Controller\Version_1_1_0
  * @Route("1.1.0")
+ * @OA\Tag(name="Tariefplan")
  */
 class TariefplanController extends AbstractController
 {
     /**
      * Retourneert alle tariefplannen voor een markt
      *
-     * @Method("GET")
-     * @Route("/tariefplannen/list/{marktId}")
-     * @ApiDoc(
-     *  section="Tariefplan",
-     *  filters={
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/tariefplannen/list/{marktId}", methods={"GET"})
      * @IsGranted("ROLE_USER")
      */
-    public function listAction($marktId)
-    {
-        $marktRepo = $this->getDoctrine()->getRepository('AppApiBundle:Markt');
-        $tariefplanRepo = $this->getDoctrine()->getRepository('AppApiBundle:Tariefplan');
-
-        /**
-         * @var Markt $markt
-         */
+    public function listAction(
+        MarktRepository $marktRepo,
+        TariefplanRepository $tariefplanRepo,
+        MarktMapper $mapper,
+        $marktId
+    ) {
         $markt = $marktRepo->findOneById($marktId);
 
         if (null === $markt) {
@@ -62,8 +59,6 @@ class TariefplanController extends AbstractController
 
         $tariefplannen = $tariefplanRepo->findBy(array('markt' => $markt), array('geldigVanaf' => 'DESC'));
 
-        /* @var $mapper \App\Mapper\MarktMapper */
-        $mapper = $this->get('appapi.mapper.tariefplan');
         $response = $mapper->multipleEntityToModel($tariefplannen);
 
         return new JsonResponse($response, Response::HTTP_OK, ['X-Api-ListSize' => count($tariefplannen)]);
@@ -72,31 +67,21 @@ class TariefplanController extends AbstractController
     /**
      * Retourneert een tariefplan
      *
-     * @Method("GET")
-     * @Route("/tariefplannen/get/{tariefPlanId}")
-     * @ApiDoc(
-     *  section="Tariefplan",
-     *  filters={
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/tariefplannen/get/{tariefPlanId}", methods={"GET"})
+     * @OA\Parameter(name="tariefPlanId", in="path", required="true", description="Tariefplan id", @OA\Schema(type="integer"))
      * @IsGranted("ROLE_USER")
      */
-    public function getAction($tariefPlanId)
-    {
-        $tariefplanRepo = $this->getDoctrine()->getRepository('AppApiBundle:Tariefplan');
-
-        /**
-         * @var TariefPlan $tariefplan
-         */
+    public function getAction(
+        TariefplanRepository $tariefplanRepo,
+        TariefplanMapper $mapper,
+        $tariefPlanId
+    ) {
         $tariefplan = $tariefplanRepo->findOneById($tariefPlanId);
 
         if (null === $tariefplan) {
             return new JsonResponse(array(), Response::HTTP_OK, ['X-Api-ListSize' => 0]);
         }
 
-        /* @var $mapper \App\Mapper\TariefPlanMapper */
-        $mapper = $this->get('appapi.mapper.tariefplan');
         $response = $mapper->singleEntityToModel($tariefplan);
 
         return new JsonResponse($response, Response::HTTP_OK);
@@ -105,30 +90,20 @@ class TariefplanController extends AbstractController
     /**
      * Verwijdert een tariefplan
      *
-     * @Method("DELETE")
-     * @Route("/tariefplannen/delete/{tariefPlanId}")
-     * @ApiDoc(
-     *  section="Tariefplan",
-     *  filters={
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/tariefplannen/delete/{tariefPlanId}", methods={"DELETE"})
+     * @OA\Parameter(name="tariefPlanId", in="path", required="true", description="Tariefplan id", @OA\Schema(type="integer"))
      * @IsGranted("ROLE_ADMIN")
      */
-    public function deleteAction($tariefPlanId)
-    {
-        $tariefplanRepo = $this->getDoctrine()->getRepository('AppApiBundle:Tariefplan');
-
-        /**
-         * @var TariefPlan $tariefplan
-         */
+    public function deleteAction(
+        EntityManagerInterface $em,
+        TariefplanRepository $tariefplanRepo,
+        $tariefPlanId
+    ) {
         $tariefplan = $tariefplanRepo->findOneById($tariefPlanId);
 
         if (null === $tariefplan) {
             return new JsonResponse(false, Response::HTTP_BAD_REQUEST);
         }
-
-        $em = $em;
 
         $lineairplan = $tariefplan->getLineairplan();
         if (null !== $lineairplan) {
@@ -155,35 +130,29 @@ class TariefplanController extends AbstractController
     /**
      * Maak een nieuw lineair tariefplan
      *
-     * @Method("POST")
-     * @Route("/tariefplannen/{marktId}/create/lineair")
-     * @ApiDoc(
-     *  section="Tariefplan",
-     *  parameters={
-     * @OA\Parameter(name="naam", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="geldigVanaf", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="geldigTot", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="tariefPerMeter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="reinigingPerMeter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="toeslagBedrijfsafvalPerMeter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="toeslagKrachtstroomPerAansluiting", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="promotieGeldenPerMeter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="promotieGeldenPerKraam", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="elektra", @OA\Schema(type="string"), required="true"},
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/tariefplannen/{marktId}/create/lineair", methods={"POST"})
+     * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="naam", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigVanaf", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigTot", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="tariefPerMeter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="reinigingPerMeter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="toeslagBedrijfsafvalPerMeter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="toeslagKrachtstroomPerAansluiting", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerMeter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerKraam", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afvaleiland", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="eenmaligElektra", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="elektra", in="body", @OA\Schema(type="string"), required="true")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function postLineairAction(Request $request, $marktId)
-    {
-        $marktRepo = $this->getDoctrine()->getRepository('AppApiBundle:Markt');
-
-        /**
-         * @var Markt $markt
-         */
+    public function postLineairAction(
+        EntityManagerInterface $em,
+        MarktRepository $marktRepo,
+        TariefplanMapper $mapper,
+        Request $request,
+        $marktId
+    ) {
         $markt = $marktRepo->findOneById($marktId);
 
         if (null === $markt) {
@@ -203,47 +172,40 @@ class TariefplanController extends AbstractController
 
         $this->processLineairPlan($tariefplan, $lineairplan, $message);
 
-        $em = $em;
         $em->persist($tariefplan);
         $em->persist($lineairplan);
         $em->flush();
 
         // return
-        $result = $this->get('appapi.mapper.tariefplan')->singleEntityToModel($tariefplan);
+        $result = $mapper->singleEntityToModel($tariefplan);
         return new JsonResponse($result, Response::HTTP_OK);
     }
 
     /**
      * Update een lineair tariefplan
      *
-     * @Method("POST")
-     * @Route("/tariefplannen/{tariefPlanId}/update/lineair")
-     * @ApiDoc(
-     *  section="Tariefplan",
-     *  parameters={
-     * @OA\Parameter(name="naam", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="geldigVanaf", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="geldigTot", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="tariefPerMeter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="reinigingPerMeter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="toeslagBedrijfsafvalPerMeter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="toeslagKrachtstroomPerAansluiting", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="promotieGeldenPerMeter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="promotieGeldenPerKraam", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="string"), required="true"},
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/tariefplannen/{tariefPlanId}/update/lineair", methods={"POST"})
+     * @OA\Parameter(name="tariefPlanId", in="path", required="true", description="Tariefplan id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="naam", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigVanaf", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigTot", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="tariefPerMeter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="reinigingPerMeter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="toeslagBedrijfsafvalPerMeter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="toeslagKrachtstroomPerAansluiting", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerMeter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerKraam", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afvaleiland", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="eenmaligElektra", in="body", @OA\Schema(type="string"), required="true")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function updateLineairAction(Request $request, $tariefPlanId)
-    {
-        $tariefPlanRepo = $this->getDoctrine()->getRepository('AppApiBundle:Tariefplan');
-
-        /**
-         * @var TariefPlan $tariefPlan
-         */
+    public function updateLineairAction(
+        EntityManagerInterface $em,
+        TariefplanRepository $tariefPlanRepo,
+        TariefplanMapper $mapper,
+        Request $request,
+        $tariefPlanId
+    ) {
         $tariefplan = $tariefPlanRepo->findOneById($tariefPlanId);
 
         if (null === $tariefplan) {
@@ -263,7 +225,7 @@ class TariefplanController extends AbstractController
         $em->flush();
 
         // return
-        $result = $this->get('appapi.mapper.tariefplan')->singleEntityToModel($tariefplan);
+        $result = $mapper->singleEntityToModel($tariefplan);
         return new JsonResponse($result, Response::HTTP_OK);
     }
 
@@ -308,34 +270,28 @@ class TariefplanController extends AbstractController
     /**
      * Maak een nieuw concreet tariefplan
      *
-     * @Method("POST")
-     * @Route("/tariefplannen/{marktId}/create/concreet")
-     * @ApiDoc(
-     *  section="Tariefplan",
-     *  parameters={
-     * @OA\Parameter(name="naam", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="geldigVanaf", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="geldigTot", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="een_meter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="drie_meter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="vier_meter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="elektra", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="promotieGeldenPerMeter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="promotieGeldenPerKraam", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="string"), required="true"},
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/tariefplannen/{marktId}/create/concreet", methods={"POST"})
+     * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="naam", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigVanaf", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigTot", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="een_meter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="drie_meter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="vier_meter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="elektra", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerMeter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerKraam", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afvaleiland", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="eenmaligElektra", in="body", @OA\Schema(type="string"), required="true")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function postConcreetAction(Request $request, $marktId)
-    {
-        $marktRepo = $this->getDoctrine()->getRepository('AppApiBundle:Markt');
-
-        /**
-         * @var Markt $markt
-         */
+    public function postConcreetAction(
+        EntityManagerInterface $em,
+        MarktRepository $marktRepo,
+        TariefplanMapper $mapper,
+        Request $request,
+        $marktId
+    ) {
         $markt = $marktRepo->findOneById($marktId);
 
         if (null === $markt) {
@@ -355,47 +311,40 @@ class TariefplanController extends AbstractController
 
         $this->processConcreetPlan($tariefplan, $concreetplan, $message);
 
-        $em = $em;
         $em->persist($tariefplan);
         $em->persist($concreetplan);
         $em->flush();
 
         // return
-        $result = $this->get('appapi.mapper.tariefplan')->singleEntityToModel($tariefplan);
+        $result = $mapper->singleEntityToModel($tariefplan);
         return new JsonResponse($result, Response::HTTP_OK);
     }
 
     /**
      * Update een concreet tariefplan
      *
-     * @Method("POST")
-     * @Route("/tariefplannen/{tariefPlanId}/update/concreet")
-     * @ApiDoc(
-     *  section="Tariefplan",
-     *  parameters={
-     * @OA\Parameter(name="naam", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="geldigVanaf", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="geldigTot", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="een_meter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="drie_meter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="vier_meter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="elektra", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="promotieGeldenPerMeter", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="promotieGeldenPerKraam", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="string"), required="true"},
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/tariefplannen/{tariefPlanId}/update/concreet", methods={"POST"})
+     * @OA\Parameter(name="tariefPlanId", in="path", required="true", description="Tariefplan id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="naam", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigVanaf", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigTot", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="een_meter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="drie_meter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="vier_meter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="elektra", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerMeter", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerKraam", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afvaleiland", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="eenmaligElektra", in="body", @OA\Schema(type="string"), required="true")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function updateConcreetAction(Request $request, $tariefPlanId)
-    {
-        $tariefPlanRepo = $this->getDoctrine()->getRepository('AppApiBundle:Tariefplan');
-
-        /**
-         * @var TariefPlan $tariefplan
-         */
+    public function updateConcreetAction(
+        EntityManagerInterface $em,
+        TariefplanRepository $tariefPlanRepo,
+        TariefplanMapper $mapper,
+        Request $request,
+        $tariefPlanId
+    ) {
         $tariefplan = $tariefPlanRepo->findOneById($tariefPlanId);
 
         if (null === $tariefplan) {
@@ -415,39 +364,28 @@ class TariefplanController extends AbstractController
         $em->flush();
 
         // return
-        $result = $this->get('appapi.mapper.tariefplan')->singleEntityToModel($tariefplan);
+        $result = $mapper->singleEntityToModel($tariefplan);
         return new JsonResponse($result, Response::HTTP_OK);
     }
 
     /**
      * Retouneert een factuur concept
      *
-     * @Method("GET")
-     * @Route("/factuur/concept/{dagvergunningId}")
-     * @ApiDoc(
-     *  section="Tariefplan",
-     *  filters={
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/factuur/concept/{dagvergunningId}", methods={"GET"})
+     * @OA\Parameter(name="dagvergunningId", in="path", required="true", description="Dagvergunning id", @OA\Schema(type="integer"))
      * @IsGranted("ROLE_USER")
      */
-    public function factuurConceptAction($dagvergunningId)
-    {
-        $dagvergunningRepo = $this->getDoctrine()->getRepository('AppApiBundle:Dagvergunning');
-        $factuurService = $this->get('appapi.factuurservice');
-
-        /**
-         * @var Dagvergunning $dagvergunning
-         */
+    public function factuurConceptAction(
+        DagvergunningRepository $dagvergunningRepo,
+        FactuurService $factuurService,
+        FactuurMapper $mapper,
+        $dagvergunningId
+    ) {
         $dagvergunning = $dagvergunningRepo->findOneById($dagvergunningId);
 
         if (null === $dagvergunning) {
             return new JsonResponse(null, Response::HTTP_OK);
         }
-
-        /* @var $mapper \App\Mapper\FactuurMapper */
-        $mapper = $this->get('appapi.mapper.factuur');
 
         $factuur = $factuurService->createFactuur($dagvergunning);
         $factuurService->saveFactuur($factuur);
@@ -459,24 +397,17 @@ class TariefplanController extends AbstractController
     /**
      * Factuur overzicht
      *
-     * @Method("GET")
-     * @Route("/report/factuur/overzicht/{van}/{tot}")
-     * @ApiDoc(
-     *  section="Tariefplan",
-     *  filters={
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/report/factuur/overzicht/{van}/{tot}", methods={"GET"})
+     * @OA\Parameter(name="van", in="path", required="true", description="Als yyyy-mm-dd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="tot", in="path", required="true", description="Als yyyy-mm-dd", @OA\Schema(type="string"))
      * @IsGranted("ROLE_SENIOR")
      */
-    public function factuurOverzichtAction($van, $tot)
-    {
-        $factuurRepo = $this->getDoctrine()->getRepository('AppApiBundle:Factuur');
-        $factuurService = $this->get('appapi.factuurservice');
-
-        /**
-         * @var Factuur[] $facturen
-         */
+    public function factuurOverzichtAction(
+        FactuurRepository $factuurRepo,
+        FactuurService $factuurService,
+        $van,
+        $tot
+    ) {
         $facturen = $factuurRepo->getFacturenByDateRange($van, $tot);
 
         $response = [
@@ -508,21 +439,19 @@ class TariefplanController extends AbstractController
     /**
      * Markt Factuur overzicht
      *
-     * @Method("GET")
-     * @Route("/report/factuur/overzichtmarkt/{marktId}/{van}/{tot}")
-     * @ApiDoc(
-     *  section="Tariefplan",
-     *  filters={
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/report/factuur/overzichtmarkt/{marktId}/{van}/{tot}", methods={"GET"})
+     * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="van", in="path", required="true", description="Als yyyy-mm-dd", @OA\Schema(type="string"))
+     * @OA\Parameter(name="tot", in="path", required="true", description="Als yyyy-mm-dd", @OA\Schema(type="string"))
      * @IsGranted("ROLE_SENIOR")
      */
-    public function factuurOverzichtMarktAction($marktId, $van, $tot)
-    {
-        $marktRepo = $this->getDoctrine()->getRepository('AppApiBundle:Markt');
-        $factuurRepo = $this->getDoctrine()->getRepository('AppApiBundle:Factuur');
-        $factuurMapper = $this->get('appapi.mapper.factuur');
+    public function factuurOverzichtMarktAction(
+        MarktRepository $marktRepo,
+        FactuurRepository $factuurRepo,
+        $marktId,
+        $van,
+        $tot
+    ) {
 
         $markt = $marktRepo->findOneById($marktId);
         /**
