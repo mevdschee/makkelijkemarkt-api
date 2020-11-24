@@ -11,28 +11,23 @@
 
 namespace App\Controller\Version_1_1_0;
 
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use OpenApi\Annotations as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Version")
  */
 class VersionController extends AbstractController
 {
     /**
      * Geeft versie nummer
      *
-     * @Method("GET")
-     * @Route("/version/")
-     * @ApiDoc(
-     *  section="Version",
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/version/", methods={"GET"})
      */
     public function getAction(Request $request)
     {

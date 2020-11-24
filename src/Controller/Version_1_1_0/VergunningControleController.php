@@ -11,12 +11,14 @@
 
 namespace App\Controller\Version_1_1_0;
 
-use App\Entity\Dagvergunning;
-use App\Entity\Koopman;
-use App\Entity\Sollicitatie;
 use App\Entity\VergunningControle;
+use App\Mapper\DagvergunningMapper;
+use App\Repository\DagvergunningRepository;
+use App\Repository\KoopmanRepository;
+use App\Repository\SollicitatieRepository;
+use App\Repository\VergunningControleRepository;
 use App\Service\FactuurService;
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,42 +30,42 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Controle")
  */
 class VergunningControleController extends AbstractController
 {
     /**
      * Maak een vergunning controle
      *
-     * @Method("POST")
-     * @Route("/controle/")
-     * @ApiDoc(
-     *  section="Controle",
-     *  parameters={
-     * @OA\Parameter(name="dagvergunningId", @OA\Schema(type="integer"), required="true", description="ID van de dagvergunning")
-     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
-     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
-     * @OA\Parameter(name="aantal3MeterKramen", @OA\Schema(type="integer"), required="false", description="Aantal 3 meter kramen")
-     * @OA\Parameter(name="aantal4MeterKramen", @OA\Schema(type="integer"), required="false", description="Aantal 4 meter kramen")
-     * @OA\Parameter(name="extraMeters", @OA\Schema(type="integer"), required="false", description="Extra meters")
-     * @OA\Parameter(name="aantalElektra", @OA\Schema(type="integer"), required="false", description="Aantal elektra aansluitingen dat is afgenomen")
-     * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="boolean"), required="false", description="Eenmalige elektra kosten ongeacht plekken")
-     * @OA\Parameter(name="krachtstroom", @OA\Schema(type="boolean"), required="false", description="Is er een krachtstroom aansluiting afgenomen?")
-     * @OA\Parameter(name="reiniging", @OA\Schema(type="boolean"), required="false", description="Is er reiniging afgenomen?")
-     * @OA\Parameter(name="erkenningsnummer", @OA\Schema(type="string"), required="true", description="Nummer zoals ingevoerd")
-     * @OA\Parameter(name="vervangerErkenningsnummer", @OA\Schema(type="string"), required="false", description="Nummer zoals ingevoerd")
-     * @OA\Parameter(name="erkenningsnummerInvoerMethode", @OA\Schema(type="string"), required="false", description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.")
-     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
-     * @OA\Parameter(name="notitie", @OA\Schema(type="string"), required="false", description="Vrij notitie veld")
-     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
-     * @OA\Parameter(name="ronde", "dataType"="int", required="false", description="Ronde nummer"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/controle/", methods={"POST"})
+     * @OA\Parameter(name="dagvergunningId", in="body", @OA\Schema(type="integer"), required="true", description="ID van de dagvergunning")
+     * @OA\Parameter(name="aanwezig", in="body", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
+     * @OA\Parameter(name="registratieGeolocatie", in="body", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
+     * @OA\Parameter(name="aantal3MeterKramen", in="body", @OA\Schema(type="integer"), required="false", description="Aantal 3 meter kramen")
+     * @OA\Parameter(name="aantal4MeterKramen", in="body", @OA\Schema(type="integer"), required="false", description="Aantal 4 meter kramen")
+     * @OA\Parameter(name="extraMeters", in="body", @OA\Schema(type="integer"), required="false", description="Extra meters")
+     * @OA\Parameter(name="aantalElektra", in="body", @OA\Schema(type="integer"), required="false", description="Aantal elektra aansluitingen dat is afgenomen")
+     * @OA\Parameter(name="afvaleiland", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="eenmaligElektra", in="body", @OA\Schema(type="boolean"), required="false", description="Eenmalige elektra kosten ongeacht plekken")
+     * @OA\Parameter(name="krachtstroom", in="body", @OA\Schema(type="boolean"), required="false", description="Is er een krachtstroom aansluiting afgenomen?")
+     * @OA\Parameter(name="reiniging", in="body", @OA\Schema(type="boolean"), required="false", description="Is er reiniging afgenomen?")
+     * @OA\Parameter(name="erkenningsnummer", in="body", @OA\Schema(type="string"), required="true", description="Nummer zoals ingevoerd")
+     * @OA\Parameter(name="vervangerErkenningsnummer", in="body", @OA\Schema(type="string"), required="false", description="Nummer zoals ingevoerd")
+     * @OA\Parameter(name="erkenningsnummerInvoerMethode", in="body", @OA\Schema(type="string"), required="false", description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.")
+     * @OA\Parameter(name="aanwezig", in="body", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
+     * @OA\Parameter(name="notitie", in="body", @OA\Schema(type="string"), required="false", description="Vrij notitie veld")
+     * @OA\Parameter(name="registratieGeolocatie", in="body", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
+     * @OA\Parameter(name="ronde", in="body", @OA\Schema(type="integer"), required="false", description="Ronde nummer")
      * @IsGranted("ROLE_USER")
      */
-    public function createAction(Request $request)
-    {
+    public function createAction(
+        EntityManagerInterface $em,
+        KoopmanRepository $repoKoopman,
+        SollicitatieRepository $repoSollicitatie,
+        DagvergunningRepository $repo,
+        DagvergunningMapper $mapper,
+        Request $request
+    ) {
         $message = json_decode($request->getContent(false), true);
         if (null === $message) {
             return new JsonResponse(['error' => json_last_error_msg()]);
@@ -125,9 +127,6 @@ class VergunningControleController extends AbstractController
             $message['vervangerErkenningsnummer'] = null;
         }
 
-        $em = $em;
-        $repo = $em->getRepository(Dagvergunning::class);
-
         $dagvergunning = $repo->find($message['dagvergunningId']);
         if (null === $dagvergunning) {
             return new JsonResponse(['error' => 'dagvergunningId not in DB']);
@@ -139,6 +138,8 @@ class VergunningControleController extends AbstractController
         $dagvergunning->addVergunningControle($controle);
 
         $controle = $this->map(
+            $repoKoopman,
+            $repoSollicitatie,
             $controle,
             $message['aanwezig'],
             $message['erkenningsnummer'],
@@ -160,7 +161,7 @@ class VergunningControleController extends AbstractController
         $em->persist($controle);
         $em->flush();
 
-        $result = $this->get('appapi.mapper.dagvergunning')->singleEntityToModel($dagvergunning);
+        $result = $mapper->singleEntityToModel($dagvergunning);
 
         return new JsonResponse($result, Response::HTTP_OK);
     }
@@ -168,35 +169,36 @@ class VergunningControleController extends AbstractController
     /**
      * Update een vergunning controle
      *
-     * @Method("PUT")
-     * @Route("/controle/{controleId}")
-     * @ApiDoc(
-     *  section="Controle",
-     *  parameters={
-     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
-     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
-     * @OA\Parameter(name="aantal3MeterKramen", @OA\Schema(type="integer"), required="false", description="Aantal 3 meter kramen")
-     * @OA\Parameter(name="aantal4MeterKramen", @OA\Schema(type="integer"), required="false", description="Aantal 4 meter kramen")
-     * @OA\Parameter(name="extraMeters", @OA\Schema(type="integer"), required="false", description="Extra meters")
-     * @OA\Parameter(name="aantalElektra", @OA\Schema(type="integer"), required="false", description="Aantal elektra aansluitingen dat is afgenomen")
-     * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="boolean"), required="false", description="Eenmalige elektra kosten ongeacht plekken")
-     * @OA\Parameter(name="krachtstroom", @OA\Schema(type="boolean"), required="false", description="Is er een krachtstroom aansluiting afgenomen?")
-     * @OA\Parameter(name="reiniging", @OA\Schema(type="boolean"), required="false", description="Is er reiniging afgenomen?")
-     * @OA\Parameter(name="erkenningsnummer", @OA\Schema(type="string"), required="true", description="Nummer zoals ingevoerd")
-     * @OA\Parameter(name="vervangerErkenningsnummer", @OA\Schema(type="string"), required="false", description="Nummer zoals ingevoerd")
-     * @OA\Parameter(name="erkenningsnummerInvoerMethode", @OA\Schema(type="string"), required="false", description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.")
-     * @OA\Parameter(name="aanwezig", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
-     * @OA\Parameter(name="notitie", @OA\Schema(type="string"), required="false", description="Vrij notitie veld")
-     * @OA\Parameter(name="registratieGeolocatie", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
-     * @OA\Parameter(name="ronde", "dataType"="int", required="false", description="Ronde nummer"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/controle/{controleId}", methods={"PUT"})
+     * @OA\Parameter(name="controleId", in="path", required="true", @OA\Schema(type="integer"), description="Controle ID")
+     * @OA\Parameter(name="aanwezig", in="body", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
+     * @OA\Parameter(name="registratieGeolocatie", in="body", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
+     * @OA\Parameter(name="aantal3MeterKramen", in="body", @OA\Schema(type="integer"), required="false", description="Aantal 3 meter kramen")
+     * @OA\Parameter(name="aantal4MeterKramen", in="body", @OA\Schema(type="integer"), required="false", description="Aantal 4 meter kramen")
+     * @OA\Parameter(name="extraMeters", in="body", @OA\Schema(type="integer"), required="false", description="Extra meters")
+     * @OA\Parameter(name="aantalElektra", in="body", @OA\Schema(type="integer"), required="false", description="Aantal elektra aansluitingen dat is afgenomen")
+     * @OA\Parameter(name="afvaleiland", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="eenmaligElektra", in="body", @OA\Schema(type="boolean"), required="false", description="Eenmalige elektra kosten ongeacht plekken")
+     * @OA\Parameter(name="krachtstroom", in="body", @OA\Schema(type="boolean"), required="false", description="Is er een krachtstroom aansluiting afgenomen?")
+     * @OA\Parameter(name="reiniging", in="body", @OA\Schema(type="boolean"), required="false", description="Is er reiniging afgenomen?")
+     * @OA\Parameter(name="erkenningsnummer", in="body", @OA\Schema(type="string"), required="true", description="Nummer zoals ingevoerd")
+     * @OA\Parameter(name="vervangerErkenningsnummer", in="body", @OA\Schema(type="string"), required="false", description="Nummer zoals ingevoerd")
+     * @OA\Parameter(name="erkenningsnummerInvoerMethode", in="body", @OA\Schema(type="string"), required="false", description="Waardes: handmatig, scan-foto, scan-nfc, scan-barcode, scan-qr, opgezocht, onbekend. Indien niet opgegeven wordt onbekend gebruikt.")
+     * @OA\Parameter(name="aanwezig", in="body", @OA\Schema(type="string"), required="false", description="Aangetroffen persoon Zelf|Partner|Vervanger met toestemming|Vervanger zonder toestemming|Niet aanwezig|Niet geregisteerd")
+     * @OA\Parameter(name="notitie", in="body", @OA\Schema(type="string"), required="false", description="Vrij notitie veld")
+     * @OA\Parameter(name="registratieGeolocatie", in="body", @OA\Schema(type="string"), required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long")
+     * @OA\Parameter(name="ronde", in="body", @OA\Schema(type="integer"), required="false", description="Ronde nummer")
      * @IsGranted("ROLE_USER")
      */
-    public function updateAction(Request $request, $controleId)
-    {
+    public function updateAction(
+        EntityManagerInterface $em,
+        KoopmanRepository $repoKoopman,
+        SollicitatieRepository $repoSollicitatie,
+        VergunningControleRepository $repo,
+        DagvergunningMapper $mapper,
+        Request $request,
+        $controleId
+    ) {
         $message = json_decode($request->getContent(false), true);
         if (null === $message) {
             return new JsonResponse(['error' => json_last_error_msg()]);
@@ -255,15 +257,14 @@ class VergunningControleController extends AbstractController
             $message['vervangerErkenningsnummer'] = null;
         }
 
-        $em = $em;
-        $repo = $em->getRepository(VergunningControle::class);
-
         $controle = $repo->find($controleId);
         if (null === $controle) {
             return new JsonResponse(['error' => 'controleId not in DB']);
         }
 
         $controle = $this->map(
+            $repoKoopman,
+            $repoSollicitatie,
             $controle,
             $message['aanwezig'],
             $message['erkenningsnummer'],
@@ -286,12 +287,14 @@ class VergunningControleController extends AbstractController
 
         $dagvergunning = $controle->getDagvergunning();
 
-        $result = $this->get('appapi.mapper.dagvergunning')->singleEntityToModel($dagvergunning);
+        $result = $mapper->singleEntityToModel($dagvergunning);
 
         return new JsonResponse($result, Response::HTTP_OK);
     }
 
     /**
+     * @param KoopmanRepository $repoKoopman
+     * @param SollicitatieRepository $repoSollicitatie
      * @param VergunningControle $vergunningControle
      * @param $aanwezig
      * @param $erkenningsnummer
@@ -311,6 +314,8 @@ class VergunningControleController extends AbstractController
      * @return VergunningControle
      */
     private function map(
+        KoopmanRepository $repoKoopman,
+        SollicitatieRepository $repoSollicitatie,
         VergunningControle $vergunningControle,
         $aanwezig,
         $erkenningsnummer,
@@ -328,10 +333,6 @@ class VergunningControleController extends AbstractController
         $notitie,
         $ronde
     ) {
-        $em = $em;
-        $repoKoopman = $em->getRepository(Koopman::class);
-        $repoSollicitatie = $em->getRepository(Sollicitatie::class);
-
         // set aanwezig
         $vergunningControle->setAanwezig($aanwezig);
 
