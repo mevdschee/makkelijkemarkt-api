@@ -11,7 +11,11 @@
 
 namespace App\Controller\Version_1_1_0;
 
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use App\Mapper\SollicitatieMapper;
+use App\Repository\MarktRepository;
+use App\Repository\SollicitatieRepository;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,27 +33,19 @@ class SollicitatieController extends AbstractController
      * Vraag sollicitaties op voor een markt
      *
      * @Route("/sollicitaties/markt/{marktId}", methods={"GET"})
-     * @ApiDoc(
-     *  section="Sollicitatie",
-     *  requirements={
-     * @OA\Parameter(name="marktId", @OA\Schema(type="integer")},
-     *  },
-     *  filters={
-     * @OA\Parameter(name="listOffset", @OA\Schema(type="integer"))
-     * @OA\Parameter(name="listLength", @OA\Schema(type="integer"), description="Default=100")
-     * @OA\Parameter(name="includeDoorgehaald", @OA\Schema(type="integer"), description="Default=1"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listOffset", in="query", required="false", @OA\Schema(type="integer"), description="Default=0")
+     * @OA\Parameter(name="listLength", in="query", required="false", @OA\Schema(type="integer"), description="Default=100")
+     * @OA\Parameter(name="includeDoorgehaald", in="query", required="false", @OA\Schema(type="integer"), description="Default=1")
      * @IsGranted("ROLE_USER")
      */
-    public function listMarktAction(Request $request, $marktId)
-    {
-        /* @var $repoSollicitatie \App\Entity\SollicitatieRepository */
-        $repoSollicitatie = $this->get('appapi.repository.sollicitatie');
-        /* @var $repoMarkt \App\Entity\MarktRepository */
-        $repoMarkt = $this->get('appapi.repository.markt');
-
+    public function listMarktAction(
+        SollicitatieRepository $repoSollicitatie,
+        MarktRepository $repoMarkt,
+        SollicitatieMapper $mapper,
+        Request $request,
+        $marktId
+    ) {
         $markt = $repoMarkt->getById($marktId);
         if ($markt === null) {
             throw $this->createNotFoundException('Not found markt with id ' . $marktId);
@@ -57,8 +53,6 @@ class SollicitatieController extends AbstractController
 
         $results = $repoSollicitatie->findByMarkt($markt, $request->query->get('listOffset'), $request->query->get('listLength', 100), $request->query->getBoolean('includeDoorgehaald', true));
 
-        /* @var $mapper \App\Mapper\SollicitatieMapper */
-        $mapper = $this->get('appapi.mapper.sollicitatie');
         $response = $mapper->multipleEntityToModel($results);
 
         return new JsonResponse($response, Response::HTTP_OK, ['X-Api-ListSize' => count($results)]);
@@ -67,29 +61,17 @@ class SollicitatieController extends AbstractController
     /**
      * Gegevens van sollicitatie op basis van id
      *
-     * @Method("GET")
-     * @Route("/sollicitaties/id/{id}")
-     * @ApiDoc(
-     *  section="Sollicitatie",
-     *  requirements={
-     * @OA\Parameter(name="id", @OA\Schema(type="integer")}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/sollicitaties/id/{id}", methods={"GET"})
+     * @OA\Parameter(name="id", in="path", required="true", description="Sollicitatie id", @OA\Schema(type="integer"))
      * @IsGranted("ROLE_USER")
      */
-    public function getByIdAction(Request $request, $id)
+    public function getByIdAction(SollicitatieRepository $repo, SollicitatieMapper $mapper, $id)
     {
-        /* @var $repo \App\Entity\SollicitatieRepository */
-        $repo = $this->get('appapi.repository.sollicitatie');
-
         $object = $repo->getById($id);
         if ($object === null) {
             throw $this->createNotFoundException('Not found sollicitatie with id ' . $id);
         }
 
-        /* @var $mapper \App\Mapper\SollicitatieMapper */
-        $mapper = $this->get('appapi.mapper.sollicitatie');
         $response = $mapper->singleEntityToModel($object);
 
         return new JsonResponse($response, Response::HTTP_OK, []);
@@ -98,25 +80,18 @@ class SollicitatieController extends AbstractController
     /**
      * Gegevens van sollicitatie op basis van markt en sollicitatienummer
      *
-     * @Method("GET")
-     * @Route("/sollicitaties/markt/{marktId}/{sollicitatieNummer}")
-     * @ApiDoc(
-     *  section="Sollicitatie",
-     *  requirements={
-     * @OA\Parameter(name="marktId", @OA\Schema(type="integer"))
-     * @OA\Parameter(name="sollicitatieNummer", @OA\Schema(type="integer")},
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/sollicitaties/markt/{marktId}/{sollicitatieNummer}", methods={"GET"})
+     * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="sollicitatieNummer", in="path", required="true", description="sollicitatieNummer", @OA\Schema(type="integer"))
      * @IsGranted("ROLE_USER")
      */
-    public function getByMarktAndSollicitatieNummerAction(Request $request, $marktId, $sollicitatieNummer)
-    {
-        /* @var $repoMarkt \App\Entity\SollicitatieRepository */
-        $repoMarkt = $this->get('appapi.repository.markt');
-        /* @var $repoSollicitatie \App\Entity\SollicitatieRepository */
-        $repoSollicitatie = $this->get('appapi.repository.sollicitatie');
-
+    public function getByMarktAndSollicitatieNummerAction(
+        MarktRepository $repoMarkt,
+        SollicitatieRepository $repoSollicitatie,
+        SollicitatieMapper $mapper,
+        $marktId,
+        $sollicitatieNummer
+    ) {
         $markt = $repoMarkt->getById($marktId);
         if ($markt === null) {
             throw $this->createNotFoundException('Not found markt with id ' . $marktId);
@@ -124,11 +99,9 @@ class SollicitatieController extends AbstractController
 
         $object = $repoSollicitatie->getByMarktAndSollicitatieNummer($markt, $sollicitatieNummer);
         if ($object === null) {
-            throw $this->createNotFoundException('Not found sollicitatie with id ' . $id);
+            throw $this->createNotFoundException('Not found sollicitatie with sollicitatieNummer ' . $sollicitatieNummer);
         }
 
-        /* @var $mapper \App\Mapper\SollicitatieMapper */
-        $mapper = $this->get('appapi.mapper.sollicitatie');
         $response = $mapper->singleEntityToModel($object);
 
         return new JsonResponse($response, Response::HTTP_OK, []);

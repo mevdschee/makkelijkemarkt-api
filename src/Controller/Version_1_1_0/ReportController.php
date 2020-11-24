@@ -18,15 +18,16 @@ use App\Mapper\SollicitatieMapper;
 use App\Model\AbstractRapportModel;
 use App\Repository\DagvergunningRepository;
 use App\Repository\KoopmanRepository;
+use App\Repository\MarktRepository;
 use App\Repository\SollicitatieRepository;
 use App\Repository\VergunningControleRepository;
 use Doctrine\ORM\Query;
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -119,8 +120,8 @@ class ReportController extends AbstractController
      * @Route("/rapport/staanverplichting/{dagStart}/{dagEind}/{vergunningType}", methods={"GET"})
      * @OA\Parameter(name="dagStart", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
      * @OA\Parameter(name="dagEind", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Parameter(name="vergunningType", in="path", required="true", @OA\Schema(type="string"), description="alle|soll|vkk|vpl|lot"}
-     * @OA\Parameter(name="marktId[]", in="query", required="true", @OA\Schema(type="integer"), description="ID van markt"}
+     * @OA\Parameter(name="vergunningType", in="path", required="true", @OA\Schema(type="string"), description="alle|soll|vkk|vpl|lot")
+     * @OA\Parameter(name="marktId[]", in="query", required="true", @OA\Schema(type="integer"), description="ID van markt")
      * @IsGranted("ROLE_SENIOR")
      */
     public function staanverplichtingRapportAction(
@@ -308,7 +309,7 @@ class ReportController extends AbstractController
      * @Route("/rapport/aanwezigheid/{marktId}/{dagStart}/{dagEind}", methods={"GET"})
      * @OA\Parameter(name="marktId", in="path", required="true", @OA\Schema(type="integer"), description="ID van markt")
      * @OA\Parameter(name="dagStart", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Parameter(name="dagEind", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
+     * @OA\Parameter(name="dagEind", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
      * @IsGranted("ROLE_SENIOR")
      */
     public function persoonlijkeAanwezigheidRapportAction(
@@ -323,40 +324,28 @@ class ReportController extends AbstractController
     }
 
     /**
-     * @Method("GET")
-     * @Route("/rapport/invoer/{marktId}/{dagStart}/{dagEind}")
-     * @ApiDoc(
-     *  section="Rapport",
-     *  requirements={
-     * @OA\Parameter(name="marktId", required="true", @OA\Schema(type="integer"), description="ID van markt")
-     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/rapport/invoer/{marktId}/{dagStart}/{dagEind}", methods={"GET"})
+     * @OA\Parameter(name="marktId", in="path", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="dagStart", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", in="path", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
      * @IsGranted("ROLE_SENIOR")
      */
-    public function invoerRapportAction($marktId, $dagStart, $dagEind)
-    {
-        $repo = $this->getDoctrine()->getRepository('AppApiBundle:Dagvergunning');
-
+    public function invoerRapportAction(
+        DagvergunningRepository $repo,
+        $marktId,
+        $dagStart,
+        $dagEind
+    ) {
         $response = $repo->getInvoer($marktId, $dagStart, $dagEind);
 
         return new JsonResponse($response, Response::HTTP_OK, ['X-Api-ListSize' => count($response)]);
     }
 
     /**
-     * @Method("GET")
-     * @Route("/rapport/detailfactuur")
-     * @ApiDoc(
-     *  section="Rapport",
-     *  requirements={
-     * @OA\Parameter(name="marktId", required="true", @OA\Schema(type="integer"), description="ID van markt")
-     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/rapport/detailfactuur", methods={"GET"})
+     * @OA\Parameter(name="marktId", in="query", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="dagStart", in="query", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", in="query", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
      * @IsGranted("ROLE_SENIOR")
      */
     public function detailFactuurRapportAction(Request $request)
@@ -415,20 +404,13 @@ class ReportController extends AbstractController
     }
 
     /**
-     * @Method("GET")
-     * @Route("/rapport/marktcapaciteit")
-     * @ApiDoc(
-     *  section="Rapport",
-     *  requirements={
-     * @OA\Parameter(name="marktId", required="true", @OA\Schema(type="integer"), description="ID van markt")
-     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/rapport/marktcapaciteit", methods={"GET"})
+     * @OA\Parameter(name="marktId", in="query", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="dagStart", in="query", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", in="query", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
      * @IsGranted("ROLE_SENIOR")
      */
-    public function marktCapaciteitRapportAction(Request $request)
+    public function marktCapaciteitRapportAction(MarktRepository $repo, Request $request)
     {
         $marktIds = $request->query->get('marktId', '');
         if (is_array($marktIds) === false) {
@@ -472,8 +454,6 @@ class ReportController extends AbstractController
             ['dateStart' => \PDO::PARAM_STR, 'dateEnd' => \PDO::PARAM_STR, 'marktIds' => \Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
         );
 
-        /** @var $repo \App\Entity\MarktRepository */
-        $repo = $this->get('appapi.repository.markt');
         $results = $repo->findAll();
         $markten = [];
         foreach ($results as $markt) {
