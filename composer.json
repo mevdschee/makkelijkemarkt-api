@@ -1,70 +1,70 @@
 {
-    "name": "gemeenteamsterdam/makkelijkemarkt-api",
-    "license": "MPLv2",
+    "name": "amsterdam/makkelijkemarkt-api",
+    "description": "",
     "type": "project",
-    "autoload": {
-        "psr-4": {
-            "": "src/"
-        }
-    },
+    "license": "proprietary",
     "require": {
-        "php": ">=7.0",
-        "ext-fileinfo": "*",
-        "symfony/symfony": "2.7.*",
-        "doctrine/orm": "~2.5",
-        "doctrine/dbal": "~2.5",
-        "doctrine/doctrine-bundle": "~1.4",
-        "symfony/assetic-bundle": "~2.3",
-        "symfony/swiftmailer-bundle": "~2.3",
-        "symfony/monolog-bundle": "~2.4",
-        "sensio/distribution-bundle": "~4.0",
-        "sensio/framework-extra-bundle": "~3.0,>=3.0.2",
-        "incenteev/composer-parameter-handler": "~2.0",
-        "doctrine/doctrine-fixtures-bundle": "2.2.*",
-        "doctrine/migrations": "^1.0",
-        "doctrine/doctrine-migrations-bundle": "^1.0",
-        "liuggio/ExcelBundle": "~2.0",
-        "nelmio/api-doc-bundle": "^2.9",
-        "nelmio/cors-bundle": "^1.4",
-        "liip/imagine-bundle": "^1.3",
-        "whiteoctober/tcpdf-bundle": "dev-master#e134861af736518ca24f4eab69699073460e4c08",
-        "tecnickcom/tcpdf": "6.2.12"
-    },
-    "require-dev": {
-        "sensio/generator-bundle": "~2.3"
-    },
-    "scripts": {
-        "post-root-package-install": [
-            "SymfonyStandard\\Composer::hookRootPackageInstall"
-        ],
-        "post-install-cmd": [
-            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::removeSymfonyStandardFiles",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget"
-        ],
-        "post-update-cmd": [
-            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::removeSymfonyStandardFiles",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget"
-        ]
+        "php": ">=7.2.5",
+        "ext-ctype": "*",
+        "ext-iconv": "*",
+        "composer/package-versions-deprecated": "1.11.99.1",
+        "doctrine/doctrine-bundle": "^2.2",
+        "doctrine/doctrine-migrations-bundle": "^3.0",
+        "doctrine/orm": "^2.7",
+        "nelmio/api-doc-bundle": "^4.0",
+        "sensio/framework-extra-bundle": "^5.6",
+        "symfony/console": "5.1.*",
+        "symfony/dotenv": "5.1.*",
+        "symfony/flex": "^1.3.1",
+        "symfony/framework-bundle": "5.1.*",
+        "symfony/security-bundle": "5.1.*",
+        "symfony/yaml": "5.1.*"
     },
     "config": {
-        "bin-dir": "bin"
+        "optimize-autoloader": true,
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests/"
+        }
+    },
+    "replace": {
+        "paragonie/random_compat": "2.*",
+        "symfony/polyfill-ctype": "*",
+        "symfony/polyfill-iconv": "*",
+        "symfony/polyfill-php72": "*",
+        "symfony/polyfill-php71": "*",
+        "symfony/polyfill-php70": "*",
+        "symfony/polyfill-php56": "*"
+    },
+    "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        },
+        "post-install-cmd": [
+            "@auto-scripts"
+        ],
+        "post-update-cmd": [
+            "@auto-scripts"
+        ]
+    },
+    "conflict": {
+        "symfony/symfony": "*"
     },
     "extra": {
-        "symfony-app-dir": "app",
-        "symfony-web-dir": "web",
-        "symfony-assets-install": "relative",
-        "incenteev-parameters": {
-            "file": "app/config/parameters.yml"
+        "symfony": {
+            "allow-contrib": false,
+            "require": "5.1.*"
         }
     }
 }

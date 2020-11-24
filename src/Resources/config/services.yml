@@ -1,0 +1,163 @@
+
+services:
+  appapi.factuurservice:
+    class: App\Service\FactuurService
+    arguments:
+      - '@doctrine.orm.entity_manager'
+      - '@appapi.concreetplanfactuurservice'
+      - '@appapi.lineairplanfactuurservice'
+  appapi.concreetplanfactuurservice:
+    class: App\Service\ConcreetplanFactuurService
+    arguments:
+      - '@doctrine.orm.entity_manager'
+  appapi.lineairplanfactuurservice:
+    class: App\Service\LineairplanFactuurService
+    arguments:
+      - '@doctrine.orm.entity_manager'
+  pdf_factuur:
+    class: App\Service\PdfFactuurService
+    arguments:
+      - '@service_container'
+  # mapper
+  appapi.mapper.account:
+    class: App\Mapper\AccountMapper
+  appapi.mapper.btwtarief:
+    class: App\Mapper\BtwTariefMapper
+  appapi.mapper.vergunningcontrole:
+    class: App\Mapper\VergunningControleMapper
+    arguments:
+      - '@appapi.mapper.koopman'
+      - '@appapi.mapper.sollicitatie'
+      - '@appapi.mapper.account'
+  appapi.mapper.token:
+    class: App\Mapper\TokenMapper
+    calls:
+      - ['setAccountMapper', ['@appapi.mapper.account']]
+  appapi.mapper.koopman:
+    class: App\Mapper\KoopmanMapper
+    calls:
+      - ['setSollicitatieMapper', ['@appapi.mapper.sollicitatie']]
+      - ['setVervangerMapper',    ['@appapi.mapper.vervanger']]
+      - ['setImagineCacheManager', ['@liip_imagine.cache.manager']]
+  appapi.mapper.markt:
+    class: App\Mapper\MarktMapper
+  appapi.mapper.notitie:
+    class: App\Mapper\NotitieMapper
+    calls:
+      - ['setMarktMapper', ['@appapi.mapper.markt']]
+  appapi.mapper.sollicitatie:
+    class: App\Mapper\SollicitatieMapper
+    calls:
+      - ['setKoopmanMapper', ['@appapi.mapper.koopman']]
+      - ['setMarktMapper', ['@appapi.mapper.markt']]
+  appapi.mapper.dagvergunning:
+    class: App\Mapper\DagvergunningMapper
+    arguments:
+      - '@appapi.mapper.markt'
+      - '@appapi.mapper.koopman'
+      - '@appapi.mapper.sollicitatie'
+      - '@appapi.mapper.account'
+      - '@appapi.mapper.factuur'
+      - '@appapi.mapper.vergunningcontrole'
+  appapi.mapper.vervanger:
+    class: App\Mapper\VervangerMapper
+    calls:
+      - ['setImagineCacheManager', ['@liip_imagine.cache.manager']]
+  appapi.mapper.tariefplan:
+      class: App\Mapper\TariefplanMapper
+      arguments:
+        - '@appapi.mapper.lineairplan'
+        - '@appapi.mapper.concreetplan'
+  appapi.mapper.factuur:
+      class: App\Mapper\FactuurMapper
+      arguments:
+        - '@appapi.mapper.product'
+        - '@appapi.factuurservice'
+  appapi.mapper.product:
+      class: App\Mapper\ProductMapper
+  appapi.mapper.lineairplan:
+      class: App\Mapper\LineairplanMapper
+  appapi.mapper.concreetplan:
+      class: App\Mapper\ConcreetPlanMapper
+  # repository
+  appapi.repository.account:
+    class: App\Entity\AccountRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'App\Entity\Account'
+  appapi.repository.dagvergunning:
+    class: App\Entity\DagvergunningRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'App\Entity\Dagvergunning'
+  appapi.repository.markt:
+    class: App\Entity\MarktRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'App\Entity\Markt'
+  appapi.repository.marktextradata:
+    class: App\Entity\DagvergunningRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'App\Entity\MarktExtraData'
+  appapi.repository.koopman:
+    class: App\Entity\DagvergunningRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'App\Entity\Koopman'
+  appapi.repository.sollicitatie:
+    class: App\Entity\SollicitatieRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'App\Entity\Sollicitatie'
+  appapi.repository.token:
+    class: App\Entity\TokenRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'App\Entity\Token'
+  appapi.repository.notitie:
+    class: App\Entity\NotitieRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'App\Entity\Notitie'
+  appapi.repository.vervanger:
+    class: App\Entity\VervangerRepository
+    factory_service: doctrine.orm.entity_manager
+    factory_method: getRepository
+    arguments:
+      - 'App\Entity\Vervanger'
+  # security
+  api_key_user_provider:
+    class: App\Security\ApiKeyUserProvider
+    arguments:
+      - '@appapi.repository.account'
+      - '@appapi.repository.token'
+  apikey_authenticator:
+    class: App\Security\ApiKeyAuthenticator
+    arguments:
+      - '%mm_app_key%'
+  appapi.kernel.listener.exception:
+    class: App\Security\ExceptionListener
+    tags:
+      - { name: kernel.event_listener, event: kernel.exception, method: onKernelException, priority: 1 }
+  appapi.repair.factuur:
+    class: App\Process\RepairFactuur
+    arguments:
+      - '@doctrine.orm.entity_manager'
+      - '@appapi.factuurservice'
+  App\Controller\Version_1_1_0\AuditController:
+    class: App\Controller\Version_1_1_0\AuditController
+    arguments:
+      - '@appapi.repository.dagvergunning'
+      - '@appapi.repository.markt'
+      - '@appapi.repository.koopman'
+      - '@doctrine.orm.entity_manager'
+      - '@appapi.mapper.dagvergunning'

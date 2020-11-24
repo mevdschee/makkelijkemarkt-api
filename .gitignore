@@ -1,19 +1,10 @@
-app/bootstrap.php.cache
-app/config/parameters.yml
-app/phpunit.xml
-bin/
-composer.phar
-vendor/
-web/bundles/
-.project
-.settings
-app/data/*
-.buildpath
-.idea
-.hg/*
-.hgignore
-.hgtags
-web/iirf.ini
-web/download/*
-web/media/cache/*
-web/config.php
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
