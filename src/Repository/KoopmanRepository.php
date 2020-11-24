@@ -11,6 +11,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Koopman;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;

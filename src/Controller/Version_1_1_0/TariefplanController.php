@@ -160,18 +160,18 @@ class TariefplanController extends AbstractController
      * @ApiDoc(
      *  section="Tariefplan",
      *  parameters={
-     *      {"name"="naam", "dataType"="string", "required"="true"},
-     *      {"name"="geldigVanaf", "dataType"="string", "required"="true"},
-     *      {"name"="geldigTot", "dataType"="string", "required"="true"},
-     *      {"name"="tariefPerMeter", "dataType"="string", "required"="true"},
-     *      {"name"="reinigingPerMeter", "dataType"="string", "required"="true"},
-     *      {"name"="toeslagBedrijfsafvalPerMeter", "dataType"="string", "required"="true"},
-     *      {"name"="toeslagKrachtstroomPerAansluiting", "dataType"="string", "required"="true"},
-     *      {"name"="promotieGeldenPerMeter", "dataType"="string", "required"="true"},
-     *      {"name"="promotieGeldenPerKraam", "dataType"="string", "required"="true"},
-     *      {"name"="afvaleiland", "dataType"="string", "required"="true"},
-     *      {"name"="eenmaligElektra", "dataType"="string", "required"="true"},
-     *      {"name"="elektra", "dataType"="string", "required"="true"},
+     * @OA\Parameter(name="naam", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigVanaf", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigTot", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="tariefPerMeter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="reinigingPerMeter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="toeslagBedrijfsafvalPerMeter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="toeslagKrachtstroomPerAansluiting", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerMeter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerKraam", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="elektra", @OA\Schema(type="string"), required="true"},
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -221,17 +221,17 @@ class TariefplanController extends AbstractController
      * @ApiDoc(
      *  section="Tariefplan",
      *  parameters={
-     *      {"name"="naam", "dataType"="string", "required"="true"},
-     *      {"name"="geldigVanaf", "dataType"="string", "required"="true"},
-     *      {"name"="geldigTot", "dataType"="string", "required"="true"},
-     *      {"name"="tariefPerMeter", "dataType"="string", "required"="true"},
-     *      {"name"="reinigingPerMeter", "dataType"="string", "required"="true"},
-     *      {"name"="toeslagBedrijfsafvalPerMeter", "dataType"="string", "required"="true"},
-     *      {"name"="toeslagKrachtstroomPerAansluiting", "dataType"="string", "required"="true"},
-     *      {"name"="promotieGeldenPerMeter", "dataType"="string", "required"="true"},
-     *      {"name"="promotieGeldenPerKraam", "dataType"="string", "required"="true"},
-     *      {"name"="afvaleiland", "dataType"="string", "required"="true"},
-     *      {"name"="eenmaligElektra", "dataType"="string", "required"="true"},
+     * @OA\Parameter(name="naam", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigVanaf", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigTot", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="tariefPerMeter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="reinigingPerMeter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="toeslagBedrijfsafvalPerMeter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="toeslagKrachtstroomPerAansluiting", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerMeter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerKraam", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="string"), required="true"},
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -313,17 +313,17 @@ class TariefplanController extends AbstractController
      * @ApiDoc(
      *  section="Tariefplan",
      *  parameters={
-     *      {"name"="naam", "dataType"="string", "required"="true"},
-     *      {"name"="geldigVanaf", "dataType"="string", "required"="true"},
-     *      {"name"="geldigTot", "dataType"="string", "required"="true"},
-     *      {"name"="een_meter", "dataType"="string", "required"="true"},
-     *      {"name"="drie_meter", "dataType"="string", "required"="true"},
-     *      {"name"="vier_meter", "dataType"="string", "required"="true"},
-     *      {"name"="elektra", "dataType"="string", "required"="true"},
-     *      {"name"="promotieGeldenPerMeter", "dataType"="string", "required"="true"},
-     *      {"name"="promotieGeldenPerKraam", "dataType"="string", "required"="true"},
-     *      {"name"="afvaleiland", "dataType"="string", "required"="true"},
-     *      {"name"="eenmaligElektra", "dataType"="string", "required"="true"},
+     * @OA\Parameter(name="naam", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigVanaf", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigTot", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="een_meter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="drie_meter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="vier_meter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="elektra", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerMeter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerKraam", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="string"), required="true"},
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -373,17 +373,17 @@ class TariefplanController extends AbstractController
      * @ApiDoc(
      *  section="Tariefplan",
      *  parameters={
-     *      {"name"="naam", "dataType"="string", "required"="true"},
-     *      {"name"="geldigVanaf", "dataType"="string", "required"="true"},
-     *      {"name"="geldigTot", "dataType"="string", "required"="true"},
-     *      {"name"="een_meter", "dataType"="string", "required"="true"},
-     *      {"name"="drie_meter", "dataType"="string", "required"="true"},
-     *      {"name"="vier_meter", "dataType"="string", "required"="true"},
-     *      {"name"="elektra", "dataType"="string", "required"="true"},
-     *      {"name"="promotieGeldenPerMeter", "dataType"="string", "required"="true"},
-     *      {"name"="promotieGeldenPerKraam", "dataType"="string", "required"="true"},
-     *      {"name"="afvaleiland", "dataType"="string", "required"="true"},
-     *      {"name"="eenmaligElektra", "dataType"="string", "required"="true"},
+     * @OA\Parameter(name="naam", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigVanaf", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="geldigTot", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="een_meter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="drie_meter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="vier_meter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="elektra", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerMeter", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="promotieGeldenPerKraam", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afvaleiland", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="eenmaligElektra", @OA\Schema(type="string"), required="true"},
      *  },
      *  views = { "default", "1.1.0" }
      * )

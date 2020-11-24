@@ -20,7 +20,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -31,22 +30,16 @@ class KoopmanController extends AbstractController
     /**
      * Zoek door alle koopmannen
      *
-     * @Method("GET")
-     * @Route("/koopman/")
-     * @ApiDoc(
-     *  section="Koopman",
-     *  filters={
-     *      {"name"="freeSearch", "dataType"="string"},
-     *      {"name"="voorletters", "dataType"="string"},
-     *      {"name"="achternaam", "dataType"="string"},
-     *      {"name"="email", "dataType"="string"},
-     *      {"name"="erkenningsnummer", "dataType"="string"},
-     *      {"name"="status", "dataType"="integer", "description"="-1 = ignore, 0 = only removed, 1 = only active"},
-     *      {"name"="listOffset", "dataType"="integer"},
-     *      {"name"="listLength", "dataType"="integer", "description"="Default=100"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/koopman/", methods={"GET"})
+     * @OA\Parameter(name="freeSearch", @OA\Schema(type="string"))
+     * @OA\Parameter(name="voorletters", @OA\Schema(type="string"))
+     * @OA\Parameter(name="achternaam", @OA\Schema(type="string"))
+     * @OA\Parameter(name="email", @OA\Schema(type="string"))
+     * @OA\Parameter(name="erkenningsnummer", @OA\Schema(type="string"))
+     * @OA\Parameter(name="status", description="-1 = ignore, 0 = only removed, 1 = only active", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listOffset", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listLength", description="Default=100", @OA\Schema(type="integer")}
+     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
     public function listAction(KoopmanRepository $repo, KoopmanMapper $mapper, Request $request)
@@ -86,29 +79,18 @@ class KoopmanController extends AbstractController
     /**
      * Gegevens van koopman op basis van API id
      *
-     * @Method("GET")
-     * @Route("/koopman/id/{id}")
-     * @ApiDoc(
-     *  section="Koopman",
-     *  requirements={
-     *      {"name"="id", "dataType"="integer"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/koopman/id/{id}", methods={"GET"})
+     * @OA\Parameter(name="id", in="path", required="true", description="Koopman id", @OA\Schema(type="integer"))
+     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
-    public function getByIdAction(Request $request, $id)
+    public function getByIdAction(KoopmanRepository $repo, KoopmanMapper $mapper, Request $request, $id)
     {
-        /* @var $repo \App\Entity\KoopmanRepository */
-        $repo = $this->get('appapi.repository.koopman');
-
         $object = $repo->getById($id);
         if ($object === null) {
             throw $this->createNotFoundException('Not found koopman with id ' . $id);
         }
 
-        /* @var $mapper \App\Mapper\KoopmanMapper */
-        $mapper = $this->get('appapi.mapper.koopman');
         $response = $mapper->singleEntityToModel($object);
 
         return new JsonResponse($response, Response::HTTP_OK, []);
@@ -117,15 +99,9 @@ class KoopmanController extends AbstractController
     /**
      * Gegevens van koopman op basis van erkenningsnummer
      *
-     * @Method("GET")
-     * @Route("/koopman/erkenningsnummer/{erkenningsnummer}")
-     * @ApiDoc(
-     *  section="Koopman",
-     *  requirements={
-     *      {"name"="erkenningsnummer", "dataType"="string"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/koopman/erkenningsnummer/{erkenningsnummer}", methods={"GET"})
+     * @OA\Parameter(name="erkenningsnummer", in="path", required="true", description="Erkenningsnummer", @OA\Schema(type="string"))
+     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
     public function getByKoopmanAction(Request $request, $erkenningsnummer)
@@ -151,15 +127,15 @@ class KoopmanController extends AbstractController
     /**
      * Gegevens van koopman op basis van erkenningsnummer
      *
-     * @Method("GET")
-     * @Route("/koopman/pasuid/{pasUid}")
+     * @Route("/koopman/pasuid/{pasUid}", methods={"GET"})
      * @ApiDoc(
      *  section="Koopman",
      *  requirements={
-     *      {"name"="pasUid", "dataType"="string"}
+     * @OA\Parameter(name="pasUid", in="path", required="true", @OA\Schema(type="string")}
      *  },
      *  views = { "default", "1.1.0" }
      * )
+     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
     public function getByPasUid(Request $request, $pasUid)
@@ -191,16 +167,16 @@ class KoopmanController extends AbstractController
     /**
      * Gegevens van koopman op basis van markt en sollicitatienummer
      *
-     * @Method("GET")
-     * @Route("/koopman/markt/{marktId}/sollicitatienummer/{sollicitatieNummer}")
+     * @Route("/koopman/markt/{marktId}/sollicitatienummer/{sollicitatieNummer}", methods={"GET"})
      * @ApiDoc(
      *  section="Koopman",
      *  requirements={
-     *      {"name"="marktId", "dataType"="integer"},
-     *      {"name"="sollicitatieNummer", "dataType"="integer"},
+     * @OA\Parameter(name="marktId", in="path", required="true", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="sollicitatieNummer", in="path", required="true", @OA\Schema(type="integer")},
      *  },
      *  views = { "default", "1.1.0" }
      * )
+     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
     public function getByMarktAndSollicitatieNummerAction(Request $request, $marktId, $sollicitatieNummer)
@@ -223,16 +199,10 @@ class KoopmanController extends AbstractController
     /**
      * Toggle Handhavingsverzoek
      *
-     * @Method("POST")
-     * @Route("/koopman/toggle_handhavingsverzoek/{id}/{date}")
-     * @ApiDoc(
-     *  section="Koopman",
-     *  requirements={
-     *      {"name"="id", "dataType"="integer"},
-     *      {"name"="date", "dataType"="string yyyy-mm-dd"},
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/koopman/toggle_handhavingsverzoek/{id}/{date}", methods={"POST"})
+     * @OA\Parameter(name="id", in="path", required="true", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="date", in="path", required="true", "dataType"="string yyyy-mm-dd")
+     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_SENIOR")
      */
     public function toggleHandhavingsVerzoekAction(EntityManagerInterface $em, $id, $date)

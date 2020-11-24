@@ -84,9 +84,9 @@ class MarktController extends AbstractController
      * @ApiDoc(
      *  section="Markt",
      *  parameters={
-     *      {"name"="aantalKramen", "dataType"="integer", "required"=true, "description"="Aantal kramen op de markt (capaciteit)"},
-     *      {"name"="aantalMeter", "dataType"="integer", "required"=true, "description"="Aantal meter op de markt (capaciteit)"},
-     *      {"name"="auditMax", "dataType"="integer", "required"=true, "description"="Aantal plaatsen op de audit lijst"}
+     * @OA\Parameter(name="aantalKramen", @OA\Schema(type="integer"), "required"=true, description="Aantal kramen op de markt (capaciteit)")
+     * @OA\Parameter(name="aantalMeter", @OA\Schema(type="integer"), "required"=true, description="Aantal meter op de markt (capaciteit)")
+     * @OA\Parameter(name="auditMax", @OA\Schema(type="integer"), "required"=true, description="Aantal plaatsen op de audit lijst"}
      *  }
      * )
      * @IsGranted("ROLE_USER")

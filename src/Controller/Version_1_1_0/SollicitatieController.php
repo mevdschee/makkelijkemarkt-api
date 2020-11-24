@@ -32,12 +32,12 @@ class SollicitatieController extends AbstractController
      * @ApiDoc(
      *  section="Sollicitatie",
      *  requirements={
-     *      {"name"="marktId", "dataType"="integer"},
+     * @OA\Parameter(name="marktId", @OA\Schema(type="integer")},
      *  },
      *  filters={
-     *      {"name"="listOffset", "dataType"="integer"},
-     *      {"name"="listLength", "dataType"="integer", "description"="Default=100"},
-     *      {"name"="includeDoorgehaald", "dataType"="integer", "description"="Default=1"}
+     * @OA\Parameter(name="listOffset", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listLength", @OA\Schema(type="integer"), description="Default=100")
+     * @OA\Parameter(name="includeDoorgehaald", @OA\Schema(type="integer"), description="Default=1"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -72,7 +72,7 @@ class SollicitatieController extends AbstractController
      * @ApiDoc(
      *  section="Sollicitatie",
      *  requirements={
-     *      {"name"="id", "dataType"="integer"}
+     * @OA\Parameter(name="id", @OA\Schema(type="integer")}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -103,8 +103,8 @@ class SollicitatieController extends AbstractController
      * @ApiDoc(
      *  section="Sollicitatie",
      *  requirements={
-     *      {"name"="marktId", "dataType"="integer"},
-     *      {"name"="sollicitatieNummer", "dataType"="integer"},
+     * @OA\Parameter(name="marktId", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="sollicitatieNummer", @OA\Schema(type="integer")},
      *  },
      *  views = { "default", "1.1.0" }
      * )

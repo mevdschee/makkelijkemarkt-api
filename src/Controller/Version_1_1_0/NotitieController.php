@@ -33,13 +33,13 @@ class NotitieController extends AbstractController
      * @ApiDoc(
      *  section="Notitie",
      *  requirements={
-     *      {"name"="marktId", "dataType"="integer"},
-     *      {"name"="dag", "dataType"="string"},
+     * @OA\Parameter(name="marktId", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="dag", @OA\Schema(type="string")},
      *  },
      *  filters={
-     *      {"name"="listOffset", "dataType"="integer"},
-     *      {"name"="listLength", "dataType"="integer", "description"="Default=100"},
-     *      {"name"="verwijderdStatus", "dataType"="integer", "description"="-1 = alles, 0 = actief, 1 = enkel verwijderd, default: 0"}
+     * @OA\Parameter(name="listOffset", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listLength", @OA\Schema(type="integer"), description="Default=100")
+     * @OA\Parameter(name="verwijderdStatus", @OA\Schema(type="integer"), description="-1 = alles, 0 = actief, 1 = enkel verwijderd, default: 0"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -76,7 +76,7 @@ class NotitieController extends AbstractController
      * @ApiDoc(
      *  section="Notitie",
      *  requirements={
-     *      {"name"="id", "dataType"="integer", "description"="Notitie id"}
+     * @OA\Parameter(name="id", @OA\Schema(type="integer"), description="Notitie id"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -105,11 +105,11 @@ class NotitieController extends AbstractController
      * @ApiDoc(
      *  section="Notitie",
      *  parameters={
-     *      {"name"="marktId", "dataType"="integer", "required"="true"},
-     *      {"name"="dag", "dataType"="string", "required"="true"},
-     *      {"name"="bericht", "dataType"="string", "required"="true"},
-     *      {"name"="afgevinkt", "dataType"="boolean", "required"="false", "description"="If not set, false"},
-     *      {"name"="aangemaaktGeolocatie", "dataType"="string", "required"="false", "description"="Geolocation as lat,long or as tupple [lat,long]"}
+     * @OA\Parameter(name="marktId", @OA\Schema(type="integer"), required="true")
+     * @OA\Parameter(name="dag", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="bericht", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afgevinkt", @OA\Schema(type="boolean"), required="false", description="If not set, false")
+     * @OA\Parameter(name="aangemaaktGeolocatie", @OA\Schema(type="string"), required="false", description="Geolocation as lat,long or as tupple [lat,long]"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -196,11 +196,11 @@ class NotitieController extends AbstractController
      * @ApiDoc(
      *  section="Notitie",
      *  requirements={
-     *      {"name"="id", "dataType"="integer"},
+     * @OA\Parameter(name="id", @OA\Schema(type="integer")},
      *  },
      *  parameters={
-     *      {"name"="bericht", "dataType"="string", "required"="true"},
-     *      {"name"="afgevinkt", "dataType"="boolean", "required"="true", "description"="If not set, false"},
+     * @OA\Parameter(name="bericht", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afgevinkt", @OA\Schema(type="boolean"), required="true", description="If not set, false"},
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -261,7 +261,7 @@ class NotitieController extends AbstractController
      * @ApiDoc(
      *  section="Notitie",
      *  requirements={
-     *      {"name"="id", "dataType"="integer"},
+     * @OA\Parameter(name="id", @OA\Schema(type="integer")},
      *  },
      *  views = { "default", "1.1.0" }
      * )

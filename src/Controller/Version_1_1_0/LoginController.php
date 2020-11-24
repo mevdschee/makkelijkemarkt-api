@@ -36,14 +36,15 @@ class LoginController extends AbstractController
      * @ApiDoc(
      *  section="Login",
      *  parameters={
-     *      {"name"="accountId", "dataType"="integer", "required"=true, "description"="Account ID"},
-     *      {"name"="password", "dataType"="string", "required"=true, "description"="Password"},
-     *      {"name"="deviceUuid", "dataType"="string", "required"=false, "description"="UUID van het gebruikte device"},
-     *      {"name"="clientApp", "dataType"="string", "required"=false, "description"="Appliciatie type"},
-     *      {"name"="clientVersion", "dataType"="string", "required"=false, "description"="Versie van de client"}
+     * @OA\Parameter(name="accountId", @OA\Schema(type="integer"), "required"=true, description="Account ID")
+     * @OA\Parameter(name="password", @OA\Schema(type="string"), "required"=true, description="Password")
+     * @OA\Parameter(name="deviceUuid", @OA\Schema(type="string"), "required"=false, description="UUID van het gebruikte device")
+     * @OA\Parameter(name="clientApp", @OA\Schema(type="string"), "required"=false, description="Appliciatie type")
+     * @OA\Parameter(name="clientVersion", @OA\Schema(type="string"), "required"=false, description="Versie van de client"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
+     * @OA\Tag(name="Login")
      */
     public function basicIdAction(Request $request)
     {
@@ -119,14 +120,15 @@ class LoginController extends AbstractController
      * @ApiDoc(
      *  section="Login",
      *  parameters={
-     *      {"name"="username", "dataType"="string", "required"=true, "description"="Username"},
-     *      {"name"="password", "dataType"="string", "required"=true, "description"="Password"},
-     *      {"name"="deviceUuid", "dataType"="string", "required"=false, "description"="UUID van het gebruikte device"},
-     *      {"name"="clientApp", "dataType"="string", "required"=false, "description"="Appliciatie type"},
-     *      {"name"="clientVersion", "dataType"="string", "required"=false, "description"="Versie van de client"}
+     * @OA\Parameter(name="username", @OA\Schema(type="string"), "required"=true, description="Username")
+     * @OA\Parameter(name="password", @OA\Schema(type="string"), "required"=true, description="Password")
+     * @OA\Parameter(name="deviceUuid", @OA\Schema(type="string"), "required"=false, description="UUID van het gebruikte device")
+     * @OA\Parameter(name="clientApp", @OA\Schema(type="string"), "required"=false, description="Appliciatie type")
+     * @OA\Parameter(name="clientVersion", @OA\Schema(type="string"), "required"=false, description="Versie van de client"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
+     * @OA\Tag(name="Login")
      */
     public function basicUsernameAction(Request $request)
     {
@@ -202,7 +204,8 @@ class LoginController extends AbstractController
      *  parameters={},
      *  views = { "default", "1.1.0" }
      * )
-     * \@IsGranted("ROLE_USER")
+     * @OA\Tag(name="Login")
+     * @IsGranted("ROLE_USER")
      */
     public function whoamiAction(Request $request)
     {
@@ -223,6 +226,7 @@ class LoginController extends AbstractController
      *  parameters={},
      *  views = { "default", "1.1.0" }
      * )
+     * @OA\Tag(name="Login")
      */
     public function logoutAction(EntityManagerInterface $em, Request $request)
     {
@@ -262,6 +266,7 @@ class LoginController extends AbstractController
      *  parameters={},
      *  views = { "default", "1.1.0" }
      * )
+     * @OA\Tag(name="Login")
      */
     public function rolesListAction()
     {

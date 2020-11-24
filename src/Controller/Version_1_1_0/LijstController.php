@@ -11,7 +11,9 @@
 
 namespace App\Controller\Version_1_1_0;
 
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use App\Mapper\SollicitatieMapper;
+use App\Repository\MarktRepository;
+use App\Repository\SollicitatieRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,24 +28,25 @@ use Symfony\Component\Routing\Annotation\Route;
 class LijstController extends AbstractController
 {
     /**
-     * @Method("GET")
-     * @Route("/lijst/week/{marktId}/{types}/{startDate}/{endDate}")
-     * @Route("/lijst/week/{marktId}/{types}")
-     * @Route("/lijst/week/{marktId}")
-     * @ApiDoc(
-     *  section="Lijst",
-     *  requirements={
-     *      {"name"="marktId", "required"="true", "dataType"="integer", "description"="ID van markt"},
-     *      {"name"="types", "required"="false", "dataType"="string", "description"="Koopman types gescheiden met een |"},
-     *      {"name"="startDate", "required"="false", "dataType"="string", "description"="date as yyyy-mm-dd"},
-     *      {"name"="endDate", "required"="false", "dataType"="string", "description"="date as yyyy-mm-dd"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/lijst/week/{marktId}/{types}/{startDate}/{endDate}", methods={"GET"})
+     * @Route("/lijst/week/{marktId}/{types}", methods={"GET"})
+     * @Route("/lijst/week/{marktId}", methods={"GET"})
+     * @OA\Parameter(name="marktId", in="path", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="types", in="path", required="false", @OA\Schema(type="string"), description="Koopman types gescheiden met een |")
+     * @OA\Parameter(name="startDate", in="path", required="false", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="endDate", in="path", required="false", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
+     * @OA\Tag(name="Lijst")
      * @IsGranted("ROLE_USER")
      */
-    public function weeklijstAction($marktId, $types = null, $startDate = null, $endDate = null)
-    {
+    public function weeklijstAction(
+        MarktRepository $marktRepo,
+        SollicitatieRepository $sollicitatieRepo,
+        SollicitatieMapper $sollicitatieMapper,
+        $marktId,
+        $types = null,
+        $startDate = null,
+        $endDate = null
+    ) {
         if (null === $types) {
             $types = array();
         } else {
@@ -56,14 +59,9 @@ class LijstController extends AbstractController
             $endDate = new \DateTime($endDate);
         }
 
-        $marktRepo = $this->getDoctrine()->getRepository('AppApiBundle:Markt');
         $markt = $marktRepo->findOneById($marktId);
 
-        $sollicitatieRepo = $this->getDoctrine()->getRepository('AppApiBundle:Sollicitatie');
         $sollicitaties = $sollicitatieRepo->findByMarktInPeriod($markt, $types, $startDate, $endDate);
-
-        /* @var $sollicitatieMapper \App\Mapper\SollicitatieMapper */
-        $sollicitatieMapper = $this->get('appapi.mapper.sollicitatie');
 
         $mappedSollicitaties = $sollicitatieMapper->multipleEntityToModel($sollicitaties);
         return new JsonResponse($mappedSollicitaties, Response::HTTP_OK, ['X-Api-ListSize' => count($mappedSollicitaties)]);

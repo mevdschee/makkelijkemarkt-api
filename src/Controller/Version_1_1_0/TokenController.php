@@ -33,11 +33,11 @@ class TokenController extends AbstractController
      * @ApiDoc(
      *  section="Token",
      *  requirements={
-     *      {"name"="accountId", "dataType"="integer", "description"="Account ID"}
+     * @OA\Parameter(name="accountId", @OA\Schema(type="integer"), description="Account ID"}
      *  },
      *  filters={
-     *      {"name"="listOffset", "dataType"="integer"},
-     *      {"name"="listLength", "dataType"="integer", "description"="Default=100"}
+     * @OA\Parameter(name="listOffset", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listLength", @OA\Schema(type="integer"), description="Default=100"}
      *  },
      *  views = { "default", "1.1.0" }
      * )

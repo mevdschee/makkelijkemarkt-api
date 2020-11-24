@@ -38,7 +38,7 @@ class ReportController extends AbstractController
      * @ApiDoc(
      *  section="Rapport",
      *  requirements={
-     *      {"name"="dag", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"}
+     * @OA\Parameter(name="dag", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -125,12 +125,12 @@ class ReportController extends AbstractController
      * @ApiDoc(
      *  section="Rapport",
      *  requirements={
-     *      {"name"="dagStart", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
-     *      {"name"="dagEind", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
-     *      {"name"="vergunningType", "required"="true", "dataType"="string", "description"="alle|soll|vkk|vpl|lot"}
+     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="vergunningType", required="true", @OA\Schema(type="string"), description="alle|soll|vkk|vpl|lot"}
      *  },
      *  filters={
-     *      {"name"="marktId[]", "dataType"="integer", "description"="ID van markt"}
+     * @OA\Parameter(name="marktId[]", @OA\Schema(type="integer"), description="ID van markt"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -295,10 +295,10 @@ class ReportController extends AbstractController
      * @ApiDoc(
      *  section="Rapport",
      *  requirements={
-     *      {"name"="marktId", "required"="true", "dataType"="integer", "description"="ID van markt"},
-     *      {"name"="type", "required"="true", "dataType"="string", "description"="dag|week|soll"},
-     *      {"name"="dagStart", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
-     *      {"name"="dagEind", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"}
+     * @OA\Parameter(name="marktId", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="type", required="true", @OA\Schema(type="string"), description="dag|week|soll")
+     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -324,9 +324,9 @@ class ReportController extends AbstractController
      * @ApiDoc(
      *  section="Rapport",
      *  requirements={
-     *      {"name"="marktId", "required"="true", "dataType"="integer", "description"="ID van markt"},
-     *      {"name"="dagStart", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
-     *      {"name"="dagEind", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"}
+     * @OA\Parameter(name="marktId", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -347,9 +347,9 @@ class ReportController extends AbstractController
      * @ApiDoc(
      *  section="Rapport",
      *  requirements={
-     *      {"name"="marktId", "required"="true", "dataType"="integer", "description"="ID van markt"},
-     *      {"name"="dagStart", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
-     *      {"name"="dagEind", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"}
+     * @OA\Parameter(name="marktId", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -370,9 +370,9 @@ class ReportController extends AbstractController
      * @ApiDoc(
      *  section="Rapport",
      *  requirements={
-     *      {"name"="marktId", "required"="true", "dataType"="integer", "description"="ID van markt"},
-     *      {"name"="dagStart", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
-     *      {"name"="dagEind", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"}
+     * @OA\Parameter(name="marktId", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
@@ -439,9 +439,9 @@ class ReportController extends AbstractController
      * @ApiDoc(
      *  section="Rapport",
      *  requirements={
-     *      {"name"="marktId", "required"="true", "dataType"="integer", "description"="ID van markt"},
-     *      {"name"="dagStart", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"},
-     *      {"name"="dagEind", "required"="true", "dataType"="string", "description"="date as yyyy-mm-dd"}
+     * @OA\Parameter(name="marktId", required="true", @OA\Schema(type="integer"), description="ID van markt")
+     * @OA\Parameter(name="dagStart", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
+     * @OA\Parameter(name="dagEind", required="true", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
      *  },
      *  views = { "default", "1.1.0" }
      * )
