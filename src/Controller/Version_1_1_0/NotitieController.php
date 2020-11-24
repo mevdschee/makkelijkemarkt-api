@@ -12,7 +12,10 @@
 namespace App\Controller\Version_1_1_0;
 
 use App\Entity\Notitie;
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use App\Mapper\NotitieMapper;
+use App\Repository\MarktRepository;
+use App\Repository\NotitieRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,36 +25,29 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Notitie")
  */
 class NotitieController extends AbstractController
 {
     /**
      * Geeft alle notities voor een bepaalde dag en markt
      *
-     * @Method("GET")
-     * @Route("/notitie/{marktId}/{dag}")
-     * @ApiDoc(
-     *  section="Notitie",
-     *  requirements={
-     * @OA\Parameter(name="marktId", @OA\Schema(type="integer"))
-     * @OA\Parameter(name="dag", @OA\Schema(type="string")},
-     *  },
-     *  filters={
-     * @OA\Parameter(name="listOffset", @OA\Schema(type="integer"))
-     * @OA\Parameter(name="listLength", @OA\Schema(type="integer"), description="Default=100")
-     * @OA\Parameter(name="verwijderdStatus", @OA\Schema(type="integer"), description="-1 = alles, 0 = actief, 1 = enkel verwijderd, default: 0"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/notitie/{marktId}/{dag}", methods={"GET"})
+     * @OA\Parameter(name="marktId", in="path", required="true",  @OA\Schema(type="integer"))
+     * @OA\Parameter(name="dag", in="path", required="true", @OA\Schema(type="string"))
+     * @OA\Parameter(name="listOffset", in="query", required="false", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="listLength", in="query", required="false", @OA\Schema(type="integer"), description="Default=100")
+     * @OA\Parameter(name="verwijderdStatus", in="query", required="false", @OA\Schema(type="integer"), description="-1 = alles, 0 = actief, 1 = enkel verwijderd, default: 0")
      * @IsGranted("ROLE_USER")
      */
-    public function listByMarktAndDagAction(Request $request, $marktId, $dag)
-    {
-        /* @var $notitieRepository \App\Entity\NotitieRepository */
-        $notitieRepository = $this->get('appapi.repository.notitie');
-        /* @var $marktRepository \App\Entity\NotitieRepository */
-        $marktRepository = $this->get('appapi.repository.markt');
-
+    public function listByMarktAndDagAction(
+        NotitieRepository $notitieRepository,
+        MarktRepository $marktRepository,
+        NotitieMapper $mapper,
+        Request $request,
+        $marktId,
+        $dag
+    ) {
         // check if markt exists
         $markt = $marktRepository->getById($marktId);
         if ($markt === null) {
@@ -61,8 +57,6 @@ class NotitieController extends AbstractController
         // get results
         $results = $notitieRepository->findByMarktAndDag($markt, $dag, $request->query->get('verwijderdStatus', 0), $request->query->get('listOffset', 0), $request->query->get('listLength', 100));
 
-        /* @var $mapper \App\Mapper\NotitieMapper */
-        $mapper = $this->get('appapi.mapper.notitie');
         $response = $mapper->multipleEntityToModel($results);
 
         return new JsonResponse($response, Response::HTTP_OK, ['X-Api-ListSize' => count($results)]);
@@ -71,28 +65,18 @@ class NotitieController extends AbstractController
     /**
      * Geeft een specifieke notitie
      *
-     * @Method("GET")
-     * @Route("/notitie/{id}")
-     * @ApiDoc(
-     *  section="Notitie",
-     *  requirements={
-     * @OA\Parameter(name="id", @OA\Schema(type="integer"), description="Notitie id"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/notitie/{id}", methods={"GET"})
+     * @OA\Parameter(name="id", in="path", required="true", @OA\Schema(type="integer"), description="Notitie id")
      * @IsGranted("ROLE_USER")
      */
-    public function getAction(Request $request, $id)
+    public function getAction(NotitieRepository $repository, NotitieMapper $mapper, $id)
     {
-        /* @var $repository \App\Entity\NotitieRepository */
-        $repositoryNotitie = $this->get('appapi.repository.notitie');
-
-        $notitie = $repositoryNotitie->getById($id);
+        $notitie = $repository->getById($id);
         if ($notitie === null) {
             throw $this->createNotFoundException('No notitie with id ' . $id);
         }
 
-        $result = $this->get('appapi.mapper.notitie')->singleEntityToModel($notitie);
+        $result = $mapper->singleEntityToModel($notitie);
 
         return new JsonResponse($result, Response::HTTP_OK);
     }
@@ -100,26 +84,16 @@ class NotitieController extends AbstractController
     /**
      * Maak een nieuw notitie
      *
-     * @Method("POST")
-     * @Route("/notitie/")
-     * @ApiDoc(
-     *  section="Notitie",
-     *  parameters={
-     * @OA\Parameter(name="marktId", @OA\Schema(type="integer"), required="true")
-     * @OA\Parameter(name="dag", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="bericht", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="afgevinkt", @OA\Schema(type="boolean"), required="false", description="If not set, false")
-     * @OA\Parameter(name="aangemaaktGeolocatie", @OA\Schema(type="string"), required="false", description="Geolocation as lat,long or as tupple [lat,long]"}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/notitie/", methods={"POST"})
+     * @OA\Parameter(name="marktId", in="body", required="true", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="dag", in="body", required="true", @OA\Schema(type="string"))
+     * @OA\Parameter(name="bericht", in="body", required="true", @OA\Schema(type="string"))
+     * @OA\Parameter(name="afgevinkt", in="body", required="false", @OA\Schema(type="boolean"), description="If not set, false")
+     * @OA\Parameter(name="aangemaaktGeolocatie", in="body", required="false", @OA\Schema(type="string"), description="Geolocation as lat,long or as tupple [lat,long]")
      * @IsGranted("ROLE_USER")
      */
-    public function postAction(Request $request)
+    public function postAction(EntityManagerInterface $em, MarktRepository $marktRepository, NotitieMapper $mapper, Request $request)
     {
-        /* @var $marktRepository \App\Entity\MarktRepository */
-        $marktRepository = $this->get('appapi.repository.markt');
-
         // parse body content
         $message = json_decode($request->getContent(false), true);
 
@@ -184,33 +158,21 @@ class NotitieController extends AbstractController
         $em->flush();
 
         // return
-        $result = $this->get('appapi.mapper.notitie')->singleEntityToModel($notitie);
+        $result = $mapper->singleEntityToModel($notitie);
         return new JsonResponse($result, Response::HTTP_OK);
     }
 
     /**
      * Werk een notitie bij
      *
-     * @Method("PUT")
-     * @Route("/notitie/{id}")
-     * @ApiDoc(
-     *  section="Notitie",
-     *  requirements={
-     * @OA\Parameter(name="id", @OA\Schema(type="integer")},
-     *  },
-     *  parameters={
-     * @OA\Parameter(name="bericht", @OA\Schema(type="string"), required="true")
-     * @OA\Parameter(name="afgevinkt", @OA\Schema(type="boolean"), required="true", description="If not set, false"},
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/notitie/{id}", methods={"PUT"})
+     * @OA\Parameter(name="id", in="path", required="true", @OA\Schema(type="integer"), description="Notitie id")
+     * @OA\Parameter(name="bericht", in="body", @OA\Schema(type="string"), required="true")
+     * @OA\Parameter(name="afgevinkt", in="body", @OA\Schema(type="boolean"), required="true", description="If not set, false")
      * @IsGranted("ROLE_USER")
      */
-    public function putAction(Request $request, $id)
+    public function putAction(EntityManagerInterface $em, NotitieRepository $notitieRepository, NotitieMapper $mapper, Request $request, $id)
     {
-        /* @var $notitieRepository \App\Entity\NotitieRepository */
-        $notitieRepository = $this->get('appapi.repository.notitie');
-
         // parse body content
         $message = json_decode($request->getContent(false), true);
 
@@ -249,29 +211,19 @@ class NotitieController extends AbstractController
         $em->flush();
 
         // return
-        $result = $this->get('appapi.mapper.notitie')->singleEntityToModel($notitie);
+        $result = $mapper->singleEntityToModel($notitie);
         return new JsonResponse($result, Response::HTTP_OK);
     }
 
     /**
      * Verwijderd een notitie
      *
-     * @Method("DELETE")
-     * @Route("/notitie/{id}")
-     * @ApiDoc(
-     *  section="Notitie",
-     *  requirements={
-     * @OA\Parameter(name="id", @OA\Schema(type="integer")},
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/notitie/{id}", methods={"DELETE"})
+     * @OA\Parameter(name="id", in="path", required="true", @OA\Schema(type="integer"), description="Notitie id")
      * @IsGranted("ROLE_USER")
      */
-    public function deleteAction(Request $request, $id)
+    public function deleteAction(EntityManagerInterface $em, NotitieRepository $notitieRepository, $id)
     {
-        /* @var $notitieRepository \App\Entity\NotitieRepository */
-        $notitieRepository = $this->get('appapi.repository.notitie');
-
         // get notitie
         $notitie = $notitieRepository->getById($id);
         if ($notitie === null) {

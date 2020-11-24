@@ -68,11 +68,8 @@ class MarktController extends AbstractController
      * @OA\Parameter(name="auditMax", in="body", @OA\Schema(type="integer"), required="true", description="Aantal plaatsen op de audit lijst")
      * @IsGranted("ROLE_USER")
      */
-    public function saveExtraInformation(EntityManagerInterface $em, Request $request, $id)
+    public function saveExtraInformation(EntityManagerInterface $em, MarktRepository $repo, MarktMapper $mapper, Request $request, $id)
     {
-        /** @var $repo \App\Entity\MarktRepository */
-        $repo = $this->get('appapi.repository.markt');
-
         $markt = $repo->getById($id);
         if ($markt === null) {
             throw $this->createNotFoundException('Markt not found, id = ' . $id);
@@ -99,8 +96,6 @@ class MarktController extends AbstractController
 
         $em->flush();
 
-        /** @var $mapper \App\Mapper\MarktMapper */
-        $mapper = $this->get('appapi.mapper.markt');
         $response = $mapper->singleEntityToModel($markt);
 
         return new JsonResponse($response, Response::HTTP_OK);
