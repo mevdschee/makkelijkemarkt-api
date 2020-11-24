@@ -25,6 +25,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Btw")
  */
 class BtwController extends AbstractController
 {
@@ -35,7 +36,6 @@ class BtwController extends AbstractController
      * @Route("/btw/", methods={"POST"})
      * @OA\Parameter(name="jaar", in="body", required="true", description="Jaar van het BTW tarief", @OA\Schema(type="integer"))
      * @OA\Parameter(name="hoog", in="body", required="true", description="Btw tarief hoog", @OA\Schema(type="string"))
-     * @OA\Tag(name="Btw")
      * @IsGranted("ROLE_ADMIN")
      */
     public function createOrUpdateAction(EntityManagerInterface $em, BtwTariefRepository $repository, BtwTariefMapper $mapper, Request $request)
@@ -76,7 +76,6 @@ class BtwController extends AbstractController
      * Zoek door alle markten
      *
      * @Route("/btw/", methods={"GET"})
-     * @OA\Tag(name="Btw")
      */
     public function listAction(EntityManagerInterface $em)
     {

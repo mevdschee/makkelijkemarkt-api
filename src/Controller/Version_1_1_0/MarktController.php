@@ -11,40 +11,32 @@
 
 namespace App\Controller\Version_1_1_0;
 
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use App\Mapper\MarktMapper;
+use App\Repository\MarktRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Markt")
  */
 class MarktController extends AbstractController
 {
     /**
      * Zoek door alle markten
      *
-     * @Method("GET")
-     * @Route("/markt/")
-     * @ApiDoc(
-     *  section="Markt",
-     *  filters={
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/markt/", methods={"GET"})
      */
-    public function listAction(Request $request)
+    public function listAction(MarktRepository $repo, MarktMapper $mapper)
     {
-        /* @var $repo \App\Entity\MarktRepository */
-        $repo = $this->get('appapi.repository.markt');
-
         $results = $repo->findAll();
 
-        /* @var $mapper \App\Mapper\MarktMapper */
-        $mapper = $this->get('appapi.mapper.markt');
         $response = $mapper->multipleEntityToModel($results);
 
         return new JsonResponse($response, Response::HTTP_OK, ['X-Api-ListSize' => count($results)]);
@@ -53,24 +45,14 @@ class MarktController extends AbstractController
     /**
      * Vraag een markt op
      *
-     * @Method("GET")
-     * @Route("/markt/{id}")
-     * @ApiDoc(
-     *  section="Markt",
-     *  filters={
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @Route("/markt/{id}", methods={"GET"})
+     * @OA\Parameter(name="id", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
      */
-    public function getAction($id)
+    public function getAction(MarktRepository $repo, MarktMapper $mapper, $id)
     {
-        /* @var $repo \App\Entity\MarktRepository */
-        $repo = $this->get('appapi.repository.markt');
 
         $result = $repo->findOneById($id);
 
-        /* @var $mapper \App\Mapper\MarktMapper */
-        $mapper = $this->get('appapi.mapper.markt');
         $response = $mapper->singleEntityToModel($result);
 
         return new JsonResponse($response, Response::HTTP_OK);
@@ -79,19 +61,14 @@ class MarktController extends AbstractController
     /**
      * Sla extra markt gegevens op die niet uit PerfectView komen
      *
-     * @Method("POST")
-     * @Route("/markt/{id}")
-     * @ApiDoc(
-     *  section="Markt",
-     *  parameters={
-     * @OA\Parameter(name="aantalKramen", @OA\Schema(type="integer"), required="true", description="Aantal kramen op de markt (capaciteit)")
-     * @OA\Parameter(name="aantalMeter", @OA\Schema(type="integer"), required="true", description="Aantal meter op de markt (capaciteit)")
-     * @OA\Parameter(name="auditMax", @OA\Schema(type="integer"), required="true", description="Aantal plaatsen op de audit lijst"}
-     *  }
-     * )
+     * @Route("/markt/{id}", methods={"POST"})
+     * @OA\Parameter(name="id", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
+     * @OA\Parameter(name="aantalKramen", in="body", @OA\Schema(type="integer"), required="true", description="Aantal kramen op de markt (capaciteit)")
+     * @OA\Parameter(name="aantalMeter", in="body", @OA\Schema(type="integer"), required="true", description="Aantal meter op de markt (capaciteit)")
+     * @OA\Parameter(name="auditMax", in="body", @OA\Schema(type="integer"), required="true", description="Aantal plaatsen op de audit lijst")
      * @IsGranted("ROLE_USER")
      */
-    public function saveExtraInformation(Request $request, $id)
+    public function saveExtraInformation(EntityManagerInterface $em, Request $request, $id)
     {
         /** @var $repo \App\Entity\MarktRepository */
         $repo = $this->get('appapi.repository.markt');
@@ -120,7 +97,7 @@ class MarktController extends AbstractController
         $markt->setTelefoonNummerContact($message['telefoonNummerContact']);
         $markt->setIndelingstype($message['indelingstype']);
 
-        $this->getDoctrine()->getEntityManagerInterface()->flush();
+        $em->flush();
 
         /** @var $mapper \App\Mapper\MarktMapper */
         $mapper = $this->get('appapi.mapper.markt');

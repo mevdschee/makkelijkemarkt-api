@@ -27,6 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Dagvergunning")
  */
 class DagvergunningController extends AbstractController
 {
@@ -52,7 +53,6 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="notitie", in="body", required="false", description="Vrij notitie veld", @OA\Schema(type="string"))
      * @OA\Parameter(name="registratieDatumtijd", in="body", required="false", description="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt", @OA\Schema(type="string"))
      * @OA\Parameter(name="registratieGeolocatie", in="body", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string"))
-     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
     public function conceptAction(Request $request)
@@ -190,7 +190,6 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="notitie", in="body", required="false", description="Vrij notitie veld", @OA\Schema(type="string"))
      * @OA\Parameter(name="registratieDatumtijd", in="body", required="false", description="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt", @OA\Schema(type="string"))
      * @OA\Parameter(name="registratieGeolocatie", in="body", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string"))
-     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
     public function createAction(EntityManagerInterface $em, Request $request)
@@ -324,7 +323,6 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="accountId", in="query", required="false", description="Filter op de persoon die de dagvergunning uitgegeven heeft", @OA\Schema(type="integer"))
      * @OA\Parameter(name="listOffset", in="query", required="false", description="", @OA\Schema(type="integer"))
      * @OA\Parameter(name="listLength", in="query", required="false", description="Default=100", @OA\Schema(type="integer"))
-     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
     public function listAction(DagvergunningRepository $dagvergunningRepository, DagvergunningMapper $dagvergunningMapper, Request $request)
@@ -372,7 +370,6 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="koopmanId", in="path", required="true", description="Koopman id", @OA\Schema(type="integer"))
      * @OA\Parameter(name="startDate", in="path", required="true", description="Als yyyy-mm-dd", @OA\Schema(type="string"))
      * @OA\Parameter(name="endDate", in="path", required="true", description="Als yyyy-mm-dd", @OA\Schema(type="string"))
-     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_SENIOR")
      */
     public function listByDateAction(
@@ -405,7 +402,6 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="id", in="path", required="true", description="Dagvergunning id", @OA\Schema(type="integer"))
      * @OA\Parameter(name="doorgehaaldDatumtijd", in="body", required="false", description="Datum/tijd dat de doorhaling is uitgevoerd, indien niet opgegeven wordt het moment van de request gebruikt", @OA\Schema(type="string"))
      * @OA\Parameter(name="doorgehaaldGeolocatie", in="body", required="false", description="Geolocatie waar de doorhaling is uitgevoerd, als lat,long", @OA\Schema(type="string"))
-     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
     public function deleteAction(EntityManagerInterface $em, Request $request, $id)
@@ -473,7 +469,6 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="notitie", required="false", description="Vrij notitie veld", @OA\Schema(type="string"))
      * @OA\Parameter(name="registratieDatumtijd", required="false", description="Datum/tijd dat de registratie is gemaakt, indien niet opgegeven wordt het moment van de request gebruikt", @OA\Schema(type="string"))
      * @OA\Parameter(name="registratieGeolocatie", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string"))
-     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
     public function updateAction(EntityManagerInterface $em, FactuurService $factuurService, DagvergunningMapper $mapper, Request $request, $id)
@@ -602,7 +597,6 @@ class DagvergunningController extends AbstractController
      *
      * @Route("/dagvergunning/{id}", methods={"GET"})
      * @OA\Parameter(name="id", in="path", required="true", description="Dagvergunning id", @OA\Schema(type="integer"))
-     * @OA\Tag(name="Dagvergunning")
      * @IsGranted("ROLE_USER")
      */
     public function detailAction(DagvergunningRepository $repository, DagvergunningMapper $mapper, $id)

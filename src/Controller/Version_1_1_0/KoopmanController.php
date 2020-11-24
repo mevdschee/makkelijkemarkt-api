@@ -25,6 +25,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Koopman")
  */
 class KoopmanController extends AbstractController
 {
@@ -40,7 +41,6 @@ class KoopmanController extends AbstractController
      * @OA\Parameter(name="status", in="query", required="false", description="-1 = ignore, 0 = only removed, 1 = only active", @OA\Schema(type="integer"))
      * @OA\Parameter(name="listOffset", in="query", required="false", @OA\Schema(type="integer"))
      * @OA\Parameter(name="listLength", in="query", required="false", description="Default=100", @OA\Schema(type="integer"))
-     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
     public function listAction(KoopmanRepository $repo, KoopmanMapper $mapper, Request $request)
@@ -82,7 +82,6 @@ class KoopmanController extends AbstractController
      *
      * @Route("/koopman/id/{id}", methods={"GET"})
      * @OA\Parameter(name="id", in="path", required="true", description="Koopman id", @OA\Schema(type="integer"))
-     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
     public function getByIdAction(KoopmanRepository $repo, KoopmanMapper $mapper, $id)
@@ -102,7 +101,6 @@ class KoopmanController extends AbstractController
      *
      * @Route("/koopman/erkenningsnummer/{erkenningsnummer}", methods={"GET"})
      * @OA\Parameter(name="erkenningsnummer", in="path", required="true", description="Erkenningsnummer", @OA\Schema(type="string"))
-     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
     public function getByKoopmanAction(
@@ -128,7 +126,6 @@ class KoopmanController extends AbstractController
      *
      * @Route("/koopman/pasuid/{pasUid}", methods={"GET"})
      * @OA\Parameter(name="pasUid", in="path", required="true", @OA\Schema(type="string"))
-     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
     public function getByPasUid(
@@ -163,7 +160,6 @@ class KoopmanController extends AbstractController
      * @Route("/koopman/markt/{marktId}/sollicitatienummer/{sollicitatieNummer}", methods={"GET"})
      * @OA\Parameter(name="marktId", in="path", required="true", @OA\Schema(type="integer"))
      * @OA\Parameter(name="sollicitatieNummer", in="path", required="true", @OA\Schema(type="integer"))
-     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
     public function getByMarktAndSollicitatieNummerAction(KoopmanRepository $repo, KoopmanMapper $mapper, $marktId, $sollicitatieNummer)
@@ -185,7 +181,6 @@ class KoopmanController extends AbstractController
      * @Route("/koopman/toggle_handhavingsverzoek/{id}/{date}", methods={"POST"})
      * @OA\Parameter(name="id", in="path", required="true", @OA\Schema(type="integer"))
      * @OA\Parameter(name="date", in="path", required="true", description="Datum yyyy-mm-dd", @OA\Schema(type="string"))
-     * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_SENIOR")
      */
     public function toggleHandhavingsVerzoekAction(EntityManagerInterface $em, KoopmanRepository $repo, KoopmanMapper $mapper, $id, $date)

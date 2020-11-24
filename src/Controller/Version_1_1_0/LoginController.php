@@ -27,6 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Login")
  */
 class LoginController extends AbstractController
 {
@@ -39,7 +40,6 @@ class LoginController extends AbstractController
      * @OA\Parameter(name="deviceUuid", @OA\Schema(type="string"), required="false", description="UUID van het gebruikte device")
      * @OA\Parameter(name="clientApp", @OA\Schema(type="string"), required="false", description="Appliciatie type")
      * @OA\Parameter(name="clientVersion", @OA\Schema(type="string"), required="false", description="Versie van de client")
-     * @OA\Tag(name="Login")
      */
     public function basicIdAction(TokenMapper $mapper, Request $request)
     {
@@ -55,9 +55,9 @@ class LoginController extends AbstractController
         }
 
         $token = new Token();
-        $token->setClientApp(isset($message['clientApp']) === true ? $message['clientApp'] : null);
-        $token->setClientVersion(isset($message['clientVersion']) === true ? $message['clientVersion'] : null);
-        $token->setDeviceUuid(isset($message['deviceUuid']) === true ? $message['deviceUuid'] : null);
+        $token->setClientApp($message['clientApp'] ?? null);
+        $token->setClientVersion($message['clientVersion'] ?? null);
+        $token->setDeviceUuid($message['deviceUuid'] ?? null);
         $token->setLifeTime(60 * 60 * 8 * 1);
 
         /* @var $accountRepo \App\Entity\AccountRepository */
@@ -114,7 +114,6 @@ class LoginController extends AbstractController
      * @OA\Parameter(name="deviceUuid", @OA\Schema(type="string"), required="false", description="UUID van het gebruikte device")
      * @OA\Parameter(name="clientApp", @OA\Schema(type="string"), required="false", description="Appliciatie type")
      * @OA\Parameter(name="clientVersion", @OA\Schema(type="string"), required="false", description="Versie van de client")
-     * @OA\Tag(name="Login")
      */
     public function basicUsernameAction(TokenMapper $mapper, Request $request)
     {
@@ -130,9 +129,9 @@ class LoginController extends AbstractController
         }
 
         $token = new Token();
-        $token->setClientApp(isset($message['clientApp']) === true ? $message['clientApp'] : null);
-        $token->setClientVersion(isset($message['clientVersion']) === true ? $message['clientVersion'] : null);
-        $token->setDeviceUuid(isset($message['deviceUuid']) === true ? $message['deviceUuid'] : null);
+        $token->setClientApp($message['clientApp'] ?? null);
+        $token->setClientVersion($message['clientVersion'] ?? null);
+        $token->setDeviceUuid($message['deviceUuid'] ?? null);
         $token->setLifeTime(60 * 60 * 8 * 1);
 
         /* @var $accountRepo \App\Entity\AccountRepository */
@@ -182,7 +181,6 @@ class LoginController extends AbstractController
 
     /**
      * @Route("/login/whoami/", methods={"GET"})
-     * @OA\Tag(name="Login")
      * @IsGranted("ROLE_USER")
      */
     public function whoamiAction(AccountMapper $mapper, Request $request)
@@ -198,7 +196,6 @@ class LoginController extends AbstractController
 
     /**
      * @Route("/logout/", methods={"GET"})
-     * @OA\Tag(name="Login")
      */
     public function logoutAction(TokenRepository $repository, TokenMapper $mapper, EntityManagerInterface $em, Request $request)
     {
@@ -230,7 +227,6 @@ class LoginController extends AbstractController
 
     /**
      * @Route("/login/roles", methods={"GET"})
-     * @OA\Tag(name="Login")
      */
     public function rolesListAction()
     {

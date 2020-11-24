@@ -28,6 +28,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Audit")
  */
 class AuditController extends AbstractController
 {
@@ -76,7 +77,6 @@ class AuditController extends AbstractController
      * @Route("/audit/{marktId}/{datum}", methods={"GET"})
      * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
      * @OA\Parameter(name="datum", in="path", required="true", description="datum YYYY-MM-DD", @OA\Schema(type="string"))
-     * @OA\Tag(name="Audit")
      * @IsGranted("ROLE_USER")
      */
     public function getAction(Request $request, $marktId, $datum)
@@ -105,7 +105,6 @@ class AuditController extends AbstractController
      * @Route("/audit/{marktId}/{datum}", methods={"POST"})
      * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
      * @OA\Parameter(name="datum", in="path", required="true", description="datum YYYY-MM-DD", @OA\Schema(type="string"))
-     * @OA\Tag(name="Audit")
      * @IsGranted("ROLE_USER")
      */
     public function postAction($marktId, $datum)
@@ -226,7 +225,6 @@ class AuditController extends AbstractController
      * @Route("/audit_reset/{marktId}/{datum}", methods={"POST"})
      * @OA\Parameter(name="marktId", in="path", required="true", description="Markt id", @OA\Schema(type="integer"))
      * @OA\Parameter(name="datum", in="path", required="true", description="datum YYYY-MM-DD", @OA\Schema(type="string"))
-     * @OA\Tag(name="Audit")
      * @IsGranted("ROLE_SENIOR")
      */
     public function resetAction($marktId, $datum)

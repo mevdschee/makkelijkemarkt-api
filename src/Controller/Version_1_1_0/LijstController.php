@@ -22,9 +22,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class LijstController
- * @package App\Controller\Version_1_1_0
  * @Route("1.1.0")
+ * @OA\Tag(name="Lijst")
  */
 class LijstController extends AbstractController
 {
@@ -36,7 +35,6 @@ class LijstController extends AbstractController
      * @OA\Parameter(name="types", in="path", required="false", @OA\Schema(type="string"), description="Koopman types gescheiden met een |")
      * @OA\Parameter(name="startDate", in="path", required="false", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
      * @OA\Parameter(name="endDate", in="path", required="false", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Tag(name="Lijst")
      * @IsGranted("ROLE_USER")
      */
     public function weeklijstAction(

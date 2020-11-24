@@ -27,6 +27,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * @Route("1.1.0")
+ * @OA\Tag(name="Account")
  */
 
 class AccountController extends AbstractController
@@ -38,7 +39,6 @@ class AccountController extends AbstractController
      * @OA\Parameter(name="order", in="query", description="Deel van een naam", @OA\Schema(type="string"))
      * @OA\Parameter(name="active", in="query", description="Actief status 1 = actief, 0 = non actief, -1 = geen selectie", @OA\Schema(type="string"))
      * @OA\Parameter(name="locked", in="query", description="Locked status 1 = actief, 0 = non actief, -1 = geen selectie", @OA\Schema(type="string"))
-     * @OA\Tag(name="Account")
      */
     public function listAction(AccountRepository $repository, AccountMapper $mapper, Request $request): Response
     {
@@ -67,7 +67,6 @@ class AccountController extends AbstractController
      *
      * @Route("/account/{id}", methods={"GET"})
      * @OA\Parameter(name="id", in="path", required="true", description="Account id", @OA\Schema(type="string"))
-     * @OA\Tag(name="Account")
      * @IsGranted("ROLE_SENIOR")
      */
     public function getAction(AccountMapper $mapper, $id): Response
@@ -94,7 +93,6 @@ class AccountController extends AbstractController
      * @OA\Parameter(name="email", in="body", required="true", @OA\Schema(type="string"))
      * @OA\Parameter(name="username", in="body", required="true", @OA\Schema(type="string"))
      * @OA\Parameter(name="password", in="body", required="true", @OA\Schema(type="string"))
-     * @OA\Tag(name="Account")
      * @IsGranted("ROLE_ADMIN")
      */
     public function putAction(EntityManagerInterface $em, AccountRepository $repository, AccountMapper $mapper, Request $request, $id): Response
@@ -164,7 +162,6 @@ class AccountController extends AbstractController
      * @OA\Parameter(name="username", in="body", @OA\Schema(type="string"))
      * @OA\Parameter(name="password", in="body", @OA\Schema(type="string"))
      * @OA\Parameter(name="role", in="body", @OA\Schema(type="string"))
-     * @OA\Tag(name="Account")
      * @IsGranted("ROLE_ADMIN")
      */
     public function postAction(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, AccountMapper $accountMapper, Request $request): Response
@@ -234,7 +231,6 @@ class AccountController extends AbstractController
      * @Route("/account_password/{id}", methods={"PUT"})
      * @OA\Parameter(name="id", in="path", required="true", description="Account id", @OA\Schema(type="string"))
      * @OA\Parameter(name="password", in="body", required="true", @OA\Schema(type="string"))
-     * @OA\Tag(name="Account")
      * @IsGranted("ROLE_SENIOR")
      */
     public function updatePasswordAction(EntityManagerInterface $em, AccountRepository $accountRepository, Request $request, $id): Response
@@ -282,7 +278,6 @@ class AccountController extends AbstractController
      *
      * @Route("/account/unlock/{id}", methods={"POST"})
      * @OA\Parameter(name="id", in="path", required="true", description="Account id", @OA\Schema(type="string"))
-     * @OA\Tag(name="Account")
      * @IsGranted("ROLE_SENIOR")
      */
     public function unlockAction(EntityManagerInterface $em, AccountRepository $accountRepository, $id): Response
