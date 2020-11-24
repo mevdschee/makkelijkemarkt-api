@@ -11,7 +11,6 @@
 
 namespace App\Controller\Version_1_1_0;
 
-use App\Entity\Dagvergunning;
 use App\Exception\FactuurServiceException;
 use App\Mapper\DagvergunningMapper;
 use App\Repository\DagvergunningRepository;
@@ -24,9 +23,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Method;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * @Route("1.1.0")

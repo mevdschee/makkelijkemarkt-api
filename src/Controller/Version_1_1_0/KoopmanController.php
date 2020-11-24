@@ -11,11 +11,12 @@
 
 namespace App\Controller\Version_1_1_0;
 
-use App\Entity\Koopman;
 use App\Mapper\KoopmanMapper;
 use App\Repository\KoopmanRepository;
+use App\Repository\VervangerRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,7 +39,7 @@ class KoopmanController extends AbstractController
      * @OA\Parameter(name="erkenningsnummer", @OA\Schema(type="string"))
      * @OA\Parameter(name="status", description="-1 = ignore, 0 = only removed, 1 = only active", @OA\Schema(type="integer"))
      * @OA\Parameter(name="listOffset", @OA\Schema(type="integer"))
-     * @OA\Parameter(name="listLength", description="Default=100", @OA\Schema(type="integer")}
+     * @OA\Parameter(name="listLength", description="Default=100", @OA\Schema(type="integer"))
      * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
@@ -84,7 +85,7 @@ class KoopmanController extends AbstractController
      * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
-    public function getByIdAction(KoopmanRepository $repo, KoopmanMapper $mapper, Request $request, $id)
+    public function getByIdAction(KoopmanRepository $repo, KoopmanMapper $mapper, $id)
     {
         $object = $repo->getById($id);
         if ($object === null) {
@@ -104,11 +105,11 @@ class KoopmanController extends AbstractController
      * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
-    public function getByKoopmanAction(Request $request, $erkenningsnummer)
-    {
-        /* @var $repo \App\Entity\KoopmanRepository */
-        $repo = $this->get('appapi.repository.koopman');
-
+    public function getByKoopmanAction(
+        KoopmanRepository $repo,
+        KoopmanMapper $mapper,
+        $erkenningsnummer
+    ) {
         // replace erkenningsnummer
         $erkenningsnummer = str_replace('.', '', $erkenningsnummer);
 
@@ -117,8 +118,6 @@ class KoopmanController extends AbstractController
             throw $this->createNotFoundException('Not found koopman with erkenningsnummer ' . $erkenningsnummer);
         }
 
-        /* @var $mapper \App\Mapper\KoopmanMapper */
-        $mapper = $this->get('appapi.mapper.koopman');
         $response = $mapper->singleEntityToModel($object);
 
         return new JsonResponse($response, Response::HTTP_OK, []);
@@ -128,26 +127,20 @@ class KoopmanController extends AbstractController
      * Gegevens van koopman op basis van erkenningsnummer
      *
      * @Route("/koopman/pasuid/{pasUid}", methods={"GET"})
-     * @ApiDoc(
-     *  section="Koopman",
-     *  requirements={
-     * @OA\Parameter(name="pasUid", in="path", required="true", @OA\Schema(type="string")}
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @OA\Parameter(name="pasUid", in="path", required="true", @OA\Schema(type="string"))
      * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
-    public function getByPasUid(Request $request, $pasUid)
-    {
-        /* @var $repo \App\Entity\KoopmanRepository */
-        $repo = $this->get('appapi.repository.koopman');
+    public function getByPasUid(
+        KoopmanRepository $koopmanRepository,
+        VervangerRepository $vervangerRepository,
+        $pasUid
+    ) {
 
-        $object = $repo->findOneByPasUid(strtoupper($pasUid));
+        $object = $koopmanRepository->findOneByPasUid(strtoupper($pasUid));
         if ($object === null) {
             // dit is geen bekende koop OF een vervangers pas
-            $repo = $this->get('appapi.repository.vervanger');
-            $object = $repo->findOneByPasUid(strtoupper($pasUid));
+            $object = $vervangerRepository->findOneByPasUid(strtoupper($pasUid));
             if ($object === null) {
                 // ook geen vervanger
                 throw $this->createNotFoundException('Not found koopman with pasUid ' . $pasUid);
@@ -168,29 +161,19 @@ class KoopmanController extends AbstractController
      * Gegevens van koopman op basis van markt en sollicitatienummer
      *
      * @Route("/koopman/markt/{marktId}/sollicitatienummer/{sollicitatieNummer}", methods={"GET"})
-     * @ApiDoc(
-     *  section="Koopman",
-     *  requirements={
      * @OA\Parameter(name="marktId", in="path", required="true", @OA\Schema(type="integer"))
-     * @OA\Parameter(name="sollicitatieNummer", in="path", required="true", @OA\Schema(type="integer")},
-     *  },
-     *  views = { "default", "1.1.0" }
-     * )
+     * @OA\Parameter(name="sollicitatieNummer", in="path", required="true", @OA\Schema(type="integer"))
      * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_USER")
      */
-    public function getByMarktAndSollicitatieNummerAction(Request $request, $marktId, $sollicitatieNummer)
+    public function getByMarktAndSollicitatieNummerAction(KoopmanRepository $repo, KoopmanMapper $mapper, $marktId, $sollicitatieNummer)
     {
-        /* @var $repo \App\Entity\KoopmanRepository */
-        $repo = $this->get('appapi.repository.koopman');
 
         $object = $repo->getBySollicitatienummer($marktId, $sollicitatieNummer);
         if ($object === null) {
             throw $this->createNotFoundException('Not found koopman with sollicitatieNummer ' . $sollicitatieNummer . ' and marktId ' . $marktId);
         }
 
-        /* @var $mapper \App\Mapper\KoopmanMapper */
-        $mapper = $this->get('appapi.mapper.koopman');
         $response = $mapper->singleEntityToModel($object);
 
         return new JsonResponse($response, Response::HTTP_OK, []);
@@ -201,29 +184,22 @@ class KoopmanController extends AbstractController
      *
      * @Route("/koopman/toggle_handhavingsverzoek/{id}/{date}", methods={"POST"})
      * @OA\Parameter(name="id", in="path", required="true", @OA\Schema(type="integer"))
-     * @OA\Parameter(name="date", in="path", required="true", "dataType"="string yyyy-mm-dd")
+     * @OA\Parameter(name="date", in="path", required="true", description="Datum yyyy-mm-dd", @OA\Schema(type="string"))
      * @OA\Tag(name="Koopman")
      * @IsGranted("ROLE_SENIOR")
      */
-    public function toggleHandhavingsVerzoekAction(EntityManagerInterface $em, $id, $date)
+    public function toggleHandhavingsVerzoekAction(EntityManagerInterface $em, KoopmanRepository $repo, KoopmanMapper $mapper, $id, $date)
     {
-        /* @var $repo \App\Entity\KoopmanRepository */
-        $repo = $this->get('appapi.repository.koopman');
-
         $koopman = $repo->find($id);
         if ($koopman === null) {
             throw $this->createNotFoundException('Koopman not found');
         }
-        /**
-         * @var Koopman $koopman
-         */
 
         $date = new \DateTime($date);
 
         $koopman->setHandhavingsVerzoek($date);
         $em->flush();
 
-        $mapper = $this->get('appapi.mapper.koopman');
         $response = $mapper->singleEntityToModel($koopman);
 
         return new JsonResponse($response, Response::HTTP_OK, []);

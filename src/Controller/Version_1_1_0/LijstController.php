@@ -14,10 +14,11 @@ namespace App\Controller\Version_1_1_0;
 use App\Mapper\SollicitatieMapper;
 use App\Repository\MarktRepository;
 use App\Repository\SollicitatieRepository;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Method;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -34,7 +35,7 @@ class LijstController extends AbstractController
      * @OA\Parameter(name="marktId", in="path", required="true", @OA\Schema(type="integer"), description="ID van markt")
      * @OA\Parameter(name="types", in="path", required="false", @OA\Schema(type="string"), description="Koopman types gescheiden met een |")
      * @OA\Parameter(name="startDate", in="path", required="false", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
-     * @OA\Parameter(name="endDate", in="path", required="false", @OA\Schema(type="string"), description="date as yyyy-mm-dd"}
+     * @OA\Parameter(name="endDate", in="path", required="false", @OA\Schema(type="string"), description="date as yyyy-mm-dd")
      * @OA\Tag(name="Lijst")
      * @IsGranted("ROLE_USER")
      */
