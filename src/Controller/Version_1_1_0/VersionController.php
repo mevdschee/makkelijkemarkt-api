@@ -14,7 +14,6 @@ namespace App\Controller\Version_1_1_0;
 use OpenApi\Annotations as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -29,14 +28,11 @@ class VersionController extends AbstractController
      *
      * @Route("/version/", methods={"GET"})
      */
-    public function getAction(Request $request)
+    public function getAction()
     {
-        /* @var $kernel \AppKernel */
-        $kernel = $this->get('kernel');
-
         return new JsonResponse(
             [
-                'apiVersion' => $kernel->getVersion(),
+                'apiVersion' => '1.1.0',
                 'androidVersion' => $this->getParameter('android_version'),
                 'androidBuild' => $this->getParameter('android_build'),
             ], Response::HTTP_OK);
