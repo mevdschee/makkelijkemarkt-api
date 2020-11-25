@@ -53,8 +53,9 @@ class MarktExtraData
     /**
      * @param number $perfectViewNummer
      */
-    public function __construct($perfectViewNummer)
+    public function __construct($afkorting, $perfectViewNummer)
     {
+        $this->afkorting = $afkorting;
         $this->perfectViewNummer = $perfectViewNummer;
     }
 
