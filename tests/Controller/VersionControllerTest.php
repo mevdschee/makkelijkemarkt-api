@@ -8,8 +8,8 @@ class VersionControllerTest extends WebTestCase
     public function testGetVersion()
     {
         $client = static::createClient();
-
-        $response = $client->request('GET', '/1.1.0/version/')->getResponse();
+        $client->request('GET', '/1.1.0/version/');
+        $response = $client->getResponse();
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertTrue($response->headers->contains('Content-Type', 'application/json'));
