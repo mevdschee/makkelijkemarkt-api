@@ -2,6 +2,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Markt;
+use App\Entity\MarktExtraData;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -9,54 +10,33 @@ class MarktData extends Fixture
 {
     public function load(ObjectManager $manager)
     {
-        $markt = new Markt();
-        $markt->setNaam('Nieuwmarkt');
-        $markt->setAfkorting('NW');
-        $markt->setPerfectViewNummer(13);
-        $markt->setSoort(Markt::SOORT_DAG);
-        $manager->persist($markt);
+        $fib100 = function ($n) {
+            list($n1, $n2) = [0, 1];
+            for ($i = 0; $i < $n; $i++) {
+                $n3 = $n2 + $n1;
+                list($n1, $n2) = [$n2, $n3];
+            }
+            return $n2 % 100;
+        };
 
-        $markt = new Markt();
-        $markt->setNaam('Dapperstraat');
-        $markt->setAfkorting('DAPP');
-        $markt->setPerfectViewNummer(6);
-        $markt->setSoort(Markt::SOORT_DAG);
-        $manager->persist($markt);
+        $dagen = ['ma', 'di', 'wo', 'do', 'vr', 'za'];
+        $soorten = ['dag', 'week', 'seizoen'];
 
-        $markt = new Markt();
-        $markt->setNaam('Maandag Noordermarkt');
-        $markt->setAfkorting('NOM-M');
-        $markt->setPerfectViewNummer(40);
-        $markt->setSoort(Markt::SOORT_WEEK);
-        $manager->persist($markt);
+        for ($i = 0; $i < 7; $i++) {
+            $afkorting = "TM-$i";
+            $nummer = $fib100($i + 10);
 
-        $markt = new Markt();
-        $markt->setNaam('Waterlooplein');
-        $markt->setAfkorting('WAT');
-        $markt->setPerfectViewNummer(26);
-        $markt->setSoort(Markt::SOORT_DAG);
-        $manager->persist($markt);
+            $markt = new Markt();
+            $markt->setNaam("TestMarkt$i");
+            $markt->setAfkorting($afkorting);
+            $markt->setPerfectViewNummer($nummer);
+            $markt->setSoort($soorten[$i % count($soorten)]);
+            $manager->persist($markt);
 
-        $markt = new Markt();
-        $markt->setNaam('Albert Cuypstraat');
-        $markt->setAfkorting('AC');
-        $markt->setPerfectViewNummer(1);
-        $markt->setSoort(Markt::SOORT_DAG);
-        $manager->persist($markt);
-
-        $markt = new Markt();
-        $markt->setNaam('Plein 40/45');
-        $markt->setAfkorting('4045');
-        $markt->setPerfectViewNummer(19);
-        $markt->setSoort(Markt::SOORT_DAG);
-        $manager->persist($markt);
-
-        $markt = new Markt();
-        $markt->setNaam('van der Pekstraat');
-        $markt->setAfkorting('PEK');
-        $markt->setPerfectViewNummer(12);
-        $markt->setSoort(Markt::SOORT_DAG);
-        $manager->persist($markt);
+            $marktExtraData = new MarktExtraData($afkorting, $nummer);
+            $marktExtraData->setMarktDagen(array_slice($dagen, 0, ($i % count($dagen)) + 1));
+            $manager->persist($marktExtraData);
+        }
 
         $manager->flush();
     }
