@@ -11,6 +11,7 @@
 
 namespace App\Service;
 
+use Qipsius\TCPDFBundle\Controller\TCPDFController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class PdfFactuurService
@@ -50,9 +51,9 @@ class PdfFactuurService
         );
     }
 
-    public function generate($koopman, $dagvergunningen)
+    public function generate(TCPDFController $tcpdf, $koopman, $dagvergunningen)
     {
-        $this->pdf = $this->container->get("white_october.tcpdf")->create();
+        $this->pdf = $tcpdf->create();
 
         // set document information
         $this->pdf->SetCreator('Gemeente Amsterdam');
