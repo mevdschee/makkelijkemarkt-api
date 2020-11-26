@@ -19,23 +19,26 @@ class KoopmanData extends Fixture
             return $n2 % 1000;
         };
 
+        $tussenvoegsels = ['', 'van der', 'van', 'van den', 'de', 'den'];
+
         for ($i = 0; $i < 5; $i++) {
-            $nummer = "19000806.2$i";
+            $nummer = "20200101.$i";
             $hash = md5($i);
+            $year = 2020 - $i;
 
             $koopman = new Koopman();
             $koopman->setErkenningsnummer($nummer);
-            $koopman->setVoorletters('K.M.');
+            $koopman->setVoorletters(chr(ord('A') + $i) . '.' . chr(ord('A') + $i + 2) . '.');
             $koopman->setAchternaam("Koopman$i");
             $koopman->setEmail("koopman$i@amsterdam.nl");
             $koopman->setTelefoon('06-1234' . sprintf('%04d', $i));
             $koopman->setPerfectViewNummer($fib1000($i + 20));
             $koopman->setFoto(abs(crc32($i)) . '-' . $hash . '-' . $nummer . '.jpg');
             $koopman->setStatus($i % count(KoopmanMapper::$statussen));
-            $koopman->setFotoLastUpdate(new \DateTime("$i day ago"));
+            $koopman->setFotoLastUpdate(new \DateTime("$year-01-01 00:00:00"));
             $koopman->setFotoHash($hash);
             $koopman->setPasUid(strtoupper(bin2hex(substr(md5($i, true), 0, 7))));
-            $koopman->setTussenvoegsels('van der');
+            $koopman->setTussenvoegsels($tussenvoegsels[$i % count($tussenvoegsels)]);
             $koopman->setHandhavingsVerzoek(null);
             $manager->persist($koopman);
         }
