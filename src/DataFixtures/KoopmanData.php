@@ -21,14 +21,14 @@ class KoopmanData extends Fixture
 
         $tussenvoegsels = ['', 'van der', 'van', 'van den', 'de', 'den'];
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $nummer = "20200101.$i";
             $hash = md5($i);
             $year = 2020 - $i;
 
             $koopman = new Koopman();
             $koopman->setErkenningsnummer($nummer);
-            $koopman->setVoorletters(chr(ord('A') + $i) . '.' . chr(ord('A') + $i + 2) . '.');
+            $koopman->setVoorletters(chr(ord('A') + $i) . '.' . chr(ord('A') + $i + 4) . '.');
             $koopman->setAchternaam("Koopman$i");
             $koopman->setEmail("koopman$i@amsterdam.nl");
             $koopman->setTelefoon('06-1234' . sprintf('%04d', $i));
