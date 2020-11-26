@@ -35,7 +35,7 @@ class MarktData extends Fixture
             $markt->setSoort($soorten[$i % count($soorten)]);
             $markt->setPerfectViewNummer($nummer);
             if ($i % 2 == 1) {
-                $markt->setMarktDagen(array_slice($dagen, 0, ($i % count($dagen)) + 1));
+                $markt->setMarktDagen($i % 2 == 0 ? [] : array_slice($dagen, 0, ($i % count($dagen)) + 1));
             }
             $markt->setStandaardKraamAfmeting($i % 4 < 3 ? 3 : 0);
             $markt->setExtraMetersMogelijk($i % 4 < 1);
@@ -46,7 +46,7 @@ class MarktData extends Fixture
                 $markt->setAantalKramen($kramen);
                 $markt->setAantalMeter(floor($kramen * 3.55));
             }
-            // meer velden
+            $markt->setAuditMax(10);
             $markt->setIndelingstype('traditioneel');
             $manager->persist($markt);
 
