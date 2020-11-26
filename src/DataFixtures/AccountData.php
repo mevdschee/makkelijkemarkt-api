@@ -12,6 +12,8 @@ class AccountData extends Fixture
         $roles = ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_SENIOR'];
 
         for ($i = 0; $i < 9; $i++) {
+            $min = sprintf('%02d', $i);
+
             $account = new Account();
             $account->setNaam("Account$i");
             $account->setEmail("account$i@amsterdam.nl");
@@ -19,7 +21,7 @@ class AccountData extends Fixture
             $account->setPassword(password_hash("Password$i!", PASSWORD_DEFAULT));
             $account->setRole($roles[$i % count($roles)]);
             $account->setAttempts(0);
-            $account->setLastAttempt(new \DateTime("$i day ago"));
+            $account->setLastAttempt(new \DateTime("2020-01-01 00:$min:00"));
             $account->setLocked($i % 2 == 0);
             $account->setActive($i < 6);
             $manager->persist($account);
