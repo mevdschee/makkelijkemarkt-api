@@ -17,9 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("api/1.1.0")
- */
 class DefaultController extends AbstractController
 {
     /**
