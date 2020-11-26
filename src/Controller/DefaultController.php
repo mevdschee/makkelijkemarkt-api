@@ -9,7 +9,7 @@
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-namespace App\Controller\Version_1_1_0;
+namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

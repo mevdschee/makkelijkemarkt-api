@@ -58,7 +58,7 @@ class Account implements UserInterface, \Serializable
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=64)
+     * @ORM\Column(type="string", length=255)
      */
     private $password;
 
