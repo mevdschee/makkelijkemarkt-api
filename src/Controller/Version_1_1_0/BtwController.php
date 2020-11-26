@@ -24,7 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("1.1.0")
+ * @Route("api/1.1.0")
  * @OA\Tag(name="Btw")
  */
 class BtwController extends AbstractController

@@ -26,7 +26,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
- * @Route("1.1.0")
+ * @Route("api/1.1.0")
  * @OA\Tag(name="Account")
  */
 
