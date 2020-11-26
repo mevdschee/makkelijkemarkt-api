@@ -22,7 +22,7 @@ class MarktData extends Fixture
         $dagen = ['ma', 'di', 'wo', 'do', 'vr', 'za'];
         $soorten = ['dag', 'week', 'seizoen'];
 
-        for ($i = 0; $i < 7; $i++) {
+        for ($i = 0; $i < 14; $i++) {
             $afkorting = "TM-$i";
             $nummer = $fib100($i + 10);
 
