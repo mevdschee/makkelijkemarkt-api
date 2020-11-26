@@ -20,7 +20,7 @@ class AccountData extends Fixture
             $account->setUsername("account$i@amsterdam.nl");
             $account->setPassword(password_hash("Password$i!", PASSWORD_DEFAULT));
             $account->setRole($roles[$i % count($roles)]);
-            $account->setAttempts(0);
+            $account->setAttempts($i % 5);
             $account->setLastAttempt(new \DateTime("2020-01-01 00:$min:00"));
             $account->setLocked($i % 2 == 0);
             $account->setActive($i < 6);
