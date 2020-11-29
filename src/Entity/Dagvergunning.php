@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -15,7 +15,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="DagvergunningRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\DagvergunningRepository")
  * @ORM\Table(indexes={@ORM\Index(name="dag_idx", columns={"dag"}), @ORM\Index(name="reason_idx", columns={"audit_reason"})});
  */
 class Dagvergunning

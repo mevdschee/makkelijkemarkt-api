@@ -1,16 +1,14 @@
 <?php
 
-namespace GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Command;
+namespace App\Command;
 
+use App\Utils\CsvIterator;
+use App\Utils\Logger;
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Process\PerfectViewMarktImport;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\Logger;
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\CsvIterator;
 
 class PerfectViewVervangerImportCommand extends ContainerAwareCommand
 {
@@ -34,7 +32,7 @@ class PerfectViewVervangerImportCommand extends ContainerAwareCommand
         $logger = new Logger();
         $logger->addOutput($output);
 
-        /* @var $process \GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Process\PerfectViewVervangerImport */
+        /* @var $process \App\Process\PerfectViewVervangerImport */
         $process = $this->getContainer()->get('import.process.perfectviewvervangerimport');
         $process->setLogger($logger);
 

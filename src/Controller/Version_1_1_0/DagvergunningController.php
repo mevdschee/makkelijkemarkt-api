@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -406,7 +406,7 @@ class DagvergunningController extends AbstractController
      */
     public function deleteAction(EntityManagerInterface $em, Request $request, $id)
     {
-        /* @var $repoDagvergunning \App\Entity\DagvergunningRepository */
+        /* @var $repoDagvergunning \App\Repository\DagvergunningRepository */
         $repoDagvergunning = $this->get('appapi.repository.dagvergunning');
 
         // read message body

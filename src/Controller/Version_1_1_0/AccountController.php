@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -71,7 +71,7 @@ class AccountController extends AbstractController
      */
     public function getAction(AccountMapper $mapper, $id): Response
     {
-        /* @var $repository \App\Entity\AccountRepository */
+        /* @var $repository \App\Repository\TokenRepository */
         $repositoryAccount = $this->get('appapi.repository.account');
 
         $account = $repositoryAccount->getById($id);

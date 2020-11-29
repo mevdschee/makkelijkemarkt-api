@@ -1,12 +1,11 @@
 <?php
 
-namespace GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Process;
+namespace App\Process;
 
-use App\Entity\Koopman;
 use App\Repository\KoopmanRepository;
+use App\Utils\Logger;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\EntityManagerInterface;
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\Logger;
 
 class PerfectViewVervangerImport
 {

@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\Logger;
+use App\Utils\Logger;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -38,9 +38,9 @@ class StuurFactuurCommand extends ContainerAwareCommand
         }
         $output->writeln($date);
 
-        /* @var $repo \App\Entity\KoopmanRepository */
+        /* @var $repo \App\Repository\KoopmanRepository */
         $repoKoopman = $this->getContainer()->get('appapi.repository.koopman');
-        /* @var $repo \App\Entity\DagverguningRepository */
+        /* @var $repo \App\Repository\DagverguningRepository */
         $repoDagverguning = $this->getContainer()->get('appapi.repository.dagvergunning');
 
         /** @var $factuurPdfService PdfFactuurService */

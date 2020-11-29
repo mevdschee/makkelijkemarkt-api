@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -15,7 +15,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="MarktRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\MarktRepository")
  * @ORM\Table(indexes={
  *  @ORM\Index(name="marktPerfectViewNumber", columns={"perfect_view_nummer"})
  * }, uniqueConstraints={

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -14,7 +14,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="SollicitatieRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\SollicitatieRepository")
  * @ORM\Table(indexes={
  *  @ORM\Index(name="sollicitatieSollicitatieNummer", columns={"sollicitatie_nummer"}),
  *  @ORM\Index(name="sollicitatieMarktSollicitatieNummer", columns={"markt_id", "sollicitatie_nummer"}),

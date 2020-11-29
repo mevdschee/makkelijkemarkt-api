@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -11,9 +11,9 @@
 
 namespace App\Controller\Version_1_1_0;
 
-use App\Entity\TokenRepository;
 use App\Mapper\TokenMapper;
 use App\Repository\AccountRepository;
+use App\Repository\TokenRepository;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

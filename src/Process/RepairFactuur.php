@@ -3,8 +3,8 @@
 namespace App\Process;
 
 use App\Service\FactuurService;
+use App\Utils\Logger;
 use Doctrine\ORM\EntityManagerInterface;
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\Logger;
 
 class RepairFactuur
 {

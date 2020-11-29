@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -11,97 +11,116 @@
 
 namespace App\Security;
 
+use App\Repository\TokenRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Authentication\SimplePreAuthenticatorInterface;
-use Symfony\Component\Security\Core\Authentication\Token\PreAuthenticatedToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
+use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
-class ApiKeyAuthenticator implements SimplePreAuthenticatorInterface, AuthenticationFailureHandlerInterface
+class ApiKeyAuthenticator extends AbstractGuardAuthenticator
 {
-    /**
-     * @var string
-     */
-    protected $mmApiKey;
 
-    public function __construct($mmApiKey)
+    private $mmAppKey;
+    private $security;
+    private $tokenRepository;
+
+    public function __construct(string $mmAppKey, Security $security, TokenRepository $tokenRepository)
     {
-        $this->mmApiKey = $mmApiKey;
+        $this->mmAppKey = $mmAppKey;
+        $this->security = $security;
+        $this->tokenRepository = $tokenRepository;
+    }
+    /**
+     * Called on every request to decide if this authenticator should be
+     * used for the request. Returning `false` will cause this authenticator
+     * to be skipped.
+     */
+    public function supports(Request $request)
+    {
+        if ($this->security->getUser()) {
+            return false;
+        }
+        return true;
     }
 
-    public function createToken(Request $request, $providerKey)
+    /**
+     * Called on every request. Return whatever credentials you want to
+     * be passed to getUser() as $credentials.
+     */
+    public function getCredentials(Request $request)
     {
-        $appKey = $request->headers->get('MmAppKey');
-        if ($appKey !== $this->mmApiKey) {
+        if ($request->headers->get('MmAppKey', 'testkey') !== $this->mmAppKey) {
             throw new AuthenticationException('Invalid application key');
         }
 
         $authorizationHeader = $request->headers->get('Authorization');
-        if ($authorizationHeader === null) {
-            return null;
-        }
-
         $header = explode(' ', $authorizationHeader);
         if ($header[0] !== 'Bearer') {
-            return null;
+            throw new AuthenticationException('Invalid authorization type');
         }
 
-        if (isset($header[1]) === false) {
-            return null;
-        }
-
-        return new PreAuthenticatedToken(
-            'anon.',
-            $header[1],
-            $providerKey
-        );
-    }
-
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
-    {
-        try {
-            $this->createToken($request, 'testKey');
-        } catch (AuthenticationException $e) {
-            return new Response(
-                'Invalid application key',
-                412
-            );
-        }
-    }
-
-    public function authenticateToken(TokenInterface $token, UserProviderInterface $userProvider, $providerKey)
-    {
-        if (!$userProvider instanceof ApiKeyUserProvider) {
-            throw new \InvalidArgumentException(sprintf('The user provider must be an instance of ApiKeyUserProvider (%s was given).', get_class($userProvider)));
-        }
-
-        $apiKey = $token->getCredentials();
-
-        $token = $userProvider->getTokenByApiKey($apiKey);
-        if ($token === null) {
-            return null;
+        $token = $this->tokenRepository->getByUuid($header[1] ?? '');
+        if (!$token) {
+            throw new AuthenticationException('Invalid token uuid');
         }
 
         $timeLeft = $token->getCreationDate()->getTimestamp() + $token->getLifeTime() - time();
         if ($timeLeft < 0) {
+            throw new AuthenticationException('Invalid token time');
+        }
+
+        $account = $token->getAccount();
+        if (!$account) {
+            throw new AuthenticationException('Invalid token account');
+        }
+
+        return $account->getUsername();
+    }
+
+    public function getUser($credentials, UserProviderInterface $userProvider)
+    {
+        if (null === $credentials) {
+            // The token header was empty, authentication fails with HTTP Status
+            // Code 401 "Unauthorized"
             return null;
         }
 
-        $user = $token->getAccount();
-
-        return new PreAuthenticatedToken(
-            $user,
-            $apiKey,
-            $providerKey,
-            $user->getRoles()
-        );
+        // The "username" in this case is the apiToken, see the key `property`
+        // of `your_db_provider` in `security.yaml`.
+        // If this returns a user, checkCredentials() is called next:
+        return $userProvider->loadUserByUsername($credentials);
     }
 
-    public function supportsToken(TokenInterface $token, $providerKey)
+    public function checkCredentials($credentials, UserInterface $account)
     {
-        return $token instanceof PreAuthenticatedToken && $token->getProviderKey() === $providerKey;
+        return true;
+    }
+
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    {
+        // on success, let the request continue
+        return null;
+    }
+
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
+    {
+        return new Response($exception->getMessage(), Response::HTTP_PRECONDITION_FAILED);
+    }
+
+    /**
+     * Called when authentication is needed, but it's not sent
+     */
+    public function start(Request $request, AuthenticationException $authException = null)
+    {
+        return new Response('Authentication Required', Response::HTTP_UNAUTHORIZED);
+    }
+
+    public function supportsRememberMe()
+    {
+        return false;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -9,7 +9,7 @@
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-namespace GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils;
+namespace App\Utils;
 
 class CsvIterator implements \Iterator
 {

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -9,16 +9,23 @@
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-namespace App\Entity;
+namespace App\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use App\Entity\Account;
+use App\Entity\Token;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * Repository for Token entity
  */
-class TokenRepository extends EntityRepository
+class TokenRepository extends ServiceEntityRepository
 {
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Token::class);
+    }
+
     /**
      * @param string $uuid
      * @return Token|NULL

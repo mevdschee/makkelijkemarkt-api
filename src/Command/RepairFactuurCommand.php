@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\Logger;
+use App\Utils\Logger;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

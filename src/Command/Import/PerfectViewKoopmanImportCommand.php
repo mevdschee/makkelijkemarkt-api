@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -9,10 +9,10 @@
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-namespace GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Command;
+namespace App\Command;
 
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\CsvIterator;
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\Logger;
+use App\Utils\CsvIterator;
+use App\Utils\Logger;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -41,7 +41,7 @@ class PerfectViewKoopmanImportCommand extends ContainerAwareCommand
         $logger = new Logger();
         $logger->addOutput($output);
 
-        /* @var $process \GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Process\PerfectViewKoopmanImport */
+        /* @var $process \App\Process\PerfectViewKoopmanImport */
         $process = $this->getContainer()->get('import.process.perfectviewkoopmanimport');
         $process->setLogger($logger);
 

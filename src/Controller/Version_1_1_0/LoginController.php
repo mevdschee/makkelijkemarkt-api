@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -12,10 +12,10 @@
 namespace App\Controller\Version_1_1_0;
 
 use App\Entity\Token;
-use App\Entity\TokenRepository;
 use App\Enum\Roles;
 use App\Mapper\AccountMapper;
 use App\Mapper\TokenMapper;
+use App\Repository\TokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use OpenApi\Annotations as OA;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -60,7 +60,7 @@ class LoginController extends AbstractController
         $token->setDeviceUuid($message['deviceUuid'] ?? null);
         $token->setLifeTime(60 * 60 * 8 * 1);
 
-        /* @var $accountRepo \App\Entity\AccountRepository */
+        /* @var $accountRepo \App\Repository\TokenRepository */
         $accountRepo = $this->get('appapi.repository.account');
         $account = $accountRepo->getById($message['accountId']);
         if ($account === null) {
@@ -134,7 +134,7 @@ class LoginController extends AbstractController
         $token->setDeviceUuid($message['deviceUuid'] ?? null);
         $token->setLifeTime(60 * 60 * 8 * 1);
 
-        /* @var $accountRepo \App\Entity\AccountRepository */
+        /* @var $accountRepo \App\Repository\TokenRepository */
         $accountRepo = $this->get('appapi.repository.account');
         $account = $accountRepo->getByUsername($message['username']);
         if ($account === null) {

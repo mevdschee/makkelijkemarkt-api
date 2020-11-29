@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2020 X Gemeente
+ *  Copyright (c) 2020 X Gemeente
  *                     X Amsterdam
  *                     X Onderzoek, Informatie en Statistiek
  *
@@ -9,13 +9,13 @@
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-namespace GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Process;
+namespace App\Process;
 
 use App\Entity\Markt;
 use App\Repository\MarktExtraDataRepository;
 use App\Repository\MarktRepository;
+use App\Utils\Logger;
 use Doctrine\ORM\EntityManagerInterface;
-use GemeenteAmsterdam\MakkelijkeMarkt\ImportBundle\Utils\Logger;
 
 class PerfectViewMarktImport
 {

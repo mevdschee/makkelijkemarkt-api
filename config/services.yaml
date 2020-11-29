@@ -5,7 +5,8 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     android_version: 1.4.6
-    android_build:   2017020244
+    android_build: 2017020244
+    mm_app_key: testkey
 
 services:
     # default configuration for services in *this* file
@@ -31,3 +32,5 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Security\ApiKeyAuthenticator: ['%mm_app_key%']

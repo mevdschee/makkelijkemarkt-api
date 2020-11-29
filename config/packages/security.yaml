@@ -1,7 +1,11 @@
 security:
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    enable_authenticator_manager: true
     providers:
-        users_in_memory: { memory: null }
+        api_key_user_provider:
+            entity:
+                class: App\Entity\Account
+                property: username
     encoders:
         # use your user class name here
         App\Entity\Account:
@@ -13,10 +17,15 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        secured_area:
+            pattern: ^/api
+            provider: api_key_user_provider
+            logout: ~
+            guard:
+                authenticators:
+                    - App\Security\ApiKeyAuthenticator
         main:
-            anonymous: true
             lazy: true
-            provider: users_in_memory
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
