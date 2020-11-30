@@ -24,6 +24,7 @@ security:
             guard:
                 authenticators:
                     - App\Security\ApiKeyAuthenticator
+            access_denied_handler: App\Security\AccessDeniedHandler
         main:
             lazy: true
 

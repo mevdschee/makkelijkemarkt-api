@@ -29,7 +29,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class TokenController extends AbstractController
 {
     /**
-     * Geeft accounts
+     * Geeft tokens
      *
      * @Route("/account/{accountId}/tokens", methods={"GET"})
      * @OA\Parameter(name="accountId", in="path", required="true", @OA\Schema(type="integer"), description="Account ID")

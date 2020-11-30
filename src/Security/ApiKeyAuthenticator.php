@@ -11,7 +11,9 @@
 
 namespace App\Security;
 
+use App\Entity\Account;
 use App\Repository\TokenRepository;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -57,15 +59,24 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
             throw new AuthenticationException('Invalid application key');
         }
 
+        if (!$request->headers->has('Authorization')) {
+            return false;
+        }
+
         $authorizationHeader = $request->headers->get('Authorization');
         $header = explode(' ', $authorizationHeader);
         if ($header[0] !== 'Bearer') {
             throw new AuthenticationException('Invalid authorization header');
         }
 
-        $token = $this->tokenRepository->getByUuid($header[1] ?? '');
-        if (!$token) {
+        $uuid = $header[1] ?? '';
+        if (!$uuid) {
             throw new AuthenticationException('Invalid token uuid');
+        }
+
+        $token = $this->tokenRepository->getByUuid($uuid);
+        if (!$token) {
+            throw new AuthenticationException('Invalid token');
         }
 
         $timeLeft = $token->getCreationDate()->getTimestamp() + $token->getLifeTime() - time();
@@ -78,15 +89,22 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
             throw new AuthenticationException('Invalid token account');
         }
 
-        return $account->getUsername();
+        $username = $account->getUsername();
+        if (!$username) {
+            throw new AuthenticationException('Invalid username');
+        }
+
+        return $username;
     }
 
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
-        if (null === $credentials) {
+        if (!$credentials) {
             // The token header was empty, authentication fails with HTTP Status
             // Code 401 "Unauthorized"
-            return null;
+            $account = new Account();
+            $account->setUsername('anonymous');
+            return $account;
         }
 
         // The "username" in this case is the apiToken, see the key `property`
@@ -108,7 +126,7 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        return new Response($exception->getMessage(), Response::HTTP_PRECONDITION_FAILED);
+        return new JsonResponse($exception->getMessage(), Response::HTTP_PRECONDITION_FAILED);
     }
 
     /**
@@ -116,7 +134,7 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
-        return new Response('Authentication Required', Response::HTTP_UNAUTHORIZED);
+        return new JsonResponse('Authentication Required', Response::HTTP_UNAUTHORIZED);
     }
 
     public function supportsRememberMe()

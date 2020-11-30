@@ -12,19 +12,20 @@ class ApiKeyAuthenticatorTest extends WebTestCase
         $response = $client->getResponse();
 
         $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals($response->getContent(), 'Invalid application key');
+        $this->assertEquals('Invalid application key', json_decode($response->getContent(), true));
     }
 
-    public function testWithoutAuthorizationHeader()
+    public function testWithoutValidAuthorizationHeader()
     {
         $client = static::createClient();
         $client->request('GET', '/api/1.1.0/account/', [], [], [
             'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => 'NotBearer test-uuid',
         ]);
         $response = $client->getResponse();
 
         $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals($response->getContent(), 'Invalid authorization header');
+        $this->assertEquals('Invalid authorization header', json_decode($response->getContent(), true));
     }
 
     public function testWithoutValidUuid()
@@ -37,7 +38,7 @@ class ApiKeyAuthenticatorTest extends WebTestCase
         $response = $client->getResponse();
 
         $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals($response->getContent(), 'Invalid token uuid');
+        $this->assertEquals('Invalid token uuid', json_decode($response->getContent(), true));
     }
 
 }
