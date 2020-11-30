@@ -2,6 +2,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Account;
+use App\Entity\Token;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -33,6 +34,12 @@ class AccountData extends Fixture
             $account->setLocked($i % 2 == 0);
             $account->setActive($i < 6);
             $manager->persist($account);
+
+            $token = new Token();
+            $token->setAccount($account);
+            $token->setCreationDate(new \DateTime("2020-01-01 00:00:00"));
+            $token->setLifeTime(3600 * 24 * 365.25 * 10);
+            $manager->persist($token);
         }
 
         $manager->flush();

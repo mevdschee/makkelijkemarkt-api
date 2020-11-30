@@ -53,14 +53,14 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
      */
     public function getCredentials(Request $request)
     {
-        if ($request->headers->get('MmAppKey', 'testkey') !== $this->mmAppKey) {
+        if ($request->headers->get('MmAppKey') !== $this->mmAppKey) {
             throw new AuthenticationException('Invalid application key');
         }
 
         $authorizationHeader = $request->headers->get('Authorization');
         $header = explode(' ', $authorizationHeader);
         if ($header[0] !== 'Bearer') {
-            throw new AuthenticationException('Invalid authorization type');
+            throw new AuthenticationException('Invalid authorization header');
         }
 
         $token = $this->tokenRepository->getByUuid($header[1] ?? '');

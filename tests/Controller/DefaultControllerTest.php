@@ -10,9 +10,10 @@ class DefaultControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        $client->request('GET', '/1.1.0/');
+        $client->request('GET', '/');
         $response = $client->getResponse();
 
+        $this->assertTrue($response->isSuccessful());
         $this->assertEquals(['msg' => 'Hallo!'], json_decode($response->getContent(), true));
     }
 }
