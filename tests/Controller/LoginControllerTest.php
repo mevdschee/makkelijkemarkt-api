@@ -107,8 +107,9 @@ class LoginControllerTest extends WebTestCase
 
     public function testLoginLogout()
     {
-        // first request
         $client = static::createClient();
+
+        // first request
         $client->request('POST', '/api/1.1.0/login/basicUsername/', [], [], [
             'HTTP_MmAppKey' => 'testkey',
         ], json_encode([
@@ -120,6 +121,7 @@ class LoginControllerTest extends WebTestCase
         $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
         $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
         $uuid = $result['uuid'];
+
         // second request
         $client->request('GET', '/api/1.1.0/login/whoami/', [], [], [
             'HTTP_MmAppKey' => 'testkey',
@@ -129,6 +131,7 @@ class LoginControllerTest extends WebTestCase
         $result = json_decode($response->getContent(), true);
         $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
         $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
+
         // third request
         $client->request('GET', '/api/1.1.0/logout/', [], [], [
             'HTTP_MmAppKey' => 'testkey',
@@ -138,6 +141,7 @@ class LoginControllerTest extends WebTestCase
         $result = json_decode($response->getContent(), true);
         $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
         $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
+
         // fourth request
         $client->request('GET', '/api/1.1.0/login/whoami/', [], [], [
             'HTTP_MmAppKey' => 'testkey',
