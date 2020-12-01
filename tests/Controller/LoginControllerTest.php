@@ -167,20 +167,19 @@ class LoginControllerTest extends WebTestCase
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
         $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
-        $this->assertEquals([], $result);
-        $uuid = $result['uuid'];
+        $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
+        $accountId = $result['account']['id'];
 
         // second request
         $client->request('POST', '/api/1.1.0/login/basicId/', [], [], [
             'HTTP_MmAppKey' => 'testkey',
         ], json_encode([
-            'username' => "account1@amsterdam.nl",
+            'accountId' => $accountId,
             'password' => "Password1!",
         ]));
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
         $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
-        $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
-        $uuid = $result['uuid'];
+        $this->assertNotEmpty($result['uuid']);
     }
 }

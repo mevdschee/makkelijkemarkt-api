@@ -43,8 +43,13 @@ class LoginController extends AbstractController
      * @OA\Parameter(name="clientApp", @OA\Schema(type="string"), required="false", description="Appliciatie type")
      * @OA\Parameter(name="clientVersion", @OA\Schema(type="string"), required="false", description="Versie van de client")
      */
-    public function basicIdAction(TokenMapper $mapper, Request $request)
-    {
+    public function basicIdAction(
+        EntityManagerInterface $em,
+        AccountRepository $accountRepo,
+        TokenMapper $mapper,
+        Request $request,
+        UserPasswordEncoderInterface $passwordEncoder
+    ) {
         $message = json_decode($request->getContent(false), true);
         if ($message === null) {
             return new JsonResponse(['error' => json_last_error_msg()]);
@@ -62,8 +67,6 @@ class LoginController extends AbstractController
         $token->setDeviceUuid($message['deviceUuid'] ?? null);
         $token->setLifeTime(60 * 60 * 8 * 1);
 
-        /* @var $accountRepo \App\Repository\TokenRepository */
-        $accountRepo = $this->get('appapi.repository.account');
         $account = $accountRepo->getById($message['accountId']);
         if ($account === null) {
             throw $this->createAccessDeniedException('Account unknown');
@@ -80,18 +83,15 @@ class LoginController extends AbstractController
         $token->setAccount($account);
 
         $account->setLastAttempt(new \DateTime());
-        $em = $this->get('doctrine.orm.entity_manager');
         $em->flush();
 
-        $encoder = $this->container->get('security.password_encoder');
-        if ($encoder->isPasswordValid($account, $message['password']) === false) {
+        if ($passwordEncoder->isPasswordValid($account, $message['password']) === false) {
             $attempts = $account->getAttempts();
             $attempts++;
             $account->setAttempts($attempts++);
             if ($attempts >= 9) {
                 $account->setLocked(true);
             }
-            $em = $this->get('doctrine.orm.entity_manager');
             $em->flush();
             throw $this->createAccessDeniedException('Password invalid');
         }
