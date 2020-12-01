@@ -39,6 +39,7 @@ class AccountController extends AbstractController
      * @OA\Parameter(name="order", in="query", description="Deel van een naam", @OA\Schema(type="string"))
      * @OA\Parameter(name="active", in="query", description="Actief status 1 = actief, 0 = non actief, -1 = geen selectie", @OA\Schema(type="string"))
      * @OA\Parameter(name="locked", in="query", description="Locked status 1 = actief, 0 = non actief, -1 = geen selectie", @OA\Schema(type="string"))
+     * @IsGranted("ROLE_SENIOR")
      */
     public function listAction(AccountRepository $repository, AccountMapper $mapper, Request $request): Response
     {
@@ -69,14 +70,11 @@ class AccountController extends AbstractController
      * @OA\Parameter(name="id", in="path", required="true", description="Account id", @OA\Schema(type="string"))
      * @IsGranted("ROLE_SENIOR")
      */
-    public function getAction(AccountMapper $mapper, $id): Response
+    public function getAction(AccountRepository $repositoryAccount, AccountMapper $mapper, $id): Response
     {
-        /* @var $repository \App\Repository\TokenRepository */
-        $repositoryAccount = $this->get('appapi.repository.account');
-
         $account = $repositoryAccount->getById($id);
         if ($account === null) {
-            throw $this->createNotFoundException('No account with id ' . $id);
+            return new JsonResponse(['error' => 'No account with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
         $result = $mapper->singleEntityToModel($account);
@@ -102,24 +100,24 @@ class AccountController extends AbstractController
 
         // validate message
         if ($message === null) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if (isset($message['naam']) === false) {
-            return new JsonResponse(['error' => 'Required field naam is missing']);
+            return new JsonResponse(['error' => 'Required field naam is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['email']) === false) {
-            return new JsonResponse(['error' => 'Required field email is missing']);
+            return new JsonResponse(['error' => 'Required field email is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['username']) === false) {
-            return new JsonResponse(['error' => 'Required field username is missing']);
+            return new JsonResponse(['error' => 'Required field username is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         $roles = Roles::all();
         if (!array_key_exists($message['role'], $roles)) {
-            return new JsonResponse(['error' => 'Unknown role']);
+            return new JsonResponse(['error' => 'Unknown role'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         // get account
@@ -171,32 +169,32 @@ class AccountController extends AbstractController
 
         // validate message
         if ($message === null) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if (isset($message['naam']) === false) {
-            return new JsonResponse(['error' => 'Required field naam is missing']);
+            return new JsonResponse(['error' => 'Required field naam is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['email']) === false) {
-            return new JsonResponse(['error' => 'Required field email is missing']);
+            return new JsonResponse(['error' => 'Required field email is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['username']) === false) {
-            return new JsonResponse(['error' => 'Required field username is missing']);
+            return new JsonResponse(['error' => 'Required field username is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['password']) === false) {
-            return new JsonResponse(['error' => 'Required field password is missing']);
+            return new JsonResponse(['error' => 'Required field password is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['role']) === false) {
-            return new JsonResponse(['error' => 'Required field role is missing']);
+            return new JsonResponse(['error' => 'Required field role is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         $roles = Roles::all();
         if (!array_key_exists($message['role'], $roles)) {
-            return new JsonResponse(['error' => 'Unknown role']);
+            return new JsonResponse(['error' => 'Unknown role'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         // get account
@@ -240,22 +238,22 @@ class AccountController extends AbstractController
 
         // validate message
         if ($message === null) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         if (isset($message['password']) === false) {
-            return new JsonResponse(['error' => 'Password field is missing']);
+            return new JsonResponse(['error' => 'Password field is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         $account = $accountRepository->find($id);
         if (null === $account) {
-            return new JsonResponse(['error' => 'Account not found']);
+            return new JsonResponse(['error' => 'Account not found'], Response::HTTP_PRECONDITION_FAILED);
         }
         /**
          * @var Account $account
          */
 
         if ('ROLE_ADMIN' === $account->getRole() && 'ROLE_ADMIN' !== $this->getUser()->getRole()) {
-            return new JsonResponse(['error' => 'Access denied']);
+            return new JsonResponse(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
         }
 
         // encrypt password

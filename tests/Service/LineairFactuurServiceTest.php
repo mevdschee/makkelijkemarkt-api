@@ -1,4 +1,13 @@
 <?php
+/*
+ *  Copyright (c) 2020 X Gemeente
+ *                     X Amsterdam
+ *                     X Onderzoek, Informatie en Statistiek
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 
 namespace App\Tests\Controller;
 
@@ -59,9 +68,9 @@ class LineairFactuurServiceTest extends KernelTestCase
 
     public function setUp(): void
     {
-        self::bootKernel();
-        $this->factuurService = static::$kernel->getContainer()->get('appapi.factuurservice');
-        $this->em = static::$kernel->getContainer()->get('doctrine.orm.entity_manager');
+        static::bootKernel();
+        $this->factuurService = static::$container->get(FactuurService::class);
+        $this->em = static::$container->get(EntityManagerInterface::class);
 
         $this->em->getConnection()->beginTransaction();
         $this->em->getConnection()->setAutoCommit(false);

@@ -18,7 +18,7 @@ use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 class KoopmanMapper
 {
     /**
-     * @var string
+     * @var string[]
      */
     public static $statussen = [
         Koopman::STATUS_ACTIEF => 'Actief',

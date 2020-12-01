@@ -67,7 +67,7 @@ class VergunningControleController extends AbstractController
     ) {
         $message = json_decode($request->getContent(false), true);
         if (null === $message) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         if (false === isset($message['dagvergunningId'])) {
             return new JsonResponse(['error' => 'Required field dagvergunningId is missing']);
@@ -200,7 +200,7 @@ class VergunningControleController extends AbstractController
     ) {
         $message = json_decode($request->getContent(false), true);
         if (null === $message) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         if (false === isset($message['aanwezig'])) {
             return new JsonResponse(['error' => 'Required field aanwezig is missing']);

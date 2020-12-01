@@ -34,6 +34,10 @@ class AccountRepository extends ServiceEntityRepository
         return $this->find(intval($id));
     }
 
+    /**
+     * @param string $username
+     * @return Account|NULL
+     */
     public function getByUsername($username)
     {
         return $this->findOneBy(['username' => $username]);

@@ -61,7 +61,7 @@ class DagvergunningController extends AbstractController
 
         // check inputs
         if ($message === null) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if (isset($message['marktId']) === false) {
@@ -198,7 +198,7 @@ class DagvergunningController extends AbstractController
 
         // check inputs
         if ($message === null) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if (isset($message['marktId']) === false) {
@@ -484,7 +484,7 @@ class DagvergunningController extends AbstractController
 
         // check inputs
         if ($message === null) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if (isset($message['marktId']) === false) {

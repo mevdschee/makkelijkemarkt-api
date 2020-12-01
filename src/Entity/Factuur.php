@@ -36,7 +36,7 @@ class Factuur
     private $dagvergunning;
 
     /**
-     * @var Product[]
+     * @var ArrayCollection|Product[]
      * @ORM\OneToMany(targetEntity="Product", mappedBy="factuur")
      */
     private $producten;

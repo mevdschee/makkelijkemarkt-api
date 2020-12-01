@@ -100,7 +100,7 @@ class NotitieController extends AbstractController
 
         // validate message
         if ($message === null) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if (isset($message['marktId']) === false) {
@@ -179,7 +179,7 @@ class NotitieController extends AbstractController
 
         // validate message
         if ($message === null) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if (isset($message['afgevinkt']) === false) {

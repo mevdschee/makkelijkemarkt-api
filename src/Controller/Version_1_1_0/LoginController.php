@@ -52,7 +52,7 @@ class LoginController extends AbstractController
     ) {
         $message = json_decode($request->getContent(false), true);
         if ($message === null) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $message = array_merge(['accountId' => null, 'password' => null], $message);
@@ -126,7 +126,7 @@ class LoginController extends AbstractController
     ) {
         $message = json_decode($request->getContent(false), true);
         if ($message === null) {
-            return new JsonResponse(['error' => json_last_error_msg()]);
+            return new JsonResponse(['error' => json_last_error_msg()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $message = array_merge(['username' => null, 'password' => null], $message);
