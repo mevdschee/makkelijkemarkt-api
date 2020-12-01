@@ -13,7 +13,7 @@ class VervangerMapper
     /**
      * @var CacheManager
      */
-    protected $imagineCacheManager;
+    private $imagineCacheManager;
 
     /**
      * @param CacheManager $imagineCacheManager

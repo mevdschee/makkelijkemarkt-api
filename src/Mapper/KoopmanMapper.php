@@ -48,11 +48,11 @@ class KoopmanMapper
      * @param VervangerMapper $mapperVervanger
      * @param CacheManager $imagineCacheManager
      */
-    public function __construct(SimpleSollicitatieMapper $mapperSimpleSolliciatie, VervangerMapper $mapperVervanger)
+    public function __construct(SimpleSollicitatieMapper $mapperSimpleSolliciatie, VervangerMapper $mapperVervanger, CacheManager $imagineCacheManager)
     {
         $this->mapperSimpleSolliciatie = $mapperSimpleSolliciatie;
         $this->mapperVervanger = $mapperVervanger;
-        $this->imagineCacheManager = null;
+        $this->imagineCacheManager = $imagineCacheManager;
     }
 
     /**
