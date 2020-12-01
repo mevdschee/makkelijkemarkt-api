@@ -80,7 +80,7 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
         }
 
         $timeLeft = $token->getCreationDate()->getTimestamp() + $token->getLifeTime() - time();
-        if ($timeLeft < 0) {
+        if ($timeLeft <= 0) {
             throw new AuthenticationException('Invalid token time');
         }
 
@@ -126,7 +126,7 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        return new JsonResponse($exception->getMessage(), Response::HTTP_PRECONDITION_FAILED);
+        return new JsonResponse(['error' => $exception->getMessage()], Response::HTTP_PRECONDITION_FAILED);
     }
 
     /**

@@ -138,7 +138,15 @@ class LoginControllerTest extends WebTestCase
         $result = json_decode($response->getContent(), true);
         $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
         $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
-
+        // fourth request
+        $client->request('GET', '/api/1.1.0/login/whoami/', [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ]);
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertFalse($response->isSuccessful(), 'Request has succeeded');
+        $this->assertEquals(['error' => 'Invalid token time'], $result);
     }
 
 }
