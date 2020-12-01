@@ -11,6 +11,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Tariefplan;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -116,14 +117,14 @@ class Markt
     private $aanwezigeOpties;
 
     /**
-     * @var Sollicitatie[]
+     * @var ArrayCollection|Sollicitatie[]
      * @ORM\OneToMany(targetEntity="Sollicitatie", mappedBy="markt", fetch="EXTRA_LAZY", orphanRemoval=true)
      * @ORM\OrderBy({"sollicitatieNummer"="ASC"})
      */
     private $sollicitaties;
 
     /**
-     * @var Tariefplan[]
+     * @var ArrayCollection|Tariefplan[]
      * @ORM\OneToMany(targetEntity="Tariefplan", mappedBy="markt", fetch="EXTRA_LAZY", orphanRemoval=true)
      * @ORM\OrderBy({"geldigVanaf"="DESC"})
      */
@@ -301,7 +302,7 @@ class Markt
     }
 
     /**
-     * @return string
+     * @return string[]
      */
     public function getMarktDagen()
     {
@@ -464,11 +465,11 @@ class Markt
     /**
      * Add tariefplannen
      *
-     * @param \App\Entity\Tariefplan $tariefplannen
+     * @param Tariefplan $tariefplannen
      *
      * @return Markt
      */
-    public function addTariefplannen(\App\Entity\Tariefplan $tariefplannen)
+    public function addTariefplannen(Tariefplan $tariefplannen)
     {
         $this->tariefplannen[] = $tariefplannen;
 
@@ -478,9 +479,9 @@ class Markt
     /**
      * Remove tariefplannen
      *
-     * @param \App\Entity\Tariefplan $tariefplannen
+     * @param Tariefplan $tariefplannen
      */
-    public function removeTariefplannen(\App\Entity\Tariefplan $tariefplannen)
+    public function removeTariefplannen(Tariefplan $tariefplannen)
     {
         $this->tariefplannen->removeElement($tariefplannen);
     }

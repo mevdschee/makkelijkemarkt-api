@@ -133,7 +133,7 @@ class Dagvergunning
     private $factuur;
 
     /**
-     * @var VergunningControle[]
+     * @var ArrayCollection|VergunningControle[]
      * @ORM\OneToMany(targetEntity="App\Entity\VergunningControle", mappedBy="dagvergunning")
      */
     private $vergunningControles;

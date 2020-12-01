@@ -127,7 +127,7 @@ class Koopman
     private $pasUid;
 
     /**
-     * @var Sollicitatie[]
+     * @var ArrayCollection|Sollicitatie[]
      * @ORM\OneToMany(targetEntity="Sollicitatie", mappedBy="koopman", fetch="LAZY", orphanRemoval=true)
      */
     private $sollicitaties;
@@ -145,19 +145,19 @@ class Koopman
     private $handhavingsVerzoek;
 
     /**
-     * @var Dagvergunning[]
+     * @var ArrayCollection|Dagvergunning[]
      * @ORM\OneToMany(targetEntity="Dagvergunning", mappedBy="koopman", fetch="LAZY", orphanRemoval=true)
      */
     private $dagvergunningen;
 
     /**
-     * @var Vervanger[]
+     * @var ArrayCollection|Vervanger[]
      * @ORM\OneToMany(targetEntity="Vervanger", mappedBy="koopman", fetch="EXTRA_LAZY", orphanRemoval=true)
      */
     private $vervangersVan;
 
     /**
-     * @var Vervanger[]
+     * @var ArrayCollection|Vervanger[]
      * @ORM\OneToMany(targetEntity="Vervanger", mappedBy="vervanger", fetch="EXTRA_LAZY", orphanRemoval=true)
      */
     private $vervangerVoor;
