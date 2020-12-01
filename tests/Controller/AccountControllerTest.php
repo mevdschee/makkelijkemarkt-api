@@ -8,7 +8,9 @@ class AccountControllerTest extends WebTestCase
     public function testGetAccount()
     {
         $client = static::createClient();
-        $client->request('GET', '/api/1.1.0/account/');
+        $client->request('GET', '/api/1.1.0/account/', [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+        ]);
         $response = $client->getResponse();
 
         $this->assertTrue($response->isSuccessful(), 'Request is successful');

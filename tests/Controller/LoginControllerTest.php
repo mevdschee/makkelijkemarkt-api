@@ -4,7 +4,7 @@ namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class DefaultControllerTest extends WebTestCase
+class LoginControllerTest extends WebTestCase
 {
     public function testBasicUsernameWithoutAuthorizationHeader()
     {
@@ -27,7 +27,7 @@ class DefaultControllerTest extends WebTestCase
         $response = $client->getResponse();
 
         $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals('Access Denied by controller annotation @IsGranted("ROLE_USER")', json_decode($response->getContent(), true));
+        $this->assertEquals(['error' => 'Access Denied by controller annotation @IsGranted("ROLE_USER")'], json_decode($response->getContent(), true));
     }
 
     public function testLoginWithInvalidUsername()
@@ -42,7 +42,7 @@ class DefaultControllerTest extends WebTestCase
         $response = $client->getResponse();
 
         $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals('Account unknown', json_decode($response->getContent(), true));
+        $this->assertEquals(['error' => 'Account unknown'], json_decode($response->getContent(), true));
     }
 
     public function testLoginWithInvalidPassword()
@@ -57,7 +57,7 @@ class DefaultControllerTest extends WebTestCase
         $response = $client->getResponse();
 
         $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals('Password invalid', json_decode($response->getContent(), true));
+        $this->assertEquals(['error' => 'Password invalid'], json_decode($response->getContent(), true));
     }
 
     public function testLoginWithLockedAccount()
@@ -72,7 +72,7 @@ class DefaultControllerTest extends WebTestCase
         $response = $client->getResponse();
 
         $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals('Account is locked', json_decode($response->getContent(), true));
+        $this->assertEquals(['error' => 'Account is locked'], json_decode($response->getContent(), true));
     }
 
     public function testLoginWithInactiveAccount()
@@ -87,7 +87,7 @@ class DefaultControllerTest extends WebTestCase
         $response = $client->getResponse();
 
         $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals('Account is not active', json_decode($response->getContent(), true));
+        $this->assertEquals(['error' => 'Account is not active'], json_decode($response->getContent(), true));
     }
 
     public function testLoginWithLockedInactiveAccount()
@@ -102,7 +102,7 @@ class DefaultControllerTest extends WebTestCase
         $response = $client->getResponse();
 
         $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals('Account is locked', json_decode($response->getContent(), true));
+        $this->assertEquals(['error' => 'Account is locked'], json_decode($response->getContent(), true));
     }
 
 }

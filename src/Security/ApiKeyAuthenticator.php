@@ -134,7 +134,7 @@ class ApiKeyAuthenticator extends AbstractGuardAuthenticator
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
-        return new JsonResponse('Authentication Required', Response::HTTP_UNAUTHORIZED);
+        return new JsonResponse(['error' => 'Authentication Required'], Response::HTTP_UNAUTHORIZED);
     }
 
     public function supportsRememberMe()

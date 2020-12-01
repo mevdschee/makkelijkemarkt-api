@@ -11,6 +11,6 @@ class AccessDeniedHandler implements AccessDeniedHandlerInterface
 {
     public function handle(Request $request, AccessDeniedException $accessDeniedException)
     {
-        return new JsonResponse($accessDeniedException->getMessage(), Response::HTTP_UNAUTHORIZED);
+        return new JsonResponse(['error' => $accessDeniedException->getMessage()], Response::HTTP_UNAUTHORIZED);
     }
 }

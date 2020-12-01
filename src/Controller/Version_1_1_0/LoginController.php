@@ -70,11 +70,11 @@ class LoginController extends AbstractController
         }
 
         if ($account->getLocked() === true) {
-            return new JsonResponse('Account is locked', Response::HTTP_LOCKED, []);
+            return new JsonResponse(['error' => 'Account is locked'], Response::HTTP_LOCKED, []);
         }
 
         if ($account->getActive() === false) {
-            return new JsonResponse('Account is not active', Response::HTTP_FORBIDDEN, []);
+            return new JsonResponse(['error' => 'Account is not active'], Response::HTTP_FORBIDDEN, []);
         }
 
         $token->setAccount($account);
@@ -147,11 +147,11 @@ class LoginController extends AbstractController
         }
 
         if ($account->getLocked() === true) {
-            return new JsonResponse('Account is locked', Response::HTTP_LOCKED, []);
+            return new JsonResponse(['error' => 'Account is locked'], Response::HTTP_LOCKED, []);
         }
 
         if ($account->getActive() === false) {
-            return new JsonResponse('Account is not active', Response::HTTP_FORBIDDEN, []);
+            return new JsonResponse(['error' => 'Account is not active'], Response::HTTP_FORBIDDEN, []);
         }
 
         $token->setAccount($account);
