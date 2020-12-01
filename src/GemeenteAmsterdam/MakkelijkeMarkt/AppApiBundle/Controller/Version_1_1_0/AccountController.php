@@ -44,6 +44,7 @@ class AccountController extends Controller
      *  },
      *  views = { "default", "1.1.0" }
      * )
+     * @Security("has_role('ROLE_SENIOR')")
      */
     public function listAction(Request $request)
     {
