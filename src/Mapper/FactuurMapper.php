@@ -47,7 +47,7 @@ class FactuurMapper
 
     /**
      * @param \App\Entity\Factuur $list
-     * @return \App\Model\FactuurModel
+     * @return \App\Model\FactuurModel[]
      */
     public function multipleEntityToModel($list)
     {

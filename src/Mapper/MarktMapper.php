@@ -13,7 +13,6 @@ namespace App\Mapper;
 
 use App\Entity\Markt;
 use App\Model\MarktModel;
-use App\Model\SimpleMarktModel;
 
 class MarktMapper
 {
@@ -59,21 +58,8 @@ class MarktMapper
     }
 
     /**
-     * @param Markt $e
-     * @return \App\Model\SimpleMarktModel
-     */
-    public function singleEntityToSimpleModel(Markt $e)
-    {
-        $object = new SimpleMarktModel();
-        $object->id = $e->getId();
-        $object->naam = $e->getNaam();
-        $object->afkorting = $e->getAfkorting();
-        return $object;
-    }
-
-    /**
      * @param \App\Entity\Markt $list
-     * @return \App\Model\MarktModel
+     * @return \App\Model\MarktModel[]
      */
     public function multipleEntityToModel($list)
     {
@@ -81,20 +67,6 @@ class MarktMapper
         foreach ($list as $e) {
             /* @var $e Markt */
             $result[] = $this->singleEntityToModel($e);
-        }
-        return $result;
-    }
-
-    /**
-     * @param \App\Entity\Markt $list
-     * @return \App\Model\SimpleMarktModel
-     */
-    public function multipleEntityToSimpleModel($list)
-    {
-        $result = [];
-        foreach ($list as $e) {
-            /* @var $e Markt */
-            $result[] = $this->singleEntityToSimpleModel($e);
         }
         return $result;
     }

@@ -16,6 +16,14 @@ class VervangerMapper
     protected $imagineCacheManager;
 
     /**
+     * @param CacheManager $imagineCacheManager
+     */
+    public function __construct(CacheManager $imagineCacheManager)
+    {
+        $this->imagineCacheManager = $imagineCacheManager;
+    }
+
+    /**
      * @param Vervanger $e
      * @return \App\Model\KoopmanModel
      */
@@ -47,7 +55,7 @@ class VervangerMapper
 
     /**
      * @param \App\Entity\Vervanger $list
-     * @return \App\Model\VervangerModel
+     * @return \App\Model\VervangerModel[]
      */
     public function multipleEntityToModel($list)
     {
@@ -57,13 +65,5 @@ class VervangerMapper
             $result[] = $this->singleEntityToModel($e);
         }
         return $result;
-    }
-
-    /**
-     * @param CacheManager $imagineCacheManager
-     */
-    public function setImagineCacheManager(CacheManager $imagineCacheManager)
-    {
-        $this->imagineCacheManager = $imagineCacheManager;
     }
 }

@@ -8,27 +8,27 @@ use App\Model\VergunningControleModel;
 class VergunningControleMapper
 {
     /**
-     * @var KoopmanMapper
+     * @var SimpleKoopmanMapper
      */
-    protected $mapperKoopman;
+    private $mapperSimpleKoopman;
 
     /**
-     * @var SollicitatieMapper
+     * @var SimpleSollicitatieMapper
      */
-    protected $mapperSollicitatie;
+    private $mapperSimpleSollicitatie;
 
     /**
      * @var AccountMapper
      */
-    protected $mapperAccount;
+    private $mapperAccount;
 
     public function __construct(
-        KoopmanMapper $koopmanMapper,
-        SollicitatieMapper $sollicitatieMapper,
+        SimpleKoopmanMapper $simpleKoopmanMapper,
+        SimpleSollicitatieMapper $simpleSollicitatieMapper,
         AccountMapper $accountMapper
     ) {
-        $this->mapperKoopman = $koopmanMapper;
-        $this->mapperSollicitatie = $sollicitatieMapper;
+        $this->mapperSimpleKoopman = $simpleKoopmanMapper;
+        $this->mapperSimpleSollicitatie = $simpleSollicitatieMapper;
         $this->mapperAccount = $accountMapper;
     }
 
@@ -44,7 +44,7 @@ class VergunningControleMapper
         $object->erkenningsnummerInvoerMethode = $e->getErkenningsnummerInvoerMethode();
         $object->registratieGeolocatie = $e->getRegistratieGeolocatie();
         if ($e->getVervanger() !== null) {
-            $object->vervanger = $this->mapperKoopman->singleEntityToSimpleModel($e->getVervanger());
+            $object->vervanger = $this->mapperSimpleKoopman->singleEntityToModel($e->getVervanger());
         }
         $object->aantal3MeterKramen = $e->getAantal3MeterKramen();
         $object->aantal4MeterKramen = $e->getAantal4MeterKramen();
@@ -66,7 +66,7 @@ class VergunningControleMapper
         $object->status = $e->getStatusSolliciatie();
         $object->ronde = $e->getRonde();
         if ($e->getSollicitatie() !== null) {
-            $object->sollicitatie = $this->mapperSollicitatie->singleEntityToSimpleModel($e->getSollicitatie());
+            $object->sollicitatie = $this->mapperSimpleSollicitatie->singleEntityToModel($e->getSollicitatie());
         }
         $object->totaleLengte = ($e->getAantal3MeterKramen() * 3) + ($e->getAantal4MeterKramen() * 4) + $e->getExtraMeters();
         $object->totaleLengteVast = ($e->getAantal3meterKramenVast() * 3) + ($e->getAantal4meterKramenVast() * 4) + $e->getExtraMeters();

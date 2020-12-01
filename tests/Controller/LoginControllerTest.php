@@ -105,4 +105,40 @@ class LoginControllerTest extends WebTestCase
         $this->assertEquals(['error' => 'Account is locked'], json_decode($response->getContent(), true));
     }
 
+    public function testLoginLogout()
+    {
+        // first request
+        $client = static::createClient();
+        $client->request('POST', '/api/1.1.0/login/basicUsername/', [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+        ], json_encode([
+            'username' => "account1@amsterdam.nl",
+            'password' => "Password1!",
+        ]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
+        $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
+        $uuid = $result['uuid'];
+        // second request
+        $client->request('GET', '/api/1.1.0/login/whoami/', [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ]);
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
+        $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
+        // third request
+        $client->request('GET', '/api/1.1.0/logout/', [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ]);
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
+        $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
+
+    }
+
 }

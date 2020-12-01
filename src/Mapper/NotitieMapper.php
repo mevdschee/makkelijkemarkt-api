@@ -17,16 +17,16 @@ use App\Model\NotitieModel;
 class NotitieMapper
 {
     /**
-     * @var MarktMapper
+     * @var SimpleMarktMapper
      */
-    protected $mapperMarkt;
+    private $mapperSimpleMarkt;
 
     /**
-     * @param MarktMapper $mapperMarkt
+     * @param SimpleMarktMapper $mapperSimpleMarkt
      */
-    public function setMarktMapper(MarktMapper $mapperMarkt)
+    public function __construct(SimpleMarktMapper $mapperSimpleMarkt)
     {
-        $this->mapperMarkt = $mapperMarkt;
+        $this->mapperSimpleMarkt = $mapperSimpleMarkt;
     }
 
     /**
@@ -43,7 +43,7 @@ class NotitieMapper
         $object->afgevinktStatus = $e->getAfgevinktStatus();
         $object->bericht = $e->getBericht();
         $object->dag = $e->getDag()->format('Y-m-d');
-        $object->markt = $this->mapperMarkt->singleEntityToSimpleModel($e->getMarkt());
+        $object->markt = $this->mapperSimpleMarkt->singleEntityToModel($e->getMarkt());
         $object->verwijderdDatumtijd = $e->getVerwijderdDatumtijd() === null ? null : $e->getVerwijderdDatumtijd()->format('Y-m-d H:i:s');
         $object->verwijderdStatus = $e->getVerwijderd();
         return $object;

@@ -24,7 +24,7 @@ class TokenMapper
     /**
      * @param AccountMapper $mapperAccount
      */
-    public function setAccountMapper(AccountMapper $mapperAccount)
+    public function __construct(AccountMapper $mapperAccount)
     {
         $this->mapperAccount = $mapperAccount;
     }

@@ -379,7 +379,7 @@ class Markt
     }
 
     /**
-     * @return string
+     * @return string[]
      */
     public function getAanwezigeOpties()
     {

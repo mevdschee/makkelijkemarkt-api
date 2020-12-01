@@ -17,46 +17,46 @@ use App\Model\DagvergunningModel;
 class DagvergunningMapper
 {
     /**
-     * @var MarktMapper
+     * @var SimpleMarktMapper
      */
-    protected $mapperMarkt;
+    private $mapperSimpleMarkt;
 
     /**
-     * @var KoopmanMapper
+     * @var SimpleKoopmanMapper
      */
-    protected $mapperKoopman;
+    private $mapperSimpleKoopman;
 
     /**
-     * @var SollicitatieMapper
+     * @var SollicitSimpleSollicitatieMapperatieMapper
      */
-    protected $mapperSollicitatie;
+    private $mapperSimpleSollicitatie;
 
     /**
      * @var FactuurMapper
      */
-    protected $mapperFactuur;
+    private $mapperFactuur;
 
     /**
      * @var AccountMapper
      */
-    protected $mapperAccount;
+    private $mapperAccount;
 
     /**
      * @var VergunningControleMapper
      */
-    protected $mapperVergunningControle;
+    private $mapperVergunningControle;
 
     public function __construct(
-        MarktMapper $marktMapper,
-        KoopmanMapper $koopmanMapper,
-        SollicitatieMapper $sollicitatieMapper,
+        SimpleMarktMapper $mapperSimpleMarkt,
+        SimpleKoopmanMapper $mapperSimpleKoopman,
+        SimpleSollicitatieMapper $mapperSimpleSollicitatie,
         AccountMapper $accountMapper,
         FactuurMapper $factuurMapper,
         VergunningControleMapper $vergunningControleMapper
     ) {
-        $this->mapperMarkt = $marktMapper;
-        $this->mapperKoopman = $koopmanMapper;
-        $this->mapperSollicitatie = $sollicitatieMapper;
+        $this->mapperSimpleMarkt = $mapperSimpleMarkt;
+        $this->mapperSimpleKoopman = $mapperSimpleKoopman;
+        $this->mapperSimpleSollicitatie = $mapperSimpleSollicitatie;
         $this->mapperAccount = $accountMapper;
         $this->mapperFactuur = $factuurMapper;
         $this->mapperVergunningControle = $vergunningControleMapper;
@@ -74,15 +74,15 @@ class DagvergunningMapper
         $object->erkenningsnummerInvoerMethode = $e->getErkenningsnummerInvoerMethode();
         $object->registratieGeolocatie = $e->getRegistratieGeolocatie();
         if ($e->getKoopman() !== null) {
-            $object->koopman = $this->mapperKoopman->singleEntityToSimpleModel($e->getKoopman());
+            $object->koopman = $this->mapperSimpleKoopman->singleEntityToModel($e->getKoopman());
         }
 
         if ($e->getVervanger() !== null) {
-            $object->vervanger = $this->mapperKoopman->singleEntityToSimpleModel($e->getVervanger());
+            $object->vervanger = $this->mapperSimpleKoopman->singleEntityToModel($e->getVervanger());
         }
 
         if ($e->getMarkt() !== null) {
-            $object->markt = $this->mapperMarkt->singleEntityToSimpleModel($e->getMarkt());
+            $object->markt = $this->mapperSimpleMarkt->singleEntityToModel($e->getMarkt());
         }
 
         $object->aantal3MeterKramen = $e->getAantal3MeterKramen();
@@ -117,7 +117,7 @@ class DagvergunningMapper
         $object->auditReason = $e->getAuditReason();
         $object->status = $e->getStatusSolliciatie();
         if ($e->getSollicitatie() !== null) {
-            $object->sollicitatie = $this->mapperSollicitatie->singleEntityToSimpleModel($e->getSollicitatie());
+            $object->sollicitatie = $this->mapperSimpleSollicitatie->singleEntityToModel($e->getSollicitatie());
         }
 
         $object->doorgehaald = $e->isDoorgehaald();
@@ -143,7 +143,7 @@ class DagvergunningMapper
 
     /**
      * @param \App\Entity\Dagvergunning $list
-     * @return \App\Model\DagvergunningModel
+     * @return \App\Model\DagvergunningModel[]
      */
     public function multipleEntityToModel($list)
     {

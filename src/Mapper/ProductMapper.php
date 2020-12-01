@@ -29,7 +29,7 @@ class ProductMapper
 
     /**
      * @param \App\Entity\Product $list
-     * @return \App\Model\ProductModel
+     * @return \App\Model\ProductModel[]
      */
     public function multipleEntityToModel($list)
     {

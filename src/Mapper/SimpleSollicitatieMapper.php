@@ -12,9 +12,9 @@
 namespace App\Mapper;
 
 use App\Entity\Sollicitatie;
-use App\Model\SollicitatieModel;
+use App\Model\SimpleSollicitatieModel;
 
-class SollicitatieMapper
+class SimpleSollicitatieMapper
 {
     /**
      * @var SimpleMarktMapper
@@ -22,30 +22,21 @@ class SollicitatieMapper
     private $mapperSimpleMarkt;
 
     /**
-     * @var SimpleKoopmanMapper
+     * @param SimpleMarktMapper $mapperSimpleMarkt
      */
-    private $mapperSimpleKoopman;
-
-    /**
-     * @param SimpleMarktMapper $mapperMarkt
-     * @param SimpleKoopmanMapper $mapperKoopman
-     */
-    public function __construct(SimpleMarktMapper $mapperSimpleMarkt, SimpleKoopmanMapper $mapperSimpleKoopman)
+    public function __construct(SimpleMarktMapper $mapperSimpleMarkt)
     {
         $this->mapperSimpleMarkt = $mapperSimpleMarkt;
-        $this->mapperSimpleKoopman = $mapperSimpleKoopman;
     }
 
     /**
      * @param Sollicitatie $e
-     * @return \App\Model\SollicitatieModel
+     * @return \App\Model\SimpleSollicitatieModel
      */
     public function singleEntityToModel(Sollicitatie $e)
     {
-        $object = new SollicitatieModel();
+        $object = new SimpleSollicitatieModel();
         $object->id = $e->getId();
-        $object->koopman = $this->mapperSimpleKoopman->singleEntityToModel($e->getKoopman());
-        $object->markt = $this->mapperSimpleMarkt->singleEntityToModel($e->getMarkt());
         $object->sollicitatieNummer = $e->getSolliciatieNummer();
         $object->status = $e->getStatus();
         $object->aantal3MeterKramen = $e->getAantal3MeterKramen();
@@ -57,13 +48,14 @@ class SollicitatieMapper
         $object->krachtstroom = $e->getKrachtstroom();
         $object->doorgehaald = $e->getDoorgehaald();
         $object->doorgehaaldReden = $e->getDoorgehaaldReden();
+        $object->markt = $this->mapperSimpleMarkt->singleEntityToModel($e->getMarkt());
         $object->koppelveld = $e->getKoppelveld();
         return $object;
     }
 
     /**
      * @param \App\Entity\Sollicitatie $list
-     * @return \App\Model\SollicitatieModel[]
+     * @return \App\Model\SimpleSollicitatieModel[]
      */
     public function multipleEntityToModel($list)
     {
@@ -74,4 +66,5 @@ class SollicitatieMapper
         }
         return $result;
     }
+
 }

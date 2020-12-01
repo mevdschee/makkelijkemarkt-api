@@ -20,6 +20,7 @@ security:
         secured_area:
             pattern: ^/api
             provider: api_key_user_provider
+            stateless: true
             logout: ~
             guard:
                 authenticators:

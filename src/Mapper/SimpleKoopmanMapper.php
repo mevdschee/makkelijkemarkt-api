@@ -12,27 +12,11 @@
 namespace App\Mapper;
 
 use App\Entity\Koopman;
-use App\Model\KoopmanModel;
+use App\Model\SimpleKoopmanModel;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 
-class KoopmanMapper
+class SimpleKoopmanMapper
 {
-    /**
-     * @var string
-     */
-    public static $statussen = [
-        Koopman::STATUS_ACTIEF => 'Actief',
-        Koopman::STATUS_ONBEKEND => 'Onbekend',
-        Koopman::STATUS_VERWIJDERD => 'Verwijderd',
-        Koopman::STATUS_WACHTER => 'Wachter',
-        Koopman::STATUS_VERVANGER => 'Vervanger',
-    ];
-
-    /**
-     * @var SimpleSollicitatieMapper
-     */
-    private $mapperSimpleSolliciatie;
-
     /**
      * @var VervangerMapper
      */
@@ -44,38 +28,27 @@ class KoopmanMapper
     private $imagineCacheManager;
 
     /**
-     * @param SimpleSollicitatieMapper $mapperSimpleSolliciatie
      * @param VervangerMapper $mapperVervanger
      * @param CacheManager $imagineCacheManager
      */
-    public function __construct(SimpleSollicitatieMapper $mapperSimpleSolliciatie, VervangerMapper $mapperVervanger)
+    public function __construct(VervangerMapper $mapperVervanger, CacheManager $imagineCacheManager)
     {
-        $this->mapperSimpleSolliciatie = $mapperSimpleSolliciatie;
         $this->mapperVervanger = $mapperVervanger;
-        $this->imagineCacheManager = null;
+        $this->imagineCacheManager = $imagineCacheManager;
     }
 
     /**
      * @param Koopman $e
-     * @return \App\Model\KoopmanModel
+     * @return \App\Model\SimpleKoopmanModel
      */
     public function singleEntityToModel(Koopman $e)
     {
-        $object = new KoopmanModel();
+        $object = new SimpleKoopmanModel();
         $object->voorletters = $e->getVoorletters();
         $object->tussenvoegsels = $e->getTussenvoegsels();
         $object->achternaam = $e->getAchternaam();
-        $object->telefoon = $e->getTelefoon();
-        $object->email = $e->getEmail();
         $object->id = $e->getId();
         $object->erkenningsnummer = $e->getErkenningsnummer();
-        $object->weging = $e->calculateWeging();
-
-        if ($e->getHandhavingsVerzoek() !== null) {
-            $object->handhavingsVerzoek = $e->getHandhavingsVerzoek()->format('Y-m-d');
-        }
-
-        $object->perfectViewNummer = $e->getPerfectViewNummer();
         if ($e->getFoto() !== '' && $e->getFoto() !== null) {
             $object->fotoUrl = $this->imagineCacheManager->getBrowserPath('koopman-fotos/' . $e->getFoto(), 'koopman_rect_small');
         }
@@ -84,16 +57,20 @@ class KoopmanMapper
             $object->fotoMediumUrl = $this->imagineCacheManager->getBrowserPath('koopman-fotos/' . $e->getFoto(), 'koopman_rect_medium');
         }
 
-        $object->status = self::$statussen[$e->getStatus()];
-        $object->sollicitaties = $this->mapperSimpleSolliciatie->multipleEntityToModel($e->getSollicitaties());
+        $object->status = KoopmanMapper::$statussen[$e->getStatus()];
+        $object->telefoon = $e->getTelefoon();
+        $object->email = $e->getEmail();
         $object->pasUid = $e->getPasUid();
         $object->vervangers = $this->mapperVervanger->multipleEntityToModel($e->getVervangersVan());
+        if ($e->getHandhavingsVerzoek() !== null) {
+            $object->handhavingsVerzoek = $e->getHandhavingsVerzoek()->format('Y-m-d');
+        }
         return $object;
     }
 
     /**
-     * @param \App\Entity\Koopman $list
-     * @return \App\Model\KoopmanModel[]
+     * @param \App\Entity\Koopman[] $list
+     * @return \App\Model\SimpleKoopmanModel[]
      */
     public function multipleEntityToModel($list)
     {
