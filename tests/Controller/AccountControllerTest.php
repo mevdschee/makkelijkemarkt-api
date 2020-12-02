@@ -63,7 +63,7 @@ class AccountControllerTest extends LoginWebTestCase
         $this->assertEquals(['error' => 'Access Denied by controller annotation @IsGranted("ROLE_SENIOR")'], $result);
     }
 
-    public function testGetAccountAsSeniorNonExisting()
+    public function testGetNonExistingAccountAsSenior()
     {
         $client = static::createClient();
         $uuid = $this->getTokenUuid($client, 'ROLE_SENIOR');
@@ -77,7 +77,7 @@ class AccountControllerTest extends LoginWebTestCase
         $this->assertEquals(['error' => 'No account with id 0'], $result);
     }
 
-    public function testGetAccountAsSeniorExisting()
+    public function testGetExistingAccountAsSenior()
     {
         $client = static::createClient();
         $uuid = $this->getTokenUuid($client, 'ROLE_SENIOR');
