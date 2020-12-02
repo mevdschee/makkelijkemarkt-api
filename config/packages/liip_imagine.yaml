@@ -6,7 +6,7 @@ liip_imagine:
     loaders:
         default:
             filesystem:
-                data_root: %kernel.data_dir%/
+                data_root: "%kernel.project_dir%/data/"
     resolvers:
        default:
           web_path: ~
