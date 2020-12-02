@@ -16,29 +16,19 @@ use App\Entity\Factuur;
 use App\Entity\Product;
 use App\Entity\Sollicitatie;
 use App\Entity\Tariefplan;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\BtwTariefRepository;
 
 class ConcreetplanFactuurService
 {
 
     /**
-     * @var EntityManagerInterface
+     * @var BtwTariefRepository
      */
-    protected $em;
+    private $btwTariefRepository;
 
-    /**
-     * @var Factuur
-     */
-    protected $factuur;
-
-    /**
-     * @var Tariefplan
-     */
-    protected $tariefplan;
-
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(BtwTariefRepository $btwTariefRepository)
     {
-        $this->em = $em;
+        $this->btwTariefRepository = $btwTariefRepository;
     }
 
     /**
@@ -48,33 +38,31 @@ class ConcreetplanFactuurService
      */
     public function createFactuur(Dagvergunning $dagvergunning, Tariefplan $tariefplan)
     {
-        $this->tariefplan = $tariefplan;
-        $this->factuur = new Factuur();
-        $this->factuur->setDagvergunning($dagvergunning);
-        $dagvergunning->setFactuur($this->factuur);
+        $factuur = new Factuur();
+        $factuur->setDagvergunning($dagvergunning);
+        $dagvergunning->setFactuur($factuur);
 
-        list($totaalMeters, $totaalKramen) = $this->berekenMeters($dagvergunning);
+        list($totaalMeters, $totaalKramen) = $this->berekenMeters($dagvergunning, $tariefplan, $factuur);
 
-        $this->berekenElektra($dagvergunning);
+        $this->berekenElektra($dagvergunning, $tariefplan, $factuur);
 
-        $this->berekenEenmaligElektra($dagvergunning);
+        $this->berekenEenmaligElektra($dagvergunning, $tariefplan, $factuur);
 
-        $this->berekenPromotiegelden($totaalMeters, $totaalKramen, $dagvergunning);
+        $this->berekenPromotiegelden($dagvergunning, $tariefplan, $factuur, $totaalMeters, $totaalKramen);
 
-        $btwRepo = $this->em->getRepository('AppApiBundle:BtwTarief');
         $dag = $dagvergunning->getDag();
 
-        $btwTarief = $btwRepo->findOneBy(array('jaar' => $dag->format('Y')));
+        $btwTarief = $this->btwTariefRepository->findOneBy(array('jaar' => $dag->format('Y')));
         $btw = null !== $btwTarief ? $btwTarief->getHoog() : 0;
 
-        $this->berekenAfvaleilanden($dagvergunning, $btw);
+        $this->berekenAfvaleilanden($dagvergunning, $tariefplan, $factuur, $btw);
 
-        return $this->factuur;
+        return $factuur;
     }
 
-    protected function berekenMeters(Dagvergunning $dagvergunning)
+    protected function berekenMeters(Dagvergunning $dagvergunning, Tariefplan $tariefplan, Factuur $factuur)
     {
-        $concreetplan = $this->tariefplan->getConcreetplan();
+        $concreetplan = $tariefplan->getConcreetplan();
 
         $meters[4] = $dagvergunning->getAantal4MeterKramen();
         $meters[3] = $dagvergunning->getAantal3MeterKramen();
@@ -106,19 +94,19 @@ class ConcreetplanFactuurService
                 $product = new Product();
                 $product->setNaam('4 meter plaats (vast)');
                 $product->setBedrag(0);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($facturabeleMeters);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
             if ($nietFacturabeleMeters >= 1) {
                 $product = new Product();
                 $product->setNaam('4 meter plaats');
                 $product->setBedrag($vierMeter);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($nietFacturabeleMeters);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
         }
 
@@ -141,19 +129,19 @@ class ConcreetplanFactuurService
                 $product = new Product();
                 $product->setNaam('3 meter plaats (vast)');
                 $product->setBedrag(0);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($facturabeleMeters);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
             if ($nietFacturabeleMeters >= 1) {
                 $product = new Product();
                 $product->setNaam('3 meter plaats');
                 $product->setBedrag($drieMeter);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($nietFacturabeleMeters);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
         }
 
@@ -175,28 +163,28 @@ class ConcreetplanFactuurService
                 $product = new Product();
                 $product->setNaam('extra meter (vast)');
                 $product->setBedrag(0);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($facturabeleMeters);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
             if ($nietFacturabeleMeters >= 1) {
                 $product = new Product();
                 $product->setNaam('extra meter');
                 $product->setBedrag($eenMeter);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($nietFacturabeleMeters);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
         }
 
         return [$totaalMeters, $totaalKramen];
     }
 
-    protected function berekenElektra(Dagvergunning $dagvergunning)
+    protected function berekenElektra(Dagvergunning $dagvergunning, Tariefplan $tariefplan, Factuur $factuur)
     {
-        $concreetplan = $this->tariefplan->getConcreetplan();
+        $concreetplan = $tariefplan->getConcreetplan();
 
         $vast = $dagvergunning->getAantalElektraVast();
         $afname = $dagvergunning->getAantalElektra();
@@ -207,26 +195,26 @@ class ConcreetplanFactuurService
                 $product = new Product();
                 $product->setNaam('elektra (vast)');
                 $product->setBedrag(0);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($vast);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
             if ($afname >= 1) {
                 $product = new Product();
                 $product->setNaam('elektra');
                 $product->setBedrag($kosten);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($afname);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
         }
     }
 
-    protected function berekenEenmaligElektra(Dagvergunning $dagvergunning)
+    protected function berekenEenmaligElektra(Dagvergunning $dagvergunning, Tariefplan $tariefplan, Factuur $factuur)
     {
-        $concreetplan = $this->tariefplan->getConcreetplan();
+        $concreetplan = $tariefplan->getConcreetplan();
 
         $eenmaligElektra = $dagvergunning->getEenmaligElektra();
         $kosten = $concreetplan->getEenmaligElektra();
@@ -235,25 +223,25 @@ class ConcreetplanFactuurService
                 $product = new Product();
                 $product->setNaam('eenmalige elektra (vast)');
                 $product->setBedrag(0);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal(1);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             } else {
                 $product = new Product();
                 $product->setNaam('eenmalige elektra');
                 $product->setBedrag($kosten);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal(1);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
         }
     }
 
-    protected function berekenPromotiegelden($meters, $kramen, Dagvergunning $dagvergunning)
+    protected function berekenPromotiegelden(Dagvergunning $dagvergunning, Tariefplan $tariefplan, Factuur $factuur, $meters, $kramen)
     {
-        $concreetplan = $this->tariefplan->getConcreetplan();
+        $concreetplan = $tariefplan->getConcreetplan();
 
         $metersvast[4] = $dagvergunning->getAantal4meterKramenVast();
         $metersvast[3] = $dagvergunning->getAantal3meterKramenVast();
@@ -267,18 +255,18 @@ class ConcreetplanFactuurService
                 $product = new Product();
                 $product->setNaam('promotiegelden per koopman (vast)');
                 $product->setBedrag(0);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($kramen);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             } else {
                 $product = new Product();
                 $product->setNaam('promotiegelden per koopman');
                 $product->setBedrag($perKraam);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($kramen);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
         }
 
@@ -289,26 +277,26 @@ class ConcreetplanFactuurService
                 $product = new Product();
                 $product->setNaam('promotiegelden per meter (vast)');
                 $product->setBedrag(0);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($vasteMeters);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
             if ($meters >= 1) {
                 $product = new Product();
                 $product->setNaam('promotiegelden per meter');
                 $product->setBedrag($perMeter);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($meters);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
         }
     }
 
-    protected function berekenAfvaleilanden(Dagvergunning $dagvergunning, $btw)
+    protected function berekenAfvaleilanden(Dagvergunning $dagvergunning, Tariefplan $tariefplan, Factuur $factuur, $btw)
     {
-        $lineairplan = $this->tariefplan->getConcreetplan();
+        $lineairplan = $tariefplan->getConcreetplan();
 
         $vast = $dagvergunning->getAfvaleilandVast();
         $afname = $dagvergunning->getAfvaleiland();
@@ -319,19 +307,19 @@ class ConcreetplanFactuurService
                 $product = new Product();
                 $product->setNaam('afvaleiland (vast)');
                 $product->setBedrag(0);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($vast);
                 $product->setBtwHoog(0);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
             if ($afname >= 1) {
                 $product = new Product();
                 $product->setNaam('afvaleiland');
                 $product->setBedrag($kosten);
-                $product->setFactuur($this->factuur);
+                $product->setFactuur($factuur);
                 $product->setAantal($afname);
                 $product->setBtwHoog($btw);
-                $this->factuur->addProducten($product);
+                $factuur->addProducten($product);
             }
         }
     }

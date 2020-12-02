@@ -17,9 +17,16 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class TariefplanRepository extends ServiceEntityRepository
 {
+    /**
+     * @var EntityManagerInterface $em
+     */
+
+    private $em;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Tariefplan::class);
+        $this->em = $registry->getManager();
     }
 
     /**
@@ -30,15 +37,13 @@ class TariefplanRepository extends ServiceEntityRepository
      */
     public function findByMarktAndDag($markt, $dag)
     {
-        $em = $this->getEntityManagerInterface();
-
         $dql = 'SELECT t
-                FROM AppApiBundle:Tariefplan t
+                FROM App:Tariefplan t
                 WHERE t.markt = :markt
                 AND   t.geldigVanaf <= :dag
                 AND   t.geldigTot   >= :dag';
 
-        $query = $em->createQuery($dql)
+        $query = $this->em->createQuery($dql)
             ->setParameters(array(
                 'markt' => $markt,
                 'dag' => $dag,

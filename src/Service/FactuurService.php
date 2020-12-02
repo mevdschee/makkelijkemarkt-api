@@ -15,6 +15,7 @@ use App\Entity\Dagvergunning;
 use App\Entity\Factuur;
 use App\Entity\Product;
 use App\Exception\FactuurServiceException;
+use App\Repository\TariefplanRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class FactuurService
@@ -23,24 +24,32 @@ class FactuurService
     /**
      * @var EntityManagerInterface
      */
-    protected $em;
+    private $em;
 
     /**
      * @var ConcreetplanFactuurService
      */
-    protected $concreetplanService;
+    private $concreetplanService;
 
     /**
      * @var LineairplanFactuurService
      */
-    protected $lineairplanService;
+    private $lineairplanService;
+
+    /**
+     * @var TariefplanRepository
+     */
+    private $tariefplanRepository;
 
     public function __construct(EntityManagerInterface $em,
         ConcreetplanFactuurService $concreetplanService,
-        LineairplanFactuurService $lineairplanService) {
+        LineairplanFactuurService $lineairplanService,
+        TariefplanRepository $tariefplanRepository
+    ) {
         $this->em = $em;
         $this->concreetplanService = $concreetplanService;
         $this->lineairplanService = $lineairplanService;
+        $this->tariefplanRepository = $tariefplanRepository;
     }
 
     /**
@@ -49,9 +58,7 @@ class FactuurService
      */
     public function createFactuur(Dagvergunning $dagvergunning)
     {
-        $tariefplanRepo = $this->em->getRepository('AppApiBundle:Tariefplan');
-
-        $tariefplan = $tariefplanRepo->findByMarktAndDag($dagvergunning->getMarkt(), $dagvergunning->getDag());
+        $tariefplan = $this->tariefplanRepository->findByMarktAndDag($dagvergunning->getMarkt(), $dagvergunning->getDag());
 
         if (null === $tariefplan) {
             return null;

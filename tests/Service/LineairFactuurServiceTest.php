@@ -147,6 +147,7 @@ class LineairFactuurServiceTest extends KernelTestCase
         $dagvergunning->setAantal3meterKramenVast(2);
         $dagvergunning->setAantal4MeterKramen(3);
         $dagvergunning->setAantal4meterKramenVast(2);
+        $dagvergunning->setAfvaleiland(0);
         $dagvergunning->setAantalElektra(2);
         $dagvergunning->setAantalElektraVast(1);
         $dagvergunning->setRegistratieAccount($this->account);
@@ -222,6 +223,10 @@ class LineairFactuurServiceTest extends KernelTestCase
         $lineairplan->setToeslagBedrijfsafvalPerMeter(0.10);
         $lineairplan->setPromotieGeldenPerMeter(0.10);
         $lineairplan->setPromotieGeldenPerKraam(0);
+        $lineairplan->setAfvaleiland(0);
+        $lineairplan->setEenmaligElektra(0);
+        $lineairplan->setElektra(0);
+        $lineairplan->setEenmaligElektra(0);
 
         $tariefplan->setLineairplan($lineairplan);
         $lineairplan->setTariefplan($tariefplan);
@@ -239,6 +244,7 @@ class LineairFactuurServiceTest extends KernelTestCase
         $sollicitatie->setStatus(Sollicitatie::STATUS_SOLL);
         $inschrijfdatum = new \DateTime('1995-03-02');
         $sollicitatie->setInschrijfDatum($inschrijfdatum);
+        $sollicitatie->setAantalAfvaleilanden(0);
         $sollicitatie->setDoorgehaald(false);
         $sollicitatie->setPerfectViewNummer(9000000);
         return $sollicitatie;
@@ -254,6 +260,9 @@ class LineairFactuurServiceTest extends KernelTestCase
         $account->setEmail('test@dev.null');
         $account->setUsername('test@dev.null');
         $account->setPassword('abcd');
+        $account->setAttempts(0);
+        $account->setActive(true);
+        $account->setLocked(false);
         $account->setRole(Roles::ROLE_USER);
         return $account;
     }

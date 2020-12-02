@@ -147,6 +147,7 @@ class ConcreetFactuurServiceTest extends KernelTestCase
         $dagvergunning->setAantal3meterKramenVast(2);
         $dagvergunning->setAantal4MeterKramen(3);
         $dagvergunning->setAantal4meterKramenVast(2);
+        $dagvergunning->setAfvaleiland(0);
         $dagvergunning->setAantalElektra(2);
         $dagvergunning->setAantalElektraVast(1);
         $dagvergunning->setRegistratieAccount($this->account);
@@ -219,6 +220,9 @@ class ConcreetFactuurServiceTest extends KernelTestCase
         $concreetplan->setEenMeter(2.65);
         $concreetplan->setDrieMeter(7.95);
         $concreetplan->setVierMeter(10.6);
+        $concreetplan->setAfvaleiland(0);
+        $concreetplan->setEenmaligElektra(0);
+        $concreetplan->setElektra(0);
         $concreetplan->setPromotieGeldenPerMeter(0.10);
 
         $concreetplan->setElektra(1.80);
@@ -240,6 +244,7 @@ class ConcreetFactuurServiceTest extends KernelTestCase
         $sollicitatie->setStatus(Sollicitatie::STATUS_SOLL);
         $inschrijfdatum = new \DateTime('1995-03-02');
         $sollicitatie->setInschrijfDatum($inschrijfdatum);
+        $sollicitatie->setAantalAfvaleilanden(0);
         $sollicitatie->setDoorgehaald(false);
         $sollicitatie->setPerfectViewNummer(9000000);
         return $sollicitatie;
@@ -255,6 +260,9 @@ class ConcreetFactuurServiceTest extends KernelTestCase
         $account->setEmail('test@dev.null');
         $account->setUsername('test@dev.null');
         $account->setPassword('abcd');
+        $account->setAttempts(0);
+        $account->setActive(true);
+        $account->setLocked(false);
         $account->setRole(Roles::ROLE_USER);
         return $account;
     }
