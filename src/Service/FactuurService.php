@@ -15,6 +15,9 @@ use App\Entity\Dagvergunning;
 use App\Entity\Factuur;
 use App\Entity\Product;
 use App\Exception\FactuurServiceException;
+use App\Repository\KoopmanRepository;
+use App\Repository\MarktRepository;
+use App\Repository\SollicitatieRepository;
 use App\Repository\TariefplanRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -41,15 +44,36 @@ class FactuurService
      */
     private $tariefplanRepository;
 
+    /**
+     * @var MarktRepository
+     */
+    private $marktRepository;
+
+    /**
+     * @var KoopmanRepository
+     */
+    private $koopmanRepository;
+
+    /**
+     * @var SollicitatieRepository
+     */
+    private $sollicitatieRepository;
+
     public function __construct(EntityManagerInterface $em,
         ConcreetplanFactuurService $concreetplanService,
         LineairplanFactuurService $lineairplanService,
-        TariefplanRepository $tariefplanRepository
+        TariefplanRepository $tariefplanRepository,
+        MarktRepository $marktRepository,
+        KoopmanRepository $koopmanRepository,
+        SollicitatieRepository $sollicitatieRepository
     ) {
         $this->em = $em;
         $this->concreetplanService = $concreetplanService;
         $this->lineairplanService = $lineairplanService;
         $this->tariefplanRepository = $tariefplanRepository;
+        $this->marktRepository = $marktRepository;
+        $this->koopmanRepository = $koopmanRepository;
+        $this->sollicitatieRepository = $sollicitatieRepository;
     }
 
     /**
@@ -138,11 +162,8 @@ class FactuurService
         // create object
         $dagvergunning = new Dagvergunning();
 
-        $repoMarkt = $this->em->getRepository('AppApiBundle:Markt');
-        $repoKoopman = $this->em->getRepository('AppApiBundle:Koopman');
-
         // lookup markt
-        $markt = $repoMarkt->getById($marktId);
+        $markt = $this->marktRepository->getById($marktId);
         if ($markt === null) {
             return new FactuurServiceException(['No markt with id ' . $marktId . ' found']);
         }
@@ -157,13 +178,13 @@ class FactuurService
         $dagvergunning->setErkenningsnummerInvoerMethode($erkenningsnummerInvoerMethode);
 
         // lookup koopman
-        $koopman = $repoKoopman->getByErkenningsnummer(str_replace('.', '', $erkenningsnummer));
+        $koopman = $this->koopmanRepository->getByErkenningsnummer(str_replace('.', '', $erkenningsnummer));
         if ($koopman !== null) {
             $dagvergunning->setKoopman($koopman);
         }
 
         if (null !== $vervangerErkenningsnummer) {
-            $vervanger = $repoKoopman->getByErkenningsnummer(str_replace('.', '', $vervangerErkenningsnummer));
+            $vervanger = $this->koopmanRepository->getByErkenningsnummer(str_replace('.', '', $vervangerErkenningsnummer));
             if ($vervanger !== null) {
                 $dagvergunning->setVervanger($vervanger);
             }
@@ -197,8 +218,7 @@ class FactuurService
         $dagvergunning->setNotitie($notitie);
 
         // sollicitatie koppeling
-        $sollicitatieRepository = $this->em->getRepository('AppApiBundle:Sollicitatie');
-        $sollicitatie = $sollicitatieRepository->getByMarktAndErkenningsNummer($markt, $erkenningsnummer, false);
+        $sollicitatie = $this->sollicitatieRepository->getByMarktAndErkenningsNummer($markt, $erkenningsnummer, false);
         if ($sollicitatie !== null) {
             $dagvergunning->setAantal3meterKramenVast($sollicitatie->getAantal3MeterKramen());
             $dagvergunning->setAantal4meterKramenVast($sollicitatie->getAantal4MeterKramen());
