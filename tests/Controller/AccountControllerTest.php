@@ -116,10 +116,7 @@ class AccountControllerTest extends LoginWebTestCase
         $client->request('POST', "/api/1.1.0/account/", [], [], [
             'HTTP_MmAppKey' => 'testkey',
             'HTTP_Authorization' => "Bearer $uuid",
-        ], json_encode([
-            'username' => "new.account@amsterdam.nl",
-            'password' => "NewPassword!",
-        ]));
+        ], json_encode([]));
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
         $this->assertNotNull($result);
@@ -135,13 +132,46 @@ class AccountControllerTest extends LoginWebTestCase
             'HTTP_Authorization' => "Bearer $uuid",
         ], json_encode([
             'naam' => "NewAccount",
-            'username' => "new.account@amsterdam.nl",
-            'password' => "NewPassword!",
         ]));
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
         $this->assertNotNull($result);
         $this->assertEquals(['error' => 'Required field email is missing'], $result);
+    }
+
+    public function testCreateNewAccountAsAdminWithoutUsername()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_ADMIN');
+        $client->request('POST', "/api/1.1.0/account/", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([
+            'naam' => "NewAccount",
+            'email' => "new.account@amsterdam.nl",
+        ]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Required field username is missing'], $result);
+    }
+
+    public function testCreateNewAccountAsAdminWithoutPassword()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_ADMIN');
+        $client->request('POST', "/api/1.1.0/account/", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([
+            'naam' => "NewAccount",
+            'email' => "new.account@amsterdam.nl",
+            'username' => "new.account@amsterdam.nl",
+        ]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Required field password is missing'], $result);
     }
 
     public function testCreateNewAccountAsAdminWithoutRole()
@@ -173,9 +203,9 @@ class AccountControllerTest extends LoginWebTestCase
         ], json_encode([
             'naam' => "NewAccount",
             'email' => "new.account@amsterdam.nl",
-            'role' => 'ROLE_UNKNOWN_ROLE',
             'username' => "new.account@amsterdam.nl",
             'password' => "NewPassword!",
+            'role' => 'ROLE_UNKNOWN_ROLE',
         ]));
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
@@ -193,9 +223,9 @@ class AccountControllerTest extends LoginWebTestCase
         ], json_encode([
             'naam' => "Account0",
             'email' => "account0@amsterdam.nl",
-            'role' => 'ROLE_USER',
             'username' => "account0@amsterdam.nl",
             'password' => "Password0!",
+            'role' => 'ROLE_USER',
         ]));
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
@@ -214,9 +244,9 @@ class AccountControllerTest extends LoginWebTestCase
         ], json_encode([
             'naam' => "AccountTime",
             'email' => "$time@amsterdam.nl",
-            'role' => 'ROLE_USER',
             'username' => "$time@amsterdam.nl",
             'password' => "PasswordTime!",
+            'role' => 'ROLE_USER',
         ]));
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
