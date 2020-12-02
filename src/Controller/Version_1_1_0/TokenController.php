@@ -46,7 +46,7 @@ class TokenController extends AbstractController
     ) {
         $account = $repoAccount->find($accountId);
         if ($account === null) {
-            throw $this->createNotFoundException('Account unknown');
+            return new JsonResponse(['error' => 'Cannot find account with id ' . $accountId], Response::HTTP_NOT_FOUND);
         }
 
         $results = $repoToken->search($account, $request->query->get('listOffset'), $request->query->get('listLength', 100));

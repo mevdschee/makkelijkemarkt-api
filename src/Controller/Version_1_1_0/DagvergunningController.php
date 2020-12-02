@@ -13,6 +13,7 @@ namespace App\Controller\Version_1_1_0;
 
 use App\Exception\FactuurServiceException;
 use App\Mapper\DagvergunningMapper;
+use App\Mapper\FactuurMapper;
 use App\Repository\DagvergunningRepository;
 use App\Repository\KoopmanRepository;
 use App\Service\FactuurService;
@@ -55,7 +56,7 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="registratieGeolocatie", in="body", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string"))
      * @IsGranted("ROLE_USER")
      */
-    public function conceptAction(Request $request)
+    public function conceptAction(FactuurService $factuurService, FactuurMapper $factuurMapper, Request $request)
     {
         $message = json_decode($request->getContent(false), true);
 
@@ -65,19 +66,19 @@ class DagvergunningController extends AbstractController
         }
 
         if (isset($message['marktId']) === false) {
-            return new JsonResponse(['error' => 'Required field marktId is missing']);
+            return new JsonResponse(['error' => 'Required field marktId is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['dag']) === false) {
-            return new JsonResponse(['error' => 'Required field dag is missing']);
+            return new JsonResponse(['error' => 'Required field dag is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['erkenningsnummer']) === false) {
-            return new JsonResponse(['error' => 'Required field erkenningsnummer is missing']);
+            return new JsonResponse(['error' => 'Required field erkenningsnummer is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['aanwezig']) === false) {
-            return new JsonResponse(['error' => 'Required field aanwezig is missing']);
+            return new JsonResponse(['error' => 'Required field aanwezig is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         // set defaults
@@ -133,8 +134,6 @@ class DagvergunningController extends AbstractController
             $message['vervangerErkenningsnummer'] = null;
         }
 
-        $factuurService = $this->get('appapi.factuurservice');
-
         try {
             $dagvergunning = $factuurService->createDagvergunning(
                 $message['marktId'],
@@ -160,11 +159,8 @@ class DagvergunningController extends AbstractController
             return new JsonResponse(['error' => $e->getMessage()]);
         }
 
-        /* @var $mapper \App\Mapper\FactuurMapper */
-        $mapper = $this->get('appapi.mapper.factuur');
-
         $factuur = $factuurService->createFactuur($dagvergunning);
-        $response = $mapper->singleEntityToModel($factuur);
+        $response = $factuurMapper->singleEntityToModel($factuur);
 
         return new JsonResponse($response, Response::HTTP_OK);
     }
@@ -192,7 +188,7 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="registratieGeolocatie", in="body", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string"))
      * @IsGranted("ROLE_USER")
      */
-    public function createAction(EntityManagerInterface $em, Request $request)
+    public function createAction(EntityManagerInterface $em, FactuurService $factuurService, DagvergunningMapper $dagvergunningMapper, Request $request)
     {
         $message = json_decode($request->getContent(false), true);
 
@@ -202,19 +198,19 @@ class DagvergunningController extends AbstractController
         }
 
         if (isset($message['marktId']) === false) {
-            return new JsonResponse(['error' => 'Required field marktId is missing']);
+            return new JsonResponse(['error' => 'Required field marktId is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['dag']) === false) {
-            return new JsonResponse(['error' => 'Required field dag is missing']);
+            return new JsonResponse(['error' => 'Required field dag is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['erkenningsnummer']) === false) {
-            return new JsonResponse(['error' => 'Required field erkenningsnummer is missing']);
+            return new JsonResponse(['error' => 'Required field erkenningsnummer is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         if (isset($message['aanwezig']) === false) {
-            return new JsonResponse(['error' => 'Required field aanwezig is missing']);
+            return new JsonResponse(['error' => 'Required field aanwezig is missing'], Response::HTTP_PRECONDITION_FAILED);
         }
 
         // set defaults
@@ -269,8 +265,6 @@ class DagvergunningController extends AbstractController
         if (isset($message['vervangerErkenningsnummer']) === false) {
             $message['vervangerErkenningsnummer'] = null;
         }
-
-        $factuurService = $this->get('appapi.factuurservice');
 
         try {
             $dagvergunning = $factuurService->createDagvergunning(
@@ -300,11 +294,10 @@ class DagvergunningController extends AbstractController
         $em->persist($dagvergunning);
         $em->flush();
 
-        $factuurService = $this->get('appapi.factuurservice');
         $factuur = $factuurService->createFactuur($dagvergunning);
         $factuurService->saveFactuur($factuur);
 
-        $result = $this->get('appapi.mapper.dagvergunning')->singleEntityToModel($dagvergunning);
+        $result = $dagvergunningMapper->singleEntityToModel($dagvergunning);
 
         return new JsonResponse($result, Response::HTTP_OK);
     }
@@ -382,7 +375,7 @@ class DagvergunningController extends AbstractController
         $koopman = $koopmanRepository->findOneById($koopmanId);
 
         if (null === $koopman) {
-            throw $this->createNotFoundException('Can\'t find koopman with id ' . $koopmanId);
+            return new JsonResponse(['error' => 'Cannot find koopman with id ' . $koopmanId], Response::HTTP_NOT_FOUND);
         }
 
         $sDate = new \DateTime($startDate . ' 00:00');
@@ -404,11 +397,8 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="doorgehaaldGeolocatie", in="body", required="false", description="Geolocatie waar de doorhaling is uitgevoerd, als lat,long", @OA\Schema(type="string"))
      * @IsGranted("ROLE_USER")
      */
-    public function deleteAction(EntityManagerInterface $em, Request $request, $id)
+    public function deleteAction(EntityManagerInterface $em, DagvergunningRepository $repoDagvergunning, Request $request, $id)
     {
-        /* @var $repoDagvergunning \App\Repository\DagvergunningRepository */
-        $repoDagvergunning = $this->get('appapi.repository.dagvergunning');
-
         // read message body
         $message = json_decode($request->getContent(false), true);
 
@@ -424,11 +414,11 @@ class DagvergunningController extends AbstractController
         // get object
         $dagvergunning = $repoDagvergunning->getById($id);
         if ($dagvergunning === null) {
-            throw $this->createNotFoundException('Can not find dagvergunning with id ' . $id);
+            return new JsonResponse(['error' => 'Cannot find dagvergunning with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
         if ($dagvergunning->isDoorgehaald() === true) {
-            throw $this->createNotFoundException('Dagvergunning with id ' . $id . ' already doorgehaald');
+            return new JsonResponse(['error' => 'Dagvergunning with id ' . $id . ' already doorgehaald'], Response::HTTP_NOT_FOUND);
         }
 
         // modify object
@@ -471,12 +461,12 @@ class DagvergunningController extends AbstractController
      * @OA\Parameter(name="registratieGeolocatie", required="false", description="Geolocatie waar de registratie is ingevoerd, als lat,long", @OA\Schema(type="string"))
      * @IsGranted("ROLE_USER")
      */
-    public function updateAction(EntityManagerInterface $em, FactuurService $factuurService, DagvergunningMapper $mapper, Request $request, $id)
+    public function updateAction(EntityManagerInterface $em, FactuurService $factuurService, DagvergunningRepository $dagvergunningRepository, DagvergunningMapper $mapper, Request $request, $id)
     {
         $request->query->set('doorgehaaldDatumtijd', $request->query->get('registratieDatumtijd'));
         $request->query->set('doorgehaaldGeolocatie', $request->query->get('registratieGeolocatie'));
 
-        $this->deleteAction($em, $request, $id);
+        $this->deleteAction($em, $dagvergunningRepository, $request, $id);
 
         //////
 

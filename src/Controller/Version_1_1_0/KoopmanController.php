@@ -12,6 +12,7 @@
 namespace App\Controller\Version_1_1_0;
 
 use App\Mapper\KoopmanMapper;
+use App\Mapper\SimpleKoopmanMapper;
 use App\Repository\KoopmanRepository;
 use App\Repository\VervangerRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,7 +44,7 @@ class KoopmanController extends AbstractController
      * @OA\Parameter(name="listLength", in="query", required="false", description="Default=100", @OA\Schema(type="integer"))
      * @IsGranted("ROLE_USER")
      */
-    public function listAction(KoopmanRepository $repo, KoopmanMapper $mapper, Request $request)
+    public function listAction(KoopmanRepository $repo, SimpleKoopmanMapper $mapper, Request $request)
     {
         $q = [];
         if ($request->query->has('freeSearch') === true) {
@@ -72,7 +73,7 @@ class KoopmanController extends AbstractController
 
         $results = $repo->search($q, $request->query->get('listOffset'), $request->query->get('listLength', 100));
 
-        $response = $mapper->multipleEntityToSimpleModel($results);
+        $response = $mapper->multipleEntityToModel($results);
 
         return new JsonResponse($response, Response::HTTP_OK, ['X-Api-ListSize' => count($results)]);
     }
@@ -88,7 +89,7 @@ class KoopmanController extends AbstractController
     {
         $object = $repo->getById($id);
         if ($object === null) {
-            throw $this->createNotFoundException('Not found koopman with id ' . $id);
+            return new JsonResponse(['error' => 'Cannot find koopman with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
         $response = $mapper->singleEntityToModel($object);
@@ -113,7 +114,7 @@ class KoopmanController extends AbstractController
 
         $object = $repo->getByErkenningsnummer($erkenningsnummer);
         if ($object === null) {
-            throw $this->createNotFoundException('Not found koopman with erkenningsnummer ' . $erkenningsnummer);
+            return new JsonResponse(['error' => 'Cannot find koopman with erkenningsnummer ' . $erkenningsnummer], Response::HTTP_NOT_FOUND);
         }
 
         $response = $mapper->singleEntityToModel($object);
@@ -130,6 +131,7 @@ class KoopmanController extends AbstractController
      */
     public function getByPasUid(
         KoopmanRepository $koopmanRepository,
+        KoopmanMapper $koopmanMapper,
         VervangerRepository $vervangerRepository,
         $pasUid
     ) {
@@ -140,16 +142,14 @@ class KoopmanController extends AbstractController
             $object = $vervangerRepository->findOneByPasUid(strtoupper($pasUid));
             if ($object === null) {
                 // ook geen vervanger
-                throw $this->createNotFoundException('Not found koopman with pasUid ' . $pasUid);
+                return new JsonResponse(['error' => 'Cannot find koopman with pasUid ' . $pasUid], Response::HTTP_NOT_FOUND);
             }
 
             // convert vervangersvermelding in koopman
             $object = $object->getVervanger();
         }
 
-        /* @var $mapper \App\Mapper\KoopmanMapper */
-        $mapper = $this->get('appapi.mapper.koopman');
-        $response = $mapper->singleEntityToModel($object);
+        $response = $koopmanMapper->singleEntityToModel($object);
 
         return new JsonResponse($response, Response::HTTP_OK, []);
     }
@@ -167,7 +167,7 @@ class KoopmanController extends AbstractController
 
         $object = $repo->getBySollicitatienummer($marktId, $sollicitatieNummer);
         if ($object === null) {
-            throw $this->createNotFoundException('Not found koopman with sollicitatieNummer ' . $sollicitatieNummer . ' and marktId ' . $marktId);
+            return new JsonResponse(['error' => 'Cannot find koopman with sollicitatieNummer ' . $sollicitatieNummer . ' and marktId ' . $marktId], Response::HTTP_NOT_FOUND);
         }
 
         $response = $mapper->singleEntityToModel($object);
@@ -187,7 +187,7 @@ class KoopmanController extends AbstractController
     {
         $koopman = $repo->find($id);
         if ($koopman === null) {
-            throw $this->createNotFoundException('Koopman not found');
+            return new JsonResponse(['error' => 'Cannot find koopman with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
         $date = new \DateTime($date);

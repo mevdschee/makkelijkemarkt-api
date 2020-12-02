@@ -72,7 +72,7 @@ class MarktController extends AbstractController
     {
         $markt = $repo->getById($id);
         if ($markt === null) {
-            throw $this->createNotFoundException('Markt not found, id = ' . $id);
+            return new JsonResponse(['error' => 'Cannot find Markt with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
         $message = json_decode($request->getContent(false), true);

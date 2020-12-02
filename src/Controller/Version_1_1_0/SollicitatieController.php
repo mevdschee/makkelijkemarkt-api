@@ -47,7 +47,7 @@ class SollicitatieController extends AbstractController
     ) {
         $markt = $repoMarkt->getById($marktId);
         if ($markt === null) {
-            throw $this->createNotFoundException('Not found markt with id ' . $marktId);
+            return new JsonResponse(['error' => 'Cannot find markt with id ' . $marktId], Response::HTTP_NOT_FOUND);
         }
 
         $results = $repoSollicitatie->findByMarkt($markt, $request->query->get('listOffset'), $request->query->get('listLength', 100), $request->query->getBoolean('includeDoorgehaald', true));
@@ -68,7 +68,7 @@ class SollicitatieController extends AbstractController
     {
         $object = $repo->getById($id);
         if ($object === null) {
-            throw $this->createNotFoundException('Not found sollicitatie with id ' . $id);
+            return new JsonResponse(['error' => 'Cannot find sollicitatie with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
         $response = $mapper->singleEntityToModel($object);
@@ -93,12 +93,12 @@ class SollicitatieController extends AbstractController
     ) {
         $markt = $repoMarkt->getById($marktId);
         if ($markt === null) {
-            throw $this->createNotFoundException('Not found markt with id ' . $marktId);
+            return new JsonResponse(['error' => 'Cannot find markt with id ' . $marktId], Response::HTTP_NOT_FOUND);
         }
 
         $object = $repoSollicitatie->getByMarktAndSollicitatieNummer($markt, $sollicitatieNummer);
         if ($object === null) {
-            throw $this->createNotFoundException('Not found sollicitatie with sollicitatieNummer ' . $sollicitatieNummer);
+            return new JsonResponse(['error' => 'Cannot find sollicitatie with sollicitatieNummer ' . $sollicitatieNummer], Response::HTTP_NOT_FOUND);
         }
 
         $response = $mapper->singleEntityToModel($object);

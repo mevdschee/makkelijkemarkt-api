@@ -77,13 +77,10 @@ class BtwController extends AbstractController
      *
      * @Route("/btw/", methods={"GET"})
      */
-    public function listAction(EntityManagerInterface $em)
+    public function listAction(EntityManagerInterface $em, BtwTariefRepository $repo, BtwTariefMapper $mapper)
     {
-        $repo = $em->getRepository('AppApiBundle:BtwTarief');
-
         $results = $repo->findAll();
 
-        $mapper = $this->get('appapi.mapper.btwtarief');
         $response = $mapper->multipleEntityToModel($results);
 
         return new JsonResponse($response, Response::HTTP_OK, ['X-Api-ListSize' => count($results)]);

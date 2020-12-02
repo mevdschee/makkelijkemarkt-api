@@ -52,7 +52,7 @@ class NotitieController extends AbstractController
         // check if markt exists
         $markt = $marktRepository->getById($marktId);
         if ($markt === null) {
-            throw new $this->createNotFoundException('Can not find markt with id ' . $marktId);
+            return new JsonResponse(['error' => 'Cannot find markt with id ' . $marktId], Response::HTTP_NOT_FOUND);
         }
 
         // get results
@@ -74,7 +74,7 @@ class NotitieController extends AbstractController
     {
         $notitie = $repository->getById($id);
         if ($notitie === null) {
-            throw $this->createNotFoundException('No notitie with id ' . $id);
+            return new JsonResponse(['error' => 'Cannot find notitie with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
         $result = $mapper->singleEntityToModel($notitie);
@@ -130,7 +130,7 @@ class NotitieController extends AbstractController
         // get relations
         $markt = $marktRepository->getById($message['marktId']);
         if ($markt === null) {
-            throw $this->createNotFoundException('No markt with id ' . $message['marktId'] . ' found');
+            return new JsonResponse(['error' => 'Cannot find markt with id ' . $message['marktId']], Response::HTTP_NOT_FOUND);
         }
 
         // get notitie
@@ -196,7 +196,7 @@ class NotitieController extends AbstractController
         // get notitie
         $notitie = $notitieRepository->getById($id);
         if ($notitie === null) {
-            throw $this->createNotFoundException('No notitie found with id ' . $id);
+            return new JsonResponse(['error' => 'Cannot find notitie with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
         if ($message['afgevinkt'] === true) {
@@ -228,12 +228,12 @@ class NotitieController extends AbstractController
         // get notitie
         $notitie = $notitieRepository->getById($id);
         if ($notitie === null) {
-            throw $this->createNotFoundException('No notitie found with id ' . $id);
+            return new JsonResponse(['error' => 'Cannot find notitie with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
         // check if already deleted
         if ($notitie->getVerwijderd() === true) {
-            throw $this->createNotFoundException('Notitie with id ' . $id . ' already deleted');
+            return new JsonResponse(['error' => 'Notitie with id ' . $id . ' already deleted'], Response::HTTP_NOT_FOUND);
         }
 
         // save

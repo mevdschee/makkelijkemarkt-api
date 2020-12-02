@@ -82,11 +82,11 @@ class PerfectViewVervangerImport
             $vervangerRecord = $this->getKoopmanRecord($pvRecord['Erkenningsnummer_Vervanger']);
 
             if (null === $koopmanRecord) {
-                $this->logger->info('Can\'t find koopman, skipping.');
+                $this->logger->info('Cannot find koopman, skipping.');
                 continue;
             }
             if (null === $vervangerRecord) {
-                $this->logger->info('Can\'t find vervanger, skipping.');
+                $this->logger->info('Cannot find vervanger, skipping.');
                 continue;
             }
 
