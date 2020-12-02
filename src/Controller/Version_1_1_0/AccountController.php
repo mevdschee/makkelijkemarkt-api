@@ -216,7 +216,11 @@ class AccountController extends AbstractController
 
         // save
         $em->persist($account);
-        $em->flush();
+        try {
+            $em->flush();
+        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+            return new JsonResponse(['error' => 'User already exists'], Response::HTTP_CONFLICT);
+        }
 
         // return
         $result = $accountMapper->singleEntityToModel($account);
