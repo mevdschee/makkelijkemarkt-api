@@ -92,6 +92,173 @@ class AccountControllerTest extends LoginWebTestCase
         $this->assertEquals($accountId, $result['id']);
     }
 
+    public function testEditAccountAsSenior()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_SENIOR');
+        $accountId = $this->getAccountProperty($client, $uuid, 'id');
+        $client->request('PUT', "/api/1.1.0/account/$accountId", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Access Denied by controller annotation @IsGranted("ROLE_ADMIN")'], $result);
+    }
+
+    public function testEditAccountAsAdminWithoutName()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_ADMIN');
+        $accountId = $this->getAccountProperty($client, $uuid, 'id');
+        $client->request('PUT', "/api/1.1.0/account/$accountId", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Required field naam is missing'], $result);
+    }
+
+    public function testEditAccountAsAdminWithoutEmail()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_ADMIN');
+        $accountId = $this->getAccountProperty($client, $uuid, 'id');
+        $client->request('PUT', "/api/1.1.0/account/$accountId", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([
+            'naam' => 'Account3',
+        ]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Required field email is missing'], $result);
+    }
+
+    public function testEditAccountAsAdminWithoutUsername()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_ADMIN');
+        $accountId = $this->getAccountProperty($client, $uuid, 'id');
+        $client->request('PUT', "/api/1.1.0/account/$accountId", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([
+            'naam' => 'Account3',
+            'email' => 'account3@amsterdam.nl',
+        ]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Required field username is missing'], $result);
+    }
+
+    public function testEditAccountAsAdminWithInvalidRole()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_ADMIN');
+        $accountId = $this->getAccountProperty($client, $uuid, 'id');
+        $client->request('PUT', "/api/1.1.0/account/$accountId", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([
+            'naam' => 'Account3',
+            'email' => 'account3@amsterdam.nl',
+            'username' => 'account3@amsterdam.nl',
+            'role' => 'ROLE_UNKNOWN_ROLE',
+        ]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Unknown role'], $result);
+    }
+
+    public function testEditAccountAsAdminWithInvalidAccountId()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_ADMIN');
+        $client->request('PUT', "/api/1.1.0/account/0", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([
+            'naam' => 'Account3',
+            'email' => 'account3@amsterdam.nl',
+            'username' => 'account3@amsterdam.nl',
+            'role' => 'ROLE_ADMIN',
+        ]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'No account with id 0'], $result);
+    }
+
+    public function testEditAccountAsAdminWithoutActive()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_ADMIN');
+        $accountId = $this->getAccountProperty($client, $uuid, 'id');
+        $client->request('PUT', "/api/1.1.0/account/$accountId", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([
+            'naam' => 'Account3',
+            'email' => 'account3@amsterdam.nl',
+            'username' => 'account3@amsterdam.nl',
+            'role' => 'ROLE_ADMIN',
+        ]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Required field active is missing'], $result);
+    }
+
+    public function testEditAccountAsAdminWithoutPassword()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_ADMIN');
+        $accountId = $this->getAccountProperty($client, $uuid, 'id');
+        $client->request('PUT', "/api/1.1.0/account/$accountId", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([
+            'naam' => 'Account3',
+            'email' => 'account3@amsterdam.nl',
+            'username' => 'account3@amsterdam.nl',
+            'role' => 'ROLE_ADMIN',
+            'active' => true,
+        ]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals('account3@amsterdam.nl', $result['username']);
+    }
+
+    public function testEditAccountAsAdminWithPassword()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_ADMIN');
+        $accountId = $this->getAccountProperty($client, $uuid, 'id');
+        $client->request('PUT', "/api/1.1.0/account/$accountId", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ], json_encode([
+            'naam' => 'Account3',
+            'email' => 'account3@amsterdam.nl',
+            'username' => 'account3@amsterdam.nl',
+            'role' => 'ROLE_ADMIN',
+            'active' => true,
+            'password' => 'Password3!',
+        ]));
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals('account3@amsterdam.nl', $result['username']);
+    }
+
     public function testCreateNewAccountAsSenior()
     {
         $client = static::createClient();

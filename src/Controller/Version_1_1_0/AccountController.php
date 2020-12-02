@@ -93,7 +93,7 @@ class AccountController extends AbstractController
      * @OA\Parameter(name="password", in="body", required="true", @OA\Schema(type="string"))
      * @IsGranted("ROLE_ADMIN")
      */
-    public function putAction(EntityManagerInterface $em, AccountRepository $repository, AccountMapper $mapper, Request $request, $id): Response
+    public function putAction(EntityManagerInterface $em, UserPasswordEncoderInterface $encoder, AccountRepository $repository, AccountMapper $mapper, Request $request, $id): Response
     {
         // parse body content
         $message = json_decode($request->getContent(false), true);
@@ -127,17 +127,20 @@ class AccountController extends AbstractController
             return new JsonResponse(['error' => 'No account with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
+        if (isset($message['active']) === false) {
+            return new JsonResponse(['error' => 'Required field active is missing'], Response::HTTP_PRECONDITION_FAILED);
+        }
+
         // set values
         $account->setNaam($message['naam']);
         $account->setEmail($message['email']);
         $account->setUsername($message['username']);
         $account->setRole($message['role']);
-        $account->setActive(($message['active'] == 1));
+        $account->setActive($message['active'] == 1);
 
         if (isset($message['password']) === true) {
             // encrypt password
             $unencryptedPassword = $message['password'];
-            $encoder = $this->container->get('security.password_encoder');
             $encryptedPassword = $encoder->encodePassword($account, $unencryptedPassword);
 
             $account->setPassword($encryptedPassword);
