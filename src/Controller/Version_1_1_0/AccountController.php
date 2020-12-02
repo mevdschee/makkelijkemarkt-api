@@ -124,7 +124,7 @@ class AccountController extends AbstractController
         /* @var $account Account */
         $account = $repository->getById($id);
         if ($account === null) {
-            throw $this->createNotFoundException('No account with id ' . $id);
+            return new JsonResponse(['error' => 'No account with id ' . $id], Response::HTTP_NOT_FOUND);
         }
 
         // set values
@@ -231,7 +231,7 @@ class AccountController extends AbstractController
      * @OA\Parameter(name="password", in="body", required="true", @OA\Schema(type="string"))
      * @IsGranted("ROLE_SENIOR")
      */
-    public function updatePasswordAction(EntityManagerInterface $em, AccountRepository $accountRepository, Request $request, $id): Response
+    public function updatePasswordAction(EntityManagerInterface $em, AccountRepository $accountRepository, AccountMapper $accountMapper, UserPasswordEncoderInterface $encoder, Request $request, $id): Response
     {
         // parse body content
         $message = json_decode($request->getContent(false), true);
@@ -258,7 +258,6 @@ class AccountController extends AbstractController
 
         // encrypt password
         $unencryptedPassword = $message['password'];
-        $encoder = $this->container->get('security.password_encoder');
         $encryptedPassword = $encoder->encodePassword($account, $unencryptedPassword);
 
         $account->setPassword($encryptedPassword);
@@ -266,7 +265,7 @@ class AccountController extends AbstractController
         $em->flush();
 
         // return
-        $result = $this->get('appapi.mapper.account')->singleEntityToModel($account);
+        $result = $accountMapper->singleEntityToModel($account);
 
         return new JsonResponse($result, Response::HTTP_OK);
     }

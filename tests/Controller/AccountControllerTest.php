@@ -11,28 +11,10 @@
 
 namespace App\Tests\Controller;
 
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Tests\Base\LoginWebTestCase;
 
-class AccountControllerTest extends WebTestCase
+class AccountControllerTest extends LoginWebTestCase
 {
-    public function getTokenUuid(KernelBrowser $client, string $role): string
-    {
-        $roles = ['ROLE_USER' => 1, 'ROLE_SENIOR' => 5, 'ROLE_ADMIN' => 3];
-        $i = $roles[$role];
-
-        $client->request('POST', '/api/1.1.0/login/basicUsername/', [], [], [
-            'HTTP_MmAppKey' => 'testkey',
-        ], json_encode([
-            'username' => "account$i@amsterdam.nl",
-            'password' => "Password$i!",
-        ]));
-        $response = $client->getResponse();
-        $result = json_decode($response->getContent(), true);
-        $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
-        $this->assertEquals($role, $result['account']['roles'][0]);
-        return $result['uuid'];
-    }
     public function testListAccountsAsUser()
     {
         $client = static::createClient();
@@ -43,6 +25,8 @@ class AccountControllerTest extends WebTestCase
         ]);
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(401, $response->getStatusCode());
         $this->assertEquals(['error' => 'Access Denied by controller annotation @IsGranted("ROLE_SENIOR")'], $result);
     }
 
@@ -56,6 +40,8 @@ class AccountControllerTest extends WebTestCase
         ]);
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('account0@amsterdam.nl', $result[0]['username']);
         $this->assertEquals('account1@amsterdam.nl', $result[1]['username']);
         $this->assertEquals('account2@amsterdam.nl', $result[2]['username']);
@@ -72,6 +58,8 @@ class AccountControllerTest extends WebTestCase
         ]);
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(401, $response->getStatusCode());
         $this->assertEquals(['error' => 'Access Denied by controller annotation @IsGranted("ROLE_SENIOR")'], $result);
     }
 
@@ -85,7 +73,23 @@ class AccountControllerTest extends WebTestCase
         ]);
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
         $this->assertEquals(['error' => 'No account with id 0'], $result);
+    }
+
+    public function testGetAccountAsSeniorExisting()
+    {
+        $client = static::createClient();
+        $uuid = $this->getTokenUuid($client, 'ROLE_SENIOR');
+        $accountId = $this->getAccountProperty($client, $uuid, 'id');
+        $client->request('GET', "/api/1.1.0/account/$accountId", [], [], [
+            'HTTP_MmAppKey' => 'testkey',
+            'HTTP_Authorization' => "Bearer $uuid",
+        ]);
+        $response = $client->getResponse();
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals($accountId, $result['id']);
     }
 
 }

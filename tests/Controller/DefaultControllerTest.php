@@ -21,8 +21,8 @@ class DefaultControllerTest extends WebTestCase
 
         $client->request('GET', '/');
         $response = $client->getResponse();
-
-        $this->assertTrue($response->isSuccessful());
-        $this->assertEquals(['msg' => 'Hallo!'], json_decode($response->getContent(), true));
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['msg' => 'Hallo!'], $result);
     }
 }

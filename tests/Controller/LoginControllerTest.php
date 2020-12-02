@@ -22,9 +22,9 @@ class LoginControllerTest extends WebTestCase
             'HTTP_MmAppKey' => 'testkey',
         ]);
         $response = $client->getResponse();
-
-        $this->assertTrue($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals(['error' => 'Syntax error'], json_decode($response->getContent(), true));
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Syntax error'], $result);
     }
 
     public function testLoginWhoamiOnlyAppKey()
@@ -34,9 +34,9 @@ class LoginControllerTest extends WebTestCase
             'HTTP_MmAppKey' => 'testkey',
         ]);
         $response = $client->getResponse();
-
-        $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals(['error' => 'Access Denied by controller annotation @IsGranted("ROLE_USER")'], json_decode($response->getContent(), true));
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Access Denied by controller annotation @IsGranted("ROLE_USER")'], $result);
     }
 
     public function testLoginWithInvalidUsername()
@@ -49,9 +49,9 @@ class LoginControllerTest extends WebTestCase
             'password' => "Password1!",
         ]));
         $response = $client->getResponse();
-
-        $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals(['error' => 'Account unknown'], json_decode($response->getContent(), true));
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Account unknown'], $result);
     }
 
     public function testLoginWithInvalidPassword()
@@ -64,9 +64,9 @@ class LoginControllerTest extends WebTestCase
             'password' => "Unknown",
         ]));
         $response = $client->getResponse();
-
-        $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals(['error' => 'Password invalid'], json_decode($response->getContent(), true));
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Password invalid'], $result);
     }
 
     public function testLoginWithLockedAccount()
@@ -79,9 +79,9 @@ class LoginControllerTest extends WebTestCase
             'password' => "Password2!",
         ]));
         $response = $client->getResponse();
-
-        $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals(['error' => 'Account is locked'], json_decode($response->getContent(), true));
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Account is locked'], $result);
     }
 
     public function testLoginWithInactiveAccount()
@@ -94,9 +94,9 @@ class LoginControllerTest extends WebTestCase
             'password' => "Password7!",
         ]));
         $response = $client->getResponse();
-
-        $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals(['error' => 'Account is not active'], json_decode($response->getContent(), true));
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Account is not active'], $result);
     }
 
     public function testLoginWithLockedInactiveAccount()
@@ -109,9 +109,9 @@ class LoginControllerTest extends WebTestCase
             'password' => "Password6!",
         ]));
         $response = $client->getResponse();
-
-        $this->assertFalse($response->isSuccessful(), 'Request has failed');
-        $this->assertEquals(['error' => 'Account is locked'], json_decode($response->getContent(), true));
+        $result = json_decode($response->getContent(), true);
+        $this->assertNotNull($result);
+        $this->assertEquals(['error' => 'Account is locked'], $result);
     }
 
     public function testLoginLogout()
@@ -127,7 +127,7 @@ class LoginControllerTest extends WebTestCase
         ]));
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
-        $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
+        $this->assertNotNull($result);
         $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
         $uuid = $result['uuid'];
 
@@ -138,7 +138,7 @@ class LoginControllerTest extends WebTestCase
         ]);
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
-        $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
+        $this->assertNotNull($result);
         $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
 
         // third request
@@ -148,7 +148,7 @@ class LoginControllerTest extends WebTestCase
         ]);
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
-        $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
+        $this->assertNotNull($result);
         $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
 
         // fourth request
@@ -158,7 +158,7 @@ class LoginControllerTest extends WebTestCase
         ]);
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
-        $this->assertFalse($response->isSuccessful(), 'Request has succeeded');
+        $this->assertNotNull($result);
         $this->assertEquals(['error' => 'Invalid token time'], $result);
     }
 
@@ -175,7 +175,7 @@ class LoginControllerTest extends WebTestCase
         ]));
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
-        $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
+        $this->assertNotNull($result);
         $this->assertEquals('account1@amsterdam.nl', $result['account']['username']);
         $accountId = $result['account']['id'];
 
@@ -188,7 +188,7 @@ class LoginControllerTest extends WebTestCase
         ]));
         $response = $client->getResponse();
         $result = json_decode($response->getContent(), true);
-        $this->assertTrue($response->isSuccessful(), 'Request has succeeded');
-        $this->assertNotEmpty($result['uuid']);
+        $this->assertNotNull($result);
+        $this->assertEquals(36, strlen($result['uuid']));
     }
 }
