@@ -165,7 +165,7 @@ class FactuurService
         // lookup markt
         $markt = $this->marktRepository->getById($marktId);
         if ($markt === null) {
-            return new FactuurServiceException(['No markt with id ' . $marktId . ' found']);
+            return new FactuurServiceException('No markt with id ' . $marktId . ' found');
         }
 
         $dagvergunning->setMarkt($markt);
