@@ -9,7 +9,7 @@
  *  file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-namespace App\Tests\Controller;
+namespace App\Tests\Security;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

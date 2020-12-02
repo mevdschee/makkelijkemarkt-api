@@ -16,3 +16,7 @@
 ###< symfony/phpunit-bridge ###
 
 adminer.php
+
+###> liip/imagine-bundle ###
+/public/media/cache/
+###< liip/imagine-bundle ###

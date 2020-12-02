@@ -1,0 +1,22 @@
+# Imagine
+liip_imagine:
+    # valid drivers options include "gd" or "gmagick" or "imagick"
+    driver: "gd"
+    # these settings are migrated from sf2
+    loaders:
+        default:
+            filesystem:
+                data_root: %kernel.data_dir%/
+    resolvers:
+       default:
+          web_path: ~
+    filter_sets:
+        cache: ~
+        koopman_rect_small:
+            quality: 75
+            filters:
+                thumbnail: { size: [120, 160], mode: outbound }
+        koopman_rect_medium:
+            quality: 75
+            filters:
+                thumbnail: { size: [426, 568], mode: outbound }
